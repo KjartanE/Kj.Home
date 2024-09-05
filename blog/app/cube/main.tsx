@@ -1,11 +1,11 @@
 import * as THREE from "three"
 
 export const cameraGenerator = () => {
-  const width = 750
-  const height = 750
+  const width = 1200
+  const height = 800
 
   const scene = new THREE.Scene()
-  const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
+  const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 10000)
   const renderer = new THREE.WebGLRenderer()
   renderer.setSize(width, height)
 
@@ -25,8 +25,33 @@ export const handleResize = (camera, renderer) => {
 }
 
 export const cubeGenerator = () => {
-  const geometry = new THREE.BoxGeometry()
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-  const cube = new THREE.Mesh(geometry, material)
-  return cube
+  const geometry = new THREE.BoxGeometry(50, 50, 50)
+  // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+  // const cube = new THREE.Mesh(geometry, material)
+  // cube.position.set(512, 512, 512)
+
+  const wireframe = new THREE.WireframeGeometry(geometry)
+
+  const line = new THREE.LineSegments(wireframe)
+  line.material.depthTest = false
+  line.material.opacity = 0.25
+  line.material.transparent = true
+
+  line.position.set(512, 512, 512)
+  // return cube
+  return line
+}
+
+export const wireframeGenerator = () => {
+  const geometry = new THREE.SphereGeometry(100, 100, 100)
+
+  const wireframe = new THREE.WireframeGeometry(geometry)
+
+  const line = new THREE.LineSegments(wireframe)
+  line.material.depthTest = false
+  line.material.opacity = 0.25
+  line.material.transparent = true
+
+  line.position.set(512, 512, 512)
+  return line
 }
