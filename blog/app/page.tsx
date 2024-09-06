@@ -1,5 +1,3 @@
-// import { BlogPosts } from 'app/components/posts'
-
 export default function Page() {
   return (
     <section>
@@ -15,9 +13,6 @@ export default function Page() {
         wanted to start tracking some of my projects and thoughts to share with others.
         `}
       </p>
-      {/* <div className="my-8">
-        <BlogPosts />
-        </div> */}
     </section>
   )
 }

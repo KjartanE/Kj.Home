@@ -53,12 +53,39 @@ export default function RootLayout({
       )}
     >
       <body className="antialiased max-w-2xl mx-4 mt-8 lg:mx-auto">
-        <main className="flex flex-col justify-between " style={{height: '95vh'}}>
+        <main
+          className="flex flex-col justify-between "
+          style={{ height: "95vh" }}
+        >
           <Navbar />
           {children}
           <Footer />
           {/* <Analytics /> */}
           {/* <SpeedInsights /> */}
+        </main>
+      </body>
+    </html>
+  )
+}
+
+export function ThreeLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html
+      lang="en"
+      className={cx(
+        "text-black bg-white dark:text-white dark:bg-black",
+        GeistSans.variable,
+        GeistMono.variable
+      )}
+    >
+      <body className="antialiased max-w-2xl mx-4 mt-8 lg:mx-auto">
+        <main
+          className="flex flex-col justify-between "
+          style={{ height: "95vh" }}
+        >
+          {children}
+          <Navbar />
+          <Footer />
         </main>
       </body>
     </html>

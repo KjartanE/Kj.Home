@@ -8,6 +8,18 @@ type Metadata = {
   image?: string
 }
 
+export type MDXData = {
+  metadata: Metadata
+  slug: string
+  content: string
+}
+
+export const metadata = {
+  title: "Blog",
+  description: "Read my blog.",
+}
+
+
 function parseFrontmatter(fileContent: string) {
   let frontmatterRegex = /---\s*([\s\S]*?)\s*---/
   let match = frontmatterRegex.exec(fileContent)
