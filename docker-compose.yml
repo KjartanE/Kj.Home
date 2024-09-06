@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+  dev:
+    build:
+      context: ./blog
+      dockerfile: Dockerfile.dev
+    container_name: kj_home
+    environment:
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./blog:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+  prod:
+    build:
+      context: ./blog
+      dockerfile: Dockerfile.prod
+    container_name: kj_home
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+
+volumes:
+  node_modules:
