@@ -10,7 +10,7 @@ import * as THREE from "three"
 
 const NEAR = 10,
   FAR = 10000
-const SHADOW_MAP_WIDTH = 2048,
+const SHADOW_MAP_WIDTH = 1024,
   SHADOW_MAP_HEIGHT = 1024
 
 export class TileScene {
@@ -39,21 +39,22 @@ export class TileScene {
     this.renderer.shadowMap.type = THREE.PCFShadowMap // default THREE.PCFShadowMap
 
     this.camera.position.y = 100
-    this.camera.rotation.y = 90
+    this.camera.position.z = 5
+    this.camera.position.x = 5
     this.camera.lookAt(0, 0, 0)
 
     const ambient = new THREE.AmbientLight(0xffffff)
     this.scene.add(ambient)
 
     const light = new THREE.DirectionalLight(0xffffff, 3)
-    light.position.set(0, 1500, 1000)
+    light.position.set(500, 250, 500)
     light.castShadow = true
-    light.shadow.camera.top = 2000
-    light.shadow.camera.bottom = -2000
-    light.shadow.camera.left = -2000
-    light.shadow.camera.right = 2000
-    light.shadow.camera.near = 1200
-    light.shadow.camera.far = 2500
+    light.shadow.camera.top = 1000
+    light.shadow.camera.bottom = -1000
+    light.shadow.camera.left = -1000
+    light.shadow.camera.right = 1000
+    light.shadow.camera.near = 50
+    light.shadow.camera.far = 1500
     light.shadow.bias = 0.0001
 
     light.shadow.mapSize.width = SHADOW_MAP_WIDTH
@@ -66,7 +67,7 @@ export class TileScene {
     //Plane floor receive shadows
     const planeShadow = new THREE.Mesh(
       new THREE.PlaneGeometry(1000, 1000),
-      new THREE.MeshPhongMaterial()
+      new THREE.MeshPhongMaterial({ color: 0x303030 })
     ) //Material they have to be MeshPhongMaterial
 
     planeShadow.name = "FloorShadow"
@@ -90,14 +91,57 @@ export class TileScene {
   }
 }
 
+export class TileGrid {
+  public scene: THREE.Scene
+  public tiles: Tile[]
+  public meshes: THREE.Mesh[]
+  public vertices: THREE.Vector3[]
+  public gridSize: number
+  public boxSize: number
+
+  constructor(scene: THREE.Scene, gridSize: number, boxSize: number) {
+    this.scene = scene
+    this.tiles = []
+    this.meshes = []
+    this.gridSize = gridSize
+    this.boxSize = boxSize
+  }
+
+  public addTile(tile: Tile) {
+    this.tiles.push(tile)
+    this.meshes.push(tile.mesh)
+    // this.vertices.push(tile.mesh.position)
+    tile.addToScene()
+  }
+
+  public generateGrid() {
+    for (let i = 0; i < this.gridSize; i++) {
+      for (let j = 0; j < this.gridSize; j++) {
+        const tile = new Tile(
+          this.scene,
+          i * 10,
+          0,
+          j * 10,
+          this.boxSize,
+          1,
+          0x303030,
+          this.gridSize
+        )
+        this.addTile(tile)
+      }
+    }
+  }
+}
+
 export class Tile {
   public x: number
   public y: number
-  public width: number
+  public z: number
+  public size: number
   public height: number
   public colour: number
   public scene: THREE.Scene
-  public geometry: THREE.Geometry
+  public geometry: THREE.BoxGeometry
   public material: THREE.Material
   public mesh: THREE.Mesh
 
@@ -105,23 +149,27 @@ export class Tile {
     scene: THREE.Scene,
     x: number,
     y: number,
-    width: number,
+    z: number,
+    size: number,
     height: number,
-    colour: number
+    colour: number,
+    gridSize: number
   ) {
     this.scene = scene
     this.x = x
     this.y = y
-    this.width = width
+    this.z = z
+    this.size = size
     this.height = height
     this.colour = colour
 
-    this.geometry = new THREE.BoxGeometry(this.width, 10, this.height)
-    this.material = new THREE.MeshBasicMaterial({ color: this.colour })
+    this.geometry = new THREE.BoxGeometry(this.size, this.height, this.size)
+    this.material = new THREE.MeshDepthMaterial()
     this.mesh = new THREE.Mesh(this.geometry, this.material)
 
-    this.mesh.position.x = this.x
+    this.mesh.position.x = this.x - (this.size * gridSize) / 2
     this.mesh.position.y = this.y
+    this.mesh.position.z = this.z - (this.size * gridSize) / 2
 
     this.mesh.castShadow = true
     this.mesh.receiveShadow = true
@@ -133,5 +181,14 @@ export class Tile {
 
   public removeFromScene() {
     this.scene.remove(this.mesh)
+  }
+
+  public click() {
+    // when cube is clicked on increase the height
+    this.height += 1
+    this.mesh.scale.y = this.height
+    this.mesh.position.y = this.height / 2
+
+    console.log("Clicked")
   }
 }
