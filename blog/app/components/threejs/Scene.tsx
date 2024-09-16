@@ -4,17 +4,17 @@ export class Scene {
   public scene: THREE.Scene
   public camera: THREE.OrthographicCamera
   public renderer: THREE.WebGLRenderer
-  public width: number = window.innerWidth
-  public height: number = window.innerHeight
-  public backgroundColor: string = "#000011"
+  public width: number = window.innerWidth - 200
+  public height: number = window.innerHeight - 200
+  public backgroundColor: string = "#000000"
 
   constructor() {
     this.scene = new THREE.Scene()
     this.camera = new THREE.OrthographicCamera(
-      -this.width / 2,
-      this.width / 2,
-      this.height / 2,
-      -this.height / 2,
+      -this.width,
+      this.width,
+      this.height,
+      -this.height,
       1,
       1000
     )
@@ -35,6 +35,6 @@ export class Scene {
 
   public resize() {
     this.camera.updateProjectionMatrix()
-    this.renderer.setSize(window.innerWidth, window.innerHeight)
+    this.renderer.setSize(this.height, this.height)
   }
 }

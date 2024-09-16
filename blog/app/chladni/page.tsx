@@ -1,8 +1,8 @@
 import ThreeScene from "./ThreeScene"
 
 export const metadata = {
-  title: "Cube",
-  description: "heres a cube I made",
+  title: "Chladni",
+  description: "heres a chladni I made",
 }
 
 export default function Page() {
