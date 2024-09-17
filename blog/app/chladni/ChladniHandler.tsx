@@ -1,6 +1,6 @@
 import * as THREE from "three"
 
-export class Chladni {
+export class ChladniHandler {
   public geometry: THREE.PlaneGeometry
   public material: THREE.ShaderMaterial
   public documentObjects: any[] = []

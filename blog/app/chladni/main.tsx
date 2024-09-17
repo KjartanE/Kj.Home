@@ -1,5 +1,10 @@
 import * as THREE from "three"
 
+export const metadata = {
+  title: "chladni",
+  description: "heres a chladni I made",
+}
+
 export class Particle {
   public x: number
   public y: number

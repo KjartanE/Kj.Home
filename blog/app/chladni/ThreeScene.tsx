@@ -1,23 +1,21 @@
 "use client"
-import { Scene } from "app/components/threejs/Scene"
+import { Scene } from "./Scene"
 import React, { useRef, useEffect } from "react"
-// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-// import { Particle, ParticleHandler } from "./main"
 import * as THREE from "three"
-import { Chladni } from "./Chladni"
+import { ChladniHandler } from "./ChladniHandler"
 
 const ThreeScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const scene = new Scene()
 
   useEffect(() => {
     if (!containerRef.current) return
+    const scene = new Scene()
 
     const container = containerRef.current
     container.appendChild(scene.renderer.domElement)
 
-    const chladni = new Chladni(scene.height)
+    const chladni = new ChladniHandler(scene.height)
 
     const plane = new THREE.Mesh(chladni.geometry, chladni.material)
     scene.scene.add(plane)
@@ -35,19 +33,6 @@ const ThreeScene: React.FC = () => {
     }
     animate()
 
-    // const particleHandler = new ParticleHandler(scene.scene)
-    // particleHandler.shuffle()
-    // console.log("particleHandler", particleHandler)
-
-    // const animate = () => {
-    //   // // console.log("particles", particles)
-    //   particleHandler.update(scene.scene)
-    //   console.log("particleHandler", particleHandler.particles)
-
-    //   scene.render()
-    //   requestAnimationFrame(animate)
-    // }
-
     const handleResize = () => {
       scene.resize()
     }
@@ -58,11 +43,6 @@ const ThreeScene: React.FC = () => {
     return () => {
       window.removeEventListener("resize", handleResize)
       container.removeChild(scene.renderer.domElement)
-
-      // window.removeEventListener("resize", handleResize)
-      // window.removeEventListener("mousedown", mouse.onMouseDown)
-      // window.removeEventListener("mousemove", mouse.onMouseMove)
-      // window.removeEventListener("mouseup", mouse.onMouseUp)
 
       chladni.removeInterfaces()
     }

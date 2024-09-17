@@ -41,10 +41,10 @@ export const cubeGenerator = () => {
   const wireframe = new THREE.WireframeGeometry(geometry)
 
   const line = new THREE.LineSegments(wireframe)
-  line.material.depthTest = false
-  line.material.opacity = 0.5
-  // line.material.transparent = true
-  line.material.color = new THREE.Color(colour_pallet[0])
+  // line.material.depthTest = false
+  // line.material.opacity = 0.5
+  // // line.material.transparent = true
+  // line.material.color = new THREE.Color(colour_pallet[0])
 
   line.position.set(512, 512, 512)
   // return cube
@@ -57,10 +57,10 @@ export const sphereGenerator = () => {
   const wireframe = new THREE.WireframeGeometry(geometry)
 
   const line = new THREE.LineSegments(wireframe)
-  line.material.depthTest = false
-  line.material.opacity = 0.5
-  line.material.transparent = true
-  line.material.color = new THREE.Color(colour_pallet[1])
+  // line.material.depthTest = false
+  // line.material.opacity = 0.5
+  // line.material.transparent = true
+  // line.material.color = new THREE.Color(colour_pallet[1])
 
   line.position.set(512, 512, 512)
   return line

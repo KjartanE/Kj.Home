@@ -53,9 +53,9 @@ const ThreeScene: React.FC = () => {
       const dot_wireframe = new THREE.WireframeGeometry(geometry)
 
       const dots = new THREE.LineSegments(dot_wireframe)
-      dots.material.depthTest = true
-      dots.material.opacity = 0.25
-      dots.material.transparent = true
+      // dots.material.depthTest = true
+      // dots.material.opacity = 0.25
+      // dots.material.transparent = true
       // dots.material.color = new THREE.Color(colour_pallet[0])
 
       scene.add(dots)
