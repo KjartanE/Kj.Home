@@ -50,14 +50,18 @@ export default function RootLayout({
         GeistMono.variable
       )}
     >
-      <body className="antialiased max-w-2xl mx-4 mt-8 lg:mx-auto">
+      <body className="flex content-center justify-center">
         <main
-          className="flex flex-col justify-between "
-          style={{ height: "95vh" }}
+          className="flex flex-col justify-between px-4 py-8"
+          style={{ height: "100vh", width: "100vw" }}
         >
-          <Navbar />
+          <div className="flex flex-col items-center justify-center">
+            <Navbar />
+          </div>
           {children}
-          <Footer />
+          <div className="flex flex-col items-center justify-center">
+            <Footer />
+          </div>
         </main>
       </body>
     </html>

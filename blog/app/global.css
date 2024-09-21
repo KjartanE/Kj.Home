@@ -33,6 +33,15 @@ html {
   min-width: 360px;
 }
 
+body  {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+main {
+  display: block;
+}
+
 .prose .anchor {
   @apply absolute invisible no-underline;
 

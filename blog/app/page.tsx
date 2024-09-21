@@ -1,6 +1,6 @@
 export default function Page() {
   return (
-    <section>
+    <div className="flex flex-col items-center justify-center" style={{ height: "75vh" }}>
       <h1 className="mb-8 text-2xl font-semibold tracking-tighter">
         Kjartan Einarsson
       </h1>
@@ -13,6 +13,6 @@ export default function Page() {
         wanted to start tracking some of my projects and thoughts to share with others.
         `}
       </p>
-    </section>
+    </div>
   )
 }

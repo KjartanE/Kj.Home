@@ -7,7 +7,6 @@ import { ChladniHandler } from "./ChladniHandler"
 const ThreeScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null)
 
-
   useEffect(() => {
     if (!containerRef.current) return
     const scene = new Scene()
