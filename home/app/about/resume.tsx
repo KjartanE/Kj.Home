@@ -1,44 +1,44 @@
 export interface IResume {
-  name: string
-  email: string
-  phone: string
-  location: string
-  linkedin: string
-  github: string
-  skills: string[]
-  technologies: string[]
-  languages: string[]
-  education: Education[]
-  certifications: Certification[]
-  work_experience: WorkExperience[]
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  linkedin: string;
+  github: string;
+  skills: string[];
+  technologies: string[];
+  languages: string[];
+  education: Education[];
+  certifications: Certification[];
+  work_experience: WorkExperience[];
 }
 
 export interface Certification {
-  title: string
-  date: string
+  title: string;
+  date: string;
 }
 
 export interface Education {
-  school: string
-  degree: string
-  major: string
-  graduation: string
+  school: string;
+  degree: string;
+  major: string;
+  graduation: string;
 }
 
 export interface WorkExperience {
-  company: string
-  title: string
-  date: string
-  contract: Contract[]
+  company: string;
+  title: string;
+  date: string;
+  contract: Contract[];
 }
 
 export interface Contract {
-  title: string
-  date: string
-  position: string
-  description: string
-  notes?: string[]
-  technologies: string[]
+  title: string;
+  date: string;
+  position: string;
+  description: string;
+  notes?: string[];
+  technologies: string[];
 }
 
 export const resume: IResume = {
@@ -59,7 +59,7 @@ export const resume: IResume = {
     "Communication",
     "Network Management",
     "Raspberry Pi Development",
-    "Teamwork",
+    "Teamwork"
   ],
   technologies: [
     "OpenShift",
@@ -71,7 +71,7 @@ export const resume: IResume = {
     "React",
     "NodeJS",
     "MongoDB",
-    "Cypress",
+    "Cypress"
   ],
   languages: [
     "Java",
@@ -83,29 +83,29 @@ export const resume: IResume = {
     "CSS",
     "HTML",
     "Bash",
-    "Mocha/Jest/Selenium",
+    "Mocha/Jest/Selenium"
   ],
   education: [
     {
       school: "University of Victoria",
       degree: "Bachelor of Software Engineering",
       major: "Software Engineering",
-      graduation: "2024",
-    },
+      graduation: "2024"
+    }
   ],
   certifications: [
     {
       title: "AWS Certified Cloud Practitioner",
-      date: "2024",
+      date: "2024"
     },
     {
       title: "B.C. Government, OpenShift 101",
-      date: "2024",
+      date: "2024"
     },
     {
       title: "B.C. Government, OpenShift 201",
-      date: "2024",
-    },
+      date: "2024"
+    }
   ],
   work_experience: [
     {
@@ -129,7 +129,7 @@ export const resume: IResume = {
             "DB Seed files - Insert, update, patch, and delete queries for any kind of data in PostgreSQL.",
             "DB backup containers and scripts",
             "Error control and front-end form validation (Formik)",
-            "Development and migration from TEST-PROD and DEV-TEST",
+            "Development and migration from TEST-PROD and DEV-TEST"
           ],
           technologies: [
             "React / Material-UI",
@@ -143,8 +143,8 @@ export const resume: IResume = {
             "Jest",
             "Cypress",
             "OAuth",
-            "Formik",
-          ],
+            "Formik"
+          ]
         },
         {
           title: "Species Inventory Management System / BioHub (SIMS/BIOHUB)",
@@ -165,7 +165,7 @@ export const resume: IResume = {
             "DB backup containers and scripts",
             "Error control and front-end form validation (Formik)",
             "Development and migration from TEST-PROD and DEV-TEST",
-            "Implementation of front-end map (Leaflet)",
+            "Implementation of front-end map (Leaflet)"
           ],
           technologies: [
             "React / Material-UI",
@@ -178,8 +178,8 @@ export const resume: IResume = {
             "Mocha",
             "Jest",
             "OAuth",
-            "Formik",
-          ],
+            "Formik"
+          ]
         },
         {
           title: "Habitat Restoration Tracker (HRT)",
@@ -196,8 +196,8 @@ export const resume: IResume = {
             "Docker",
             "OpenShift",
             "Mocha",
-            "Jest",
-          ],
+            "Jest"
+          ]
         },
         {
           title: "Investment Agriculture Foundation (BuyBC)",
@@ -205,9 +205,9 @@ export const resume: IResume = {
           position: "Junior Web Developer",
           description:
             "Kjartan was responsible for the development of front-end updates to the user interface of the BuyBC issuer and verifier applications. His responsibilities included implementation of a user feedback form, search bar optimization, webpage quality of life changes, and assisting in the migration of the BuyBC application to IAF servers.",
-          technologies: ["Vue.JS", "NodeJS", "TypeScript", "Docker", "Git"],
-        },
-      ],
+          technologies: ["Vue.JS", "NodeJS", "TypeScript", "Docker", "Git"]
+        }
+      ]
     },
 
     {
@@ -224,7 +224,7 @@ export const resume: IResume = {
             "Developed and installed network check-in software for company assets and devices.",
             "Developed prototype for a remote access locker system, wiring, soldering, and programming the device.",
             "Provided technology resolution to clients through verbal direction and support.",
-            "Provided in person tech support for client's devices and assets.",
+            "Provided in person tech support for client's devices and assets."
           ],
           technologies: [
             "Python",
@@ -233,10 +233,10 @@ export const resume: IResume = {
             "CSS",
             "Network Management",
             "Raspberry Pi Development",
-            "Arch Linux",
-          ],
-        },
-      ],
-    },
-  ],
-}
+            "Arch Linux"
+          ]
+        }
+      ]
+    }
+  ]
+};

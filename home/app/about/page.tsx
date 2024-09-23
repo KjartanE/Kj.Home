@@ -9,69 +9,57 @@ export default function AboutPage() {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 grid-flow-col auto-cols-max">
+      <div className="grid auto-cols-max grid-flow-col grid-cols-1 gap-4">
         <div>
           <div className="flex flex-col items-center justify-center">
             <div>
               <h1 className={title()}>About</h1>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 grid-flow-col auto-cols-max">
+            <div className="grid auto-cols-max grid-flow-col grid-cols-3 gap-4">
               <div>
-                <h2 className="mb-4 text-lg font-semibold tracking-tighter">
-                  Skills
-                </h2>
+                <h2 className="mb-4 text-lg font-semibold tracking-tighter">Skills</h2>
                 <ul className="mb-8">
                   {resume.skills.map((skill) => (
-                    <li key={skill} className="list-disc ml-4">
+                    <li key={skill} className="ml-4 list-disc">
                       {skill}
                     </li>
                   ))}
                 </ul>
               </div>
               <div>
-                <h2 className="mb-4 text-lg font-semibold tracking-tighter">
-                  Technologies
-                </h2>
+                <h2 className="mb-4 text-lg font-semibold tracking-tighter">Technologies</h2>
                 <ul className="mb-8">
                   {resume.technologies.map((technology) => (
-                    <li key={technology} className="list-disc ml-4">
+                    <li key={technology} className="ml-4 list-disc">
                       {technology}
                     </li>
                   ))}
                 </ul>
               </div>
               <div>
-                <h2 className="mb-4 text-lg font-semibold tracking-tighter">
-                  Languages
-                </h2>
+                <h2 className="mb-4 text-lg font-semibold tracking-tighter">Languages</h2>
                 <ul className="mb-8">
                   {resume.languages.map((language) => (
-                    <li key={language} className="list-disc ml-4">
+                    <li key={language} className="ml-4 list-disc">
                       {language}
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
-            <h2 className="mb-4 text-lg font-semibold tracking-tighter">
-              Education
-            </h2>
+            <h2 className="mb-4 text-lg font-semibold tracking-tighter">Education</h2>
             <p className="mb-8">{formatEducation(resume.education[0])}</p>
-            <h2 className="mb-4 text-lg font-semibold tracking-tighter">
-              Certifications
-            </h2>
+            <h2 className="mb-4 text-lg font-semibold tracking-tighter">Certifications</h2>
             <ul className="mb-8">
               {resume.certifications.map((certification) => (
-                <li key={certification.title} className="list-disc ml-4">
+                <li key={certification.title} className="ml-4 list-disc">
                   {certification.title}
                   {certification.date}
                 </li>
               ))}
             </ul>
-            <h2 className="mb-4 text-lg font-semibold tracking-tighter">
-              Work Experience
-            </h2>
+            <h2 className="mb-4 text-lg font-semibold tracking-tighter">Work Experience</h2>
             {/* <ul className="mb-8">
             {resume.work_experience.map((workExperience) => (
               <li key={workExperience.company} className="list-disc ml-4">

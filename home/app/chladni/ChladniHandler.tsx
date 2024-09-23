@@ -11,7 +11,7 @@ export class ChladniHandler {
       uniforms: {
         u_time: { value: 0.0 },
         u_resolution: {
-          value: new THREE.Vector2(size, size),
+          value: new THREE.Vector2(size, size)
         },
         u_mouse: { value: new THREE.Vector2(0.0, 0.0) },
         u_pi: { value: Math.PI },
@@ -22,10 +22,10 @@ export class ChladniHandler {
         colorOne: { value: new THREE.Color(0xffffff) },
         colorTwo: { value: new THREE.Color(0xffffff) },
         opacityOne: { value: 1.0 },
-        opacityTwo: { value: 1.0 },
+        opacityTwo: { value: 1.0 }
       },
       vertexShader: vertexShader,
-      fragmentShader: fragmentShader,
+      fragmentShader: fragmentShader
     });
 
     return this;
@@ -123,9 +123,7 @@ export class ChladniHandler {
     const colorOneLabel = menu.appendChild(document.createElement("label"));
 
     colorOnePicker.addEventListener("input", () => {
-      plane.material.uniforms.colorOne.value = new THREE.Color(
-        colorOnePicker.value,
-      );
+      plane.material.uniforms.colorOne.value = new THREE.Color(colorOnePicker.value);
       colorOneLabel.innerHTML = `colorOne: ${colorOnePicker.value}`;
     });
     this.documentObjects.push(colorOnePicker);
@@ -137,9 +135,7 @@ export class ChladniHandler {
     const colorTwoLabel = menu.appendChild(document.createElement("label"));
 
     colorTwoPicker.addEventListener("input", () => {
-      plane.material.uniforms.colorTwo.value = new THREE.Color(
-        colorTwoPicker.value,
-      );
+      plane.material.uniforms.colorTwo.value = new THREE.Color(colorTwoPicker.value);
       colorTwoLabel.innerHTML = `colorTwo: ${colorTwoPicker.value}`;
     });
     this.documentObjects.push(colorTwoPicker);
@@ -177,8 +173,7 @@ export class ChladniHandler {
 
     const githubLink = menu.appendChild(document.createElement("a"));
 
-    githubLink.href =
-      "https://github.com/petertjmills/petermills.co/blob/master/src/components/chladni.jsx";
+    githubLink.href = "https://github.com/petertjmills/petermills.co/blob/master/src/components/chladni.jsx";
     githubLink.innerHTML = "source code";
     githubLink.style.color = "white";
     githubLink.style.textDecoration = "underline";

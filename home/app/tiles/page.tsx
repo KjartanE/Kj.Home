@@ -1,9 +1,9 @@
-import ThreeScene from "./ThreeScene"
+import ThreeScene from "./ThreeScene";
 
 export const metadata = {
   title: "tiles",
-  description: "heres tiles I made",
-}
+  description: "heres tiles I made"
+};
 
 export default function Page() {
   return (
@@ -11,5 +11,5 @@ export default function Page() {
       {/* <h1 className="font-semibold text-2xl mb-8 tracking-tighter">Cube</h1> */}
       <ThreeScene />
     </section>
-  )
+  );
 }

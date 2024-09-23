@@ -6,68 +6,68 @@ export const siteConfig = {
   navItems: [
     {
       label: "Home",
-      href: "/",
+      href: "/"
     },
     {
       label: "About",
-      href: "/about",
+      href: "/about"
     },
     {
       label: "Blog",
-      href: "/blog",
+      href: "/blog"
     },
     {
       label: "Cube",
-      href: "/cube",
+      href: "/cube"
     },
     {
       label: "Tiles",
-      href: "/tiles",
+      href: "/tiles"
     },
     {
       label: "Chladni",
-      href: "/chladni",
-    },
+      href: "/chladni"
+    }
   ],
   navMenuItems: [
     {
       label: "Profile",
-      href: "/profile",
+      href: "/profile"
     },
     {
       label: "Dashboard",
-      href: "/dashboard",
+      href: "/dashboard"
     },
     {
       label: "Projects",
-      href: "/projects",
+      href: "/projects"
     },
     {
       label: "Team",
-      href: "/team",
+      href: "/team"
     },
     {
       label: "Calendar",
-      href: "/calendar",
+      href: "/calendar"
     },
     {
       label: "Settings",
-      href: "/settings",
+      href: "/settings"
     },
     {
       label: "Help & Feedback",
-      href: "/help-feedback",
+      href: "/help-feedback"
     },
     {
       label: "Logout",
-      href: "/logout",
-    },
+      href: "/logout"
+    }
   ],
   links: {
     github: "https://github.com/KjartanE",
     linkedin: "https://www.linkedin.com/in/kjartan-einarsson-05184719a/",
-    docs: "https://github.com/KjartanE/Kj.Home",
+    docs: "https://github.com/KjartanE/Kj.Home"
     // discord: "https://discord.gg/9b6yyZKmH4",
     // sponsor: "https://patreon.com/jrgarciadev",
-  },
+  }
 };

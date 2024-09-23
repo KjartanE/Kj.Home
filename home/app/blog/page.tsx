@@ -6,7 +6,7 @@ import { title } from "@/components/primitives";
 export default function BlogPage() {
   return (
     <section>
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className={title()}>My Blog</h1>
           <BlogPosts />
