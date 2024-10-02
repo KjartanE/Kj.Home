@@ -1,38 +1,46 @@
 export interface IResume {
-  name: string;
-  email: string;
-  phone: string;
-  location: string;
-  linkedin: string;
-  github: string;
+  personal: IPersonal;
   skills: string[];
   technologies: string[];
   languages: string[];
-  education: Education[];
-  certifications: Certification[];
-  work_experience: WorkExperience[];
+  education: IEducation[];
+  certifications: ICertification[];
+  work_experience: IWorkExperience[];
 }
 
-export interface Certification {
+export interface IPersonal {
+  name: string;
+  email: string;
+  phone: string;
+  description: string;
+  location: string;
+  linkedin: string;
+  github: string;
+  youtube: string;
+}
+
+export interface ICertification {
   title: string;
   date: string;
+  description: string;
+  logo: string;
 }
 
-export interface Education {
+export interface IEducation {
   school: string;
   degree: string;
   major: string;
   graduation: string;
 }
 
-export interface WorkExperience {
+export interface IWorkExperience {
   company: string;
   title: string;
   date: string;
-  contract: Contract[];
+  contract: IContract[];
 }
 
-export interface Contract {
+export interface IContract {
   title: string;
   date: string;
   position: string;
@@ -42,13 +50,16 @@ export interface Contract {
 }
 
 export const resume: IResume = {
-  name: "Kjartan Einarsson",
-  email: "kjartanreinarsson@gmail.com",
-  phone: "250-507-0444",
-
-  location: "Victoria, BC",
-  linkedin: "https://www.linkedin.com/in/kjartan-einarsson-05184719a/",
-  github: "https://github.com/KjartanE",
+  personal: {
+    name: "Kjartan Einarsson",
+    email: "kjartanreinarsson@gmail.com",
+    phone: "250-507-0444",
+    description: "I like coding.",
+    location: "Victoria, BC",
+    linkedin: "https://www.linkedin.com/in/kjartan-einarsson-05184719a/",
+    github: "https://github.com/KjartanE",
+    youtube: "https://www.youtube.com/@kjartan6030"
+  },
   skills: [
     "REST API",
     "Web Design",
@@ -96,15 +107,24 @@ export const resume: IResume = {
   certifications: [
     {
       title: "AWS Certified Cloud Practitioner",
-      date: "2024"
+      date: "June 2024",
+      description:
+        "AWS Certified Cloud Practitioner is an entry-level certification that provides a foundational understanding of AWS cloud services.",
+      logo: "./aws.png"
     },
     {
       title: "B.C. Government, OpenShift 101",
-      date: "2024"
+      date: "June 2024",
+      description:
+        "OpenShift 101 is a course that provides an introduction to OpenShift, a container orchestration platform that allows for the deployment of containerized applications.",
+      logo: "./openshift.png"
     },
     {
       title: "B.C. Government, OpenShift 201",
-      date: "2024"
+      date: "August 2024",
+      description:
+        "OpenShift 201 is a course that provides an intermediate understanding of OpenShift, focusing on the deployment and management of containerized applications.",
+      logo: "./openshift.png"
     }
   ],
   work_experience: [

@@ -1,66 +1,28 @@
-import { Education, resume } from "./resume.tsx";
+import { resume } from "./resume.tsx";
+import * as React from "react";
 
-import { title } from "@/components/primitives";
+import EducationComponent from "./components/EducationComponent.tsx";
+import CertComponent from "./components/CertComponent.tsx";
+import SkillComponent from "./components/SkillComponent.tsx";
+import PersonalComponent from "./components/PersonalComponent.tsx";
 
 export default function AboutPage() {
-  const formatEducation = (education: Education) => {
-    return `${education.school} | ${education.degree} | ${education.major} | ${education.graduation}`;
-  };
-
   return (
     <>
-      <div className="grid auto-cols-max grid-flow-col grid-cols-1 gap-4">
-        <div>
-          <div className="flex flex-col items-center justify-center">
-            <div>
-              <h1 className={title()}>About</h1>
-            </div>
+      <div>
+        <PersonalComponent personal={resume.personal} />
 
-            <div className="grid auto-cols-max grid-flow-col grid-cols-3 gap-4">
-              <div>
-                <h2 className="mb-4 text-lg font-semibold tracking-tighter">Skills</h2>
-                <ul className="mb-8">
-                  {resume.skills.map((skill) => (
-                    <li key={skill} className="ml-4 list-disc">
-                      {skill}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h2 className="mb-4 text-lg font-semibold tracking-tighter">Technologies</h2>
-                <ul className="mb-8">
-                  {resume.technologies.map((technology) => (
-                    <li key={technology} className="ml-4 list-disc">
-                      {technology}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h2 className="mb-4 text-lg font-semibold tracking-tighter">Languages</h2>
-                <ul className="mb-8">
-                  {resume.languages.map((language) => (
-                    <li key={language} className="ml-4 list-disc">
-                      {language}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            <h2 className="mb-4 text-lg font-semibold tracking-tighter">Education</h2>
-            <p className="mb-8">{formatEducation(resume.education[0])}</p>
-            <h2 className="mb-4 text-lg font-semibold tracking-tighter">Certifications</h2>
-            <ul className="mb-8">
-              {resume.certifications.map((certification) => (
-                <li key={certification.title} className="ml-4 list-disc">
-                  {certification.title}
-                  {certification.date}
-                </li>
-              ))}
-            </ul>
-            <h2 className="mb-4 text-lg font-semibold tracking-tighter">Work Experience</h2>
-            {/* <ul className="mb-8">
+        <div className="flex flex-col gap-4 pl-64">
+          <EducationComponent education={resume.education[0]} />
+          <CertComponent certifications={resume.certifications} />
+
+          <SkillComponent title="Skills" skills={resume.skills} />
+          <SkillComponent title="Technologies" skills={resume.technologies} />
+          <SkillComponent title="Languages" skills={resume.languages} />
+          <h2 className="mb-4 text-lg font-semibold tracking-tighter">Work Experience</h2>
+        </div>
+      </div>
+      {/* <ul className="mb-8">
             {resume.work_experience.map((workExperience) => (
               <li key={workExperience.company} className="list-disc ml-4">
                 {workExperience.company}
@@ -88,9 +50,6 @@ export default function AboutPage() {
               </li>
             ))}
           </ul> */}
-          </div>
-        </div>
-      </div>
     </>
   );
 }

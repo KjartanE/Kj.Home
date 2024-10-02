@@ -1,7 +1,3 @@
-import { Link } from "@nextui-org/link";
-import { button as buttonStyles } from "@nextui-org/theme";
-
-import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 
 export default function Home() {
@@ -21,7 +17,7 @@ wanted to start tracking some of my projects and thoughts to share with others.
         </div>
       </div>
 
-      <div className="flex gap-3">
+      {/* <div className="flex gap-3">
         <Link
           isExternal
           className={buttonStyles({
@@ -32,7 +28,7 @@ wanted to start tracking some of my projects and thoughts to share with others.
           href={siteConfig.links.docs}>
           Documentation
         </Link>
-      </div>
+      </div> */}
     </section>
   );
 }
