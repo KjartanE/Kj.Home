@@ -11,7 +11,7 @@ const PersonalComponent: React.FC<IPersonalComponent> = (props) => {
   const { name, email, phone, description, location, linkedin, github, youtube } = props.personal;
 
   return (
-    <div className="sticky top-32 flex-shrink">
+    <div className="sticky top-0 h-svh py-32">
       <div className="flex-shrink gap-3">
         <h1>{name}</h1>
         <p>{email}</p>
