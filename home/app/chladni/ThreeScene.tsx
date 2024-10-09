@@ -2,8 +2,8 @@
 import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 
-import { Scene } from "./Scene";
-import { ChladniHandler } from "./ChladniHandler";
+import { Scene } from "../lib/Scene";
+import { ChladniHandler } from "../lib/ChladniHandler";
 
 const ThreeScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,6 @@ const ThreeScene: React.FC = () => {
       scene.resize();
     };
 
-    // animate()
     window.addEventListener("resize", handleResize);
 
     return () => {

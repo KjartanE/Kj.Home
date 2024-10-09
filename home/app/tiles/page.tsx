@@ -1,15 +1,12 @@
-import ThreeScene from "./ThreeScene";
+import React from "react";
+import PenroseLSystemRenderer from "./PenroseLSystemRenderer";
 
-export const metadata = {
-  title: "tiles",
-  description: "heres tiles I made"
+const HomePage: React.FC = () => {
+  return (
+    <div className="flex justify-center">
+      <PenroseLSystemRenderer />
+    </div>
+  );
 };
 
-export default function Page() {
-  return (
-    <section className="flex justify-center">
-      {/* <h1 className="font-semibold text-2xl mb-8 tracking-tighter">Cube</h1> */}
-      <ThreeScene />
-    </section>
-  );
-}
+export default HomePage;

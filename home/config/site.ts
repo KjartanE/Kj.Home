@@ -13,10 +13,6 @@ export const siteConfig = {
       href: "/about"
     },
     {
-      label: "Blog",
-      href: "/blog"
-    },
-    {
       label: "Cube",
       href: "/cube"
     },
@@ -37,10 +33,6 @@ export const siteConfig = {
     {
       label: "About",
       href: "/about"
-    },
-    {
-      label: "Blog",
-      href: "/blog"
     },
     {
       label: "Cube",
