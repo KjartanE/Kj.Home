@@ -2,7 +2,6 @@
 
 import * as THREE from "three";
 import { PenroseLSystem } from "../lib/PenroseLSystem";
-import { drawLine } from "../lib/DrawLine";
 import { useEffect, useRef } from "react";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -15,7 +14,9 @@ const PenroseLSystemRenderer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const penroseLSystem = new PenroseLSystem();
 
-  penroseLSystem.simulate(5);
+  const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+
+  penroseLSystem.simulate(3);
 
   const location = useRef<IPosition | null>(null);
 
@@ -24,7 +25,6 @@ const PenroseLSystemRenderer: React.FC = () => {
 
     const { scene, camera, renderer } = new PenroseScene();
 
-    scene.clear();
     const container = containerRef.current;
 
     container.appendChild(renderer.domElement);
@@ -32,8 +32,28 @@ const PenroseLSystemRenderer: React.FC = () => {
     let steps = 0;
     const stack: IPosition[] = [];
 
+    const lineGeometry = new THREE.BufferGeometry();
+    let positions: number[] = [];
+
+    function drawLine(start: THREE.Vector3, end: THREE.Vector3) {
+      positions.push(start.x, start.y, start.z);
+      positions.push(end.x, end.y, end.z);
+    }
+
+    function renderLines() {
+      // Populate positions array for all lines
+      // After the loop, add positions to the geometry
+      lineGeometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+
+      // Create a single line mesh
+      const line = new THREE.LineSegments(lineGeometry, lineMaterial);
+
+      scene.add(line);
+    }
+
     function generateLines() {
-      const position = location.current?.position || new THREE.Vector3(0, 0, 0);
+      positions = [];
+      const position = location.current?.position.clone() || new THREE.Vector3(0, 0, 0);
       let rotation = location.current?.rotation || 0;
 
       let pushes = 0;
@@ -43,9 +63,8 @@ const PenroseLSystemRenderer: React.FC = () => {
       const theta = penroseLSystem.theta;
       let production = penroseLSystem.production;
 
-      if (steps > production.length) {
-        steps = production.length;
-      }
+      steps > production.length ? (steps = production.length) : steps;
+
       for (let i = 0; i < steps; i++) {
         const step = production[i];
 
@@ -56,10 +75,8 @@ const PenroseLSystemRenderer: React.FC = () => {
             0
           );
 
-          for (let j = 0; j < repeats; j++) {
-            drawLine(scene, position, nextPosition);
-            position.copy(nextPosition);
-          }
+          drawLine(position, nextPosition);
+          position.copy(nextPosition);
 
           repeats = 1;
         } else if (step === "+") {
@@ -103,23 +120,32 @@ const PenroseLSystemRenderer: React.FC = () => {
 
     camera.position.z = 500; // Adjust camera position
 
+    let lastRenderTime = 0;
+    const renderInterval = 1000 / 30; // 30 FPS
+
     function animate() {
-      if (steps >= penroseLSystem.production.length) {
-        return;
+      const now = Date.now();
+      const delta = now - lastRenderTime;
+
+      if (delta > renderInterval) {
+        lastRenderTime = now;
+        if (steps < penroseLSystem.production.length) {
+          steps += 64;
+          scene.clear();
+          generateLines();
+          renderLines();
+        }
+        renderer.render(scene, camera);
       }
 
-      steps += 4;
-      scene.clear(); // Clear the previous lines
-      generateLines();
-
       requestAnimationFrame(animate);
-      renderer.render(scene, camera);
     }
     animate();
 
     return () => {
       controls.dispose();
 
+      scene.clear();
       container.removeChild(renderer.domElement);
     };
   }, []);
