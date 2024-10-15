@@ -3,20 +3,40 @@
 import * as THREE from "three";
 import { PenroseLSystem } from "../lib/PenroseLSystem";
 import { useEffect, useRef } from "react";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 export interface IPosition {
   position: THREE.Vector3;
   rotation: number;
 }
 
+const vertexShader = `
+  attribute float width;
+  varying float vWidth;
+  void main() {
+    vWidth = width;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const fragmentShader = `
+  varying float vWidth;
+  void main() {
+    gl_FragColor = vec4(vWidth, vWidth, vWidth, 1.0);
+  }
+`;
+
 const PenroseLSystemRenderer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const penroseLSystem = new PenroseLSystem();
 
-  const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+  const lineMaterial = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms: {}
+  });
 
-  penroseLSystem.simulate(3);
+  penroseLSystem.simulate(5);
 
   const location = useRef<IPosition | null>(null);
 
@@ -34,16 +54,19 @@ const PenroseLSystemRenderer: React.FC = () => {
 
     const lineGeometry = new THREE.BufferGeometry();
     let positions: number[] = [];
+    let widths: number[] = [];
 
-    function drawLine(start: THREE.Vector3, end: THREE.Vector3) {
+    function drawLine(start: THREE.Vector3, end: THREE.Vector3, width: number) {
       positions.push(start.x, start.y, start.z);
       positions.push(end.x, end.y, end.z);
+      widths.push(width, width);
     }
 
     function renderLines() {
       // Populate positions array for all lines
       // After the loop, add positions to the geometry
       lineGeometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      lineGeometry.setAttribute("width", new THREE.Float32BufferAttribute(widths, 1));
 
       // Create a single line mesh
       const line = new THREE.LineSegments(lineGeometry, lineMaterial);
@@ -58,6 +81,7 @@ const PenroseLSystemRenderer: React.FC = () => {
 
       let pushes = 0;
       let repeats = 1;
+      let lineWidth = 0.1;
 
       const drawLength = penroseLSystem.drawLength;
       const theta = penroseLSystem.theta;
@@ -75,10 +99,11 @@ const PenroseLSystemRenderer: React.FC = () => {
             0
           );
 
-          drawLine(position, nextPosition);
+          drawLine(position, nextPosition, lineWidth);
           position.copy(nextPosition);
 
           repeats = 1;
+          lineWidth += 0.01; // Increase line width progressively
         } else if (step === "+") {
           rotation += theta * repeats;
           repeats = 1;
@@ -114,11 +139,11 @@ const PenroseLSystemRenderer: React.FC = () => {
     }
 
     // Create a new instance of the OrbitControls class
-    const controls = new OrbitControls(camera, renderer.domElement);
+    // const controls = new OrbitControls(camera, renderer.domElement);
 
-    controls.target.set(0, 0, 0);
+    // controls.target.set(0, 0, 0);
 
-    camera.position.z = 500; // Adjust camera position
+    // camera.position.z = 500; // Adjust camera position
 
     let lastRenderTime = 0;
     const renderInterval = 1000 / 30; // 30 FPS
@@ -130,7 +155,7 @@ const PenroseLSystemRenderer: React.FC = () => {
       if (delta > renderInterval) {
         lastRenderTime = now;
         if (steps < penroseLSystem.production.length) {
-          steps += 64;
+          steps += 16;
           scene.clear();
           generateLines();
           renderLines();
@@ -143,14 +168,14 @@ const PenroseLSystemRenderer: React.FC = () => {
     animate();
 
     return () => {
-      controls.dispose();
+      // controls.dispose();
 
       scene.clear();
       container.removeChild(renderer.domElement);
     };
   }, []);
 
-  return <div ref={containerRef} className="fixed top-0 z-0" />;
+  return <div ref={containerRef} className="fixed top-0 z-10" />;
 };
 
 export default PenroseLSystemRenderer;
@@ -175,7 +200,7 @@ export class PenroseScene {
 
     this.renderer.setSize(this.width, this.height);
 
-    this.camera.position.z = 1000;
+    this.camera.position.z = 100;
 
     this.camera.lookAt(0, 0, 0);
   }
