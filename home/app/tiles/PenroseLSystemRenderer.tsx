@@ -3,6 +3,7 @@
 import * as THREE from "three";
 import { PenroseLSystem } from "../lib/PenroseLSystem";
 import { useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
 // import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 export interface IPosition {
@@ -11,29 +12,39 @@ export interface IPosition {
 }
 
 const vertexShader = `
-  attribute float width;
-  varying float vWidth;
-  void main() {
-    vWidth = width;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
+    attribute float width;
+    varying float vWidth;
+    void main() {
+      vWidth = width;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
 
 const fragmentShader = `
-  varying float vWidth;
-  void main() {
-    gl_FragColor = vec4(vWidth, vWidth, vWidth, 1.0);
-  }
-`;
+    varying float vWidth;
+    uniform float themeColor;
+    void main() {
+      float color = mix(0.5, 1.0, themeColor);
+      gl_FragColor = vec4(vWidth * color, vWidth * color, vWidth * color, 1.0);
+    }
+  `;
 
 const PenroseLSystemRenderer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const penroseLSystem = new PenroseLSystem();
 
+  const theme = useTheme();
+
+  console.log("theme", theme);
+
+  const themeColor = theme.resolvedTheme === "dark" ? 1.0 : 0.0;
+
   const lineMaterial = new THREE.ShaderMaterial({
-    vertexShader,
-    fragmentShader,
-    uniforms: {}
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
+    uniforms: {
+      themeColor: { value: themeColor }
+    }
   });
 
   penroseLSystem.simulate(5);
@@ -43,11 +54,13 @@ const PenroseLSystemRenderer: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const { scene, camera, renderer } = new PenroseScene();
+    const { scene, camera, renderer, resize } = new PenroseScene();
 
     const container = containerRef.current;
 
     container.appendChild(renderer.domElement);
+
+    scene.background = new THREE.Color(theme.resolvedTheme === "dark" ? 0x000000 : 0xffffff);
 
     let steps = 0;
     const stack: IPosition[] = [];
@@ -81,7 +94,7 @@ const PenroseLSystemRenderer: React.FC = () => {
 
       let pushes = 0;
       let repeats = 1;
-      let lineWidth = 0.1;
+      let lineWidth = theme.resolvedTheme === "dark" ? 0.01 : 0.99;
 
       const drawLength = penroseLSystem.drawLength;
       const theta = penroseLSystem.theta;
@@ -103,7 +116,13 @@ const PenroseLSystemRenderer: React.FC = () => {
           position.copy(nextPosition);
 
           repeats = 1;
-          lineWidth += 0.01; // Increase line width progressively
+          if (theme.resolvedTheme === "dark") {
+            lineWidth += 0.01;
+          } else if (theme.resolvedTheme === "light") {
+            lineWidth -= 0.01;
+          } else {
+            lineWidth += 0.01; // Increase line width progressively
+          }
         } else if (step === "+") {
           rotation += theta * repeats;
           repeats = 1;
@@ -155,7 +174,7 @@ const PenroseLSystemRenderer: React.FC = () => {
       if (delta > renderInterval) {
         lastRenderTime = now;
         if (steps < penroseLSystem.production.length) {
-          steps += 16;
+          steps += 24;
           scene.clear();
           generateLines();
           renderLines();
@@ -165,15 +184,23 @@ const PenroseLSystemRenderer: React.FC = () => {
 
       requestAnimationFrame(animate);
     }
+
     animate();
+
+    const handleResize = () => {
+      resize(camera, renderer);
+    };
+
+    window.addEventListener("resize", handleResize);
 
     return () => {
       // controls.dispose();
 
       scene.clear();
+      window.removeEventListener("resize", handleResize);
       container.removeChild(renderer.domElement);
     };
-  }, []);
+  }, [theme]);
 
   return <div ref={containerRef} className="fixed top-0 z-10" />;
 };
@@ -196,7 +223,8 @@ export class PenroseScene {
   constructor() {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, NEAR, FAR);
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setPixelRatio(window.devicePixelRatio);
 
     this.renderer.setSize(this.width, this.height);
 
@@ -210,10 +238,9 @@ export class PenroseScene {
     this.renderer.render(this.scene, this.camera);
   }
 
-  public resize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
+  public resize(camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer) {
+    camera.updateProjectionMatrix();
 
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
   }
 }

@@ -17,6 +17,6 @@ COPY --from=base /home/.next ./.next
 COPY --from=base /home/app ./app
 COPY --from=base /home .
 
-EXPOSE 3000
+EXPOSE 4444
 
 CMD ["pnpm", "dev"]

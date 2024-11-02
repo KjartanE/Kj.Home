@@ -13,7 +13,7 @@ services:
       - /app/node_modules
       - /app/.next
     ports:
-      - "3000:3000"
+      - "4444:4444"
     env_file:
       - .env
   prod:
@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile.prod
     container_name: kj_home
     ports:
-      - "3000:3000"
+      - "4444:4444"
     env_file:
       - .env
 

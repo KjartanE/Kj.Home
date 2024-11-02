@@ -1,27 +1,22 @@
 import { resume } from "./resume.tsx";
 import * as React from "react";
 
-import EducationComponent from "./components/EducationComponent.tsx";
-import CertComponent from "./components/CertComponent.tsx";
 import SkillComponent from "./components/SkillComponent.tsx";
-import PersonalComponent from "./components/PersonalComponent.tsx";
 import IntroductionComponent from "./components/IntroductionComponent.tsx";
+import PersonalStickyComponent from "./components/PersonalStickyComponent.tsx";
 
 export default function AboutPage() {
   return (
     <div className="flex">
-      <PersonalComponent personal={resume.personal} />
+      <PersonalStickyComponent personal={resume.personal} />
       <div className="flex flex-col gap-4 px-8">
         <IntroductionComponent />
 
-        <EducationComponent education={resume.education[0]} />
-        <CertComponent certifications={resume.certifications} />
 
-        <div className="flex gap-4 justify-center">
-
-        <SkillComponent title="Skills" skills={resume.skills} />
-        <SkillComponent title="Technologies" skills={resume.technologies} />
-        <SkillComponent title="Languages" skills={resume.languages} />
+        <div className="flex justify-center gap-4">
+          <SkillComponent title="Skills" skills={resume.skills} />
+          <SkillComponent title="Technologies" skills={resume.technologies} />
+          <SkillComponent title="Languages" skills={resume.languages} />
         </div>
         <h2 className="mb-4 text-lg font-semibold tracking-tighter">Work Experience</h2>
       </div>

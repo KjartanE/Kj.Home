@@ -1,6 +1,5 @@
 import { ICertification } from "../resume";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
-import { Image } from "@nextui-org/image";
 import { Divider } from "@nextui-org/divider";
 import React from "react";
 
@@ -17,7 +16,7 @@ const CertComponent: React.FC<ICertComponent> = (props) => {
         return (
           <>
             <CardHeader className="flex gap-3" key={certification.title}>
-              <Image alt="cert logo" height={40} radius="sm" src={certification.logo} width={40} />
+              
               <h1>{certification.title}</h1>
             </CardHeader>
             <Divider />

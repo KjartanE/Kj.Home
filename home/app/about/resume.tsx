@@ -21,6 +21,7 @@ export interface IPersonal {
 
 export interface ICertification {
   title: string;
+  short: string;
   date: string;
   description: string;
   logo: string;
@@ -107,6 +108,7 @@ export const resume: IResume = {
   certifications: [
     {
       title: "AWS Certified Cloud Practitioner",
+      short: "AWS",
       date: "June 2024",
       description:
         "AWS Certified Cloud Practitioner is an entry-level certification that provides a foundational understanding of AWS cloud services.",
@@ -114,6 +116,7 @@ export const resume: IResume = {
     },
     {
       title: "B.C. Government, OpenShift 101",
+      short: "OpenShift",
       date: "June 2024",
       description:
         "OpenShift 101 is a course that provides an introduction to OpenShift, a container orchestration platform that allows for the deployment of containerized applications.",
@@ -121,6 +124,7 @@ export const resume: IResume = {
     },
     {
       title: "B.C. Government, OpenShift 201",
+      short: "OpenShift",
       date: "August 2024",
       description:
         "OpenShift 201 is a course that provides an intermediate understanding of OpenShift, focusing on the deployment and management of containerized applications.",
