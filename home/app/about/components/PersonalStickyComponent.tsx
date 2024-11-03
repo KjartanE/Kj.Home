@@ -13,7 +13,7 @@ const PersonalStickyComponent: React.FC<IPersonalStickyComponent> = (props) => {
 
   return (
     <div className="sticky top-0 h-svh py-32">
-      <Card className="flex-shrink gap-3 p-6 bg-zinc-950">
+      <Card className="flex-shrink gap-3 p-6">
         <h1>{name}</h1>
         <p>{email}</p>
         <p>{phone}</p>

@@ -42,6 +42,8 @@ export interface IWorkExperience {
 }
 
 export interface IContract {
+  id: string;
+  label: string;
   title: string;
   date: string;
   position: string;
@@ -62,7 +64,6 @@ export const resume: IResume = {
     youtube: "https://www.youtube.com/@kjartan6030"
   },
   skills: [
-    "REST API",
     "Web Design",
     "Data Structures",
     "Database Management",
@@ -74,6 +75,7 @@ export const resume: IResume = {
     "Teamwork"
   ],
   technologies: [
+    "REST API",
     "OpenShift",
     "Linux",
     "GitHub/Git",
@@ -138,6 +140,8 @@ export const resume: IResume = {
       date: "2021-Present",
       contract: [
         {
+          id: "NERT",
+          label: "NERT",
           title: "Northeastern Restoration Tracker (NERT)",
           date: "May 2024 - September 2024",
           position: "QA Tester / Full Stack Developer",
@@ -156,7 +160,8 @@ export const resume: IResume = {
             "Development and migration from TEST-PROD and DEV-TEST"
           ],
           technologies: [
-            "React / Material-UI",
+            "React",
+            "Material-UI",
             "NodeJS",
             "TypeScript",
             "Git",
@@ -171,6 +176,8 @@ export const resume: IResume = {
           ]
         },
         {
+          id: "SIMS/BIOHUB",
+          label: "SIMS/BIOHUB",
           title: "Species Inventory Management System / BioHub (SIMS/BIOHUB)",
           date: "Dec 2021 - April 2024",
           position: "Full Stack Developer",
@@ -192,8 +199,8 @@ export const resume: IResume = {
             "Implementation of front-end map (Leaflet)"
           ],
           technologies: [
-            "React / Material-UI",
-            "NodeJS",
+            "React",
+            "Material-UI",
             "TypeScript",
             "Git",
             "PostgreSQL",
@@ -206,13 +213,17 @@ export const resume: IResume = {
           ]
         },
         {
+          id: "HRT",
+          label: "HRT",
           title: "Habitat Restoration Tracker (HRT)",
           date: "Jan 2023 - April 2023",
           position: "Junior Full Stack Developer",
           description:
             "Kjartan served as a Junior Full Stack Developer during the foundational development phase of the Habitat Restoration Tracker (HRT), a critical platform aimed at managing restoration efforts across the province. He played a pivotal role in the redesign and integration of the RESTful API system and the formulation of backend and frontend testing frameworks. His contributions were essential in establishing the initial project setup and development lifecycle, ensuring a robust integration of scientific data to deliver a transparent and comprehensive overview of land-based restoration activities.",
+          notes: [],
           technologies: [
-            "React / Material-UI",
+            "React",
+            "Material-UI",
             "NodeJS",
             "TypeScript",
             "Git",
@@ -224,12 +235,15 @@ export const resume: IResume = {
           ]
         },
         {
+          id: "BuyBC",
+          label: "BuyBC",
           title: "Investment Agriculture Foundation (BuyBC)",
           date: "Sept 2021 - Dec 2021",
           position: "Junior Web Developer",
           description:
             "Kjartan was responsible for the development of front-end updates to the user interface of the BuyBC issuer and verifier applications. His responsibilities included implementation of a user feedback form, search bar optimization, webpage quality of life changes, and assisting in the migration of the BuyBC application to IAF servers.",
-          technologies: ["Vue.JS", "NodeJS", "TypeScript", "Docker", "Git"]
+          technologies: ["Vue.JS", "NodeJS", "TypeScript", "Docker", "Git"],
+          notes: []
         }
       ]
     },
@@ -240,6 +254,8 @@ export const resume: IResume = {
       date: "Jun 2020 - Dec 2020",
       contract: [
         {
+          id: "NERT",
+          label: "NERT",
           title: "Northeastern Restoration Tracker (NERT)",
           date: "May 2024 - September 2024",
           position: "QA Tester / Full Stack Developer",

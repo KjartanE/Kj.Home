@@ -7,7 +7,7 @@ export default function Home() {
       <div className="flex justify-center">
         <PenroseLSystemRenderer />
       </div>
-      <div className="inline-block max-w-xl justify-center text-center z-20">
+      <div className="z-20 inline-block max-w-xl justify-center text-center">
         <span className={title()}>Kjartan Einarsson</span>
         <br />
         <div className={subtitle({ class: "mt-4" })}>

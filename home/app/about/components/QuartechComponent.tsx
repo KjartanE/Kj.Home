@@ -1,17 +1,17 @@
 import React from "react";
 import { Card, Image } from "@nextui-org/react";
+import QProjectsComponent from "./QProjectsComponent";
 
 const QuartechComponent: React.FC = () => {
   return (
-    <Card className="space-y-4 rounded-xl p-6 shadow-md bg-zinc-800">
+    <Card className="space-y-4 rounded-xl p-6 shadow-md">
       <div className="flex">
         <div className="ml-4 flex flex-col justify-center">
-          <span className="py-1 px-4 text-gray-400">
+          <span className="px-4 py-1">
             I am currently working as a Software Engineer at <strong>Quartech ltd</strong>, as a full-stack developer.
           </span>
-          <span className="py-1 px-4 text-gray-400">
-            I have been working on a variety of projects for BC Government and internal company 
-            services.
+          <span className="px-4 py-1">
+            I have been working on a variety of projects for BC Government and internal company services.
           </span>
         </div>
         <div className="ml-4 flex flex-col justify-center">
@@ -27,6 +27,7 @@ const QuartechComponent: React.FC = () => {
           </div>
         </div>
       </div>
+      <QProjectsComponent />
     </Card>
   );
 };

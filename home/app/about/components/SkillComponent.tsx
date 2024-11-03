@@ -1,32 +1,44 @@
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
-import { Divider } from "@nextui-org/divider";
+"use client";
+
+import { Card } from "@nextui-org/card";
 import React from "react";
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
+import Chip, { findChip } from "@/components/chip";
+import { resume } from "../resume";
 
-export interface ISkillComponent {
-  title: string;
-  skills: string[];
-}
+const SkillComponent: React.FC = () => {
+  const skillRows: { skill: string; tech: string; lang: string }[] = [];
 
-const SkillComponent: React.FC<ISkillComponent> = (props) => {
-  const { title, skills } = props;
+  for (let index = 0; index < 12; index++) {
+    skillRows.push({
+      skill: resume.skills[index] || "",
+      tech: resume.technologies[index] || "",
+      lang: resume.languages[index] || ""
+    });
+  }
 
   return (
-    <Card className="mb-8">
-      <CardHeader className="flex gap-3">
-        <h1>{title}</h1>
-      </CardHeader>
-      <Divider />
-      <CardBody>
-        <ul>
-          {skills.map((skill, index) => {
-            return (
-              <li key={`${title}-${index}`} className="ml-4 list-disc">
-                {skill}
-              </li>
-            );
-          })}
-        </ul>
-      </CardBody>
+    <Card className="mb-8 flex">
+      <Table aria-label="Skills Table" className="w-full shadow-lg">
+        <TableHeader>
+          <TableColumn className="text-lg text-gray-500">Skills</TableColumn>
+          <TableColumn className="text-lg text-gray-500">Technology</TableColumn>
+          <TableColumn className="text-lg text-gray-500">Language</TableColumn>
+        </TableHeader>
+        <TableBody>
+          {skillRows.map((item, index) => (
+        <TableRow key={index}>
+          <TableCell>{findChip(item.skill) && <Chip {...findChip(item.skill)} />}</TableCell>
+          <TableCell>
+            <Chip {...findChip(item.tech)} />
+          </TableCell>
+          <TableCell>
+            <Chip {...findChip(item.lang)} />
+          </TableCell>
+        </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </Card>
   );
 };

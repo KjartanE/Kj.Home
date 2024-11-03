@@ -16,7 +16,6 @@ const CertComponent: React.FC<ICertComponent> = (props) => {
         return (
           <>
             <CardHeader className="flex gap-3" key={certification.title}>
-              
               <h1>{certification.title}</h1>
             </CardHeader>
             <Divider />
