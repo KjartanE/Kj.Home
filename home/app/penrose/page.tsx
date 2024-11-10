@@ -1,10 +1,10 @@
 import React from "react";
-import PenroseLSystemRenderer from "./PenroseLSystemRenderer";
+import PenrosePlayground from "./PenrosePlayground";
 
 const HomePage: React.FC = () => {
   return (
     <div className="flex justify-center">
-      <PenroseLSystemRenderer />
+      <PenrosePlayground />
     </div>
   );
 };

@@ -4,9 +4,8 @@ import * as THREE from "three";
 import { PenroseLSystem } from "../lib/PenroseLSystem";
 import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
-import { IPosition, PenroseScene } from "./penrose/PenroseScene";
-import { PenroseManager } from "./penrose/PenroseManager";
-// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { IPosition, PenroseScene } from "./PenroseScene";
+import { PenroseManager } from "./PenroseManager";
 
 const PenroseLSystemRenderer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -29,13 +28,6 @@ const PenroseLSystemRenderer: React.FC = () => {
     container.appendChild(renderer.domElement);
 
     scene.background = new THREE.Color(theme.resolvedTheme === "dark" ? 0x000000 : 0xffffff);
-
-    // Create a new instance of the OrbitControls class
-    // const controls = new OrbitControls(camera, renderer.domElement);
-
-    // controls.target.set(0, 0, 0);
-
-    // camera.position.z = 500; // Adjust camera position
 
     let lastRenderTime = 0;
     const renderInterval = 1000 / 30; // 30 FPS
@@ -69,8 +61,6 @@ const PenroseLSystemRenderer: React.FC = () => {
     window.addEventListener("resize", handleResize);
 
     return () => {
-      // controls.dispose();
-
       scene.clear();
       window.removeEventListener("resize", handleResize);
       container.removeChild(renderer.domElement);

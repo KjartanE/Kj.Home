@@ -17,8 +17,8 @@ export const siteConfig = {
       href: "/cube"
     },
     {
-      label: "Tiles",
-      href: "/tiles"
+      label: "Penrose",
+      href: "/penrose"
     },
     {
       label: "Chladni",
@@ -39,8 +39,8 @@ export const siteConfig = {
       href: "/cube"
     },
     {
-      label: "Tiles",
-      href: "/tiles"
+      label: "Penrose",
+      href: "/penrose"
     },
     {
       label: "Chladni",
