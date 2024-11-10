@@ -3,7 +3,7 @@
 import React, { useRef, useEffect } from "react";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-import { TileGrid, TileScene } from "./main";
+import { TileGrid, TileScene } from "../lib/tiles";
 // import * as THREE from "three"
 
 const ThreeScene: React.FC = () => {
