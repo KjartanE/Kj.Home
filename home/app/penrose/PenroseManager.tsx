@@ -6,8 +6,9 @@ import { PenroseLSystem } from "@/app/lib/PenroseLSystem";
 export class PenroseManager {
   private theme: string;
   private themeColor: number;
-  private lineMaterial: THREE.ShaderMaterial;
-  private lineGeometry: THREE.BufferGeometry;
+
+  public lineMaterial: THREE.ShaderMaterial;
+  public lineGeometry: THREE.BufferGeometry;
 
   private stack: IPosition[];
   private positions: number[];
@@ -112,6 +113,14 @@ export class PenroseManager {
         pushes--;
       }
     };
+  }
+
+  reset() {
+    this.positions = [];
+    this.widths = [];
+    this.steps = 0;
+    this.stack = [];
+    this.lineGeometry = new THREE.BufferGeometry();
   }
 }
 
