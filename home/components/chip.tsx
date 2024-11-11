@@ -131,40 +131,40 @@ export enum Language {
 }
 
 export const skillDetails = {
-  [Skill.Web_Design]: { color: "#33FF57", icon: <FaLaptopCode /> },
-  [Skill.Data_Structures]: { color: "#3357FF", icon: <FaDatabase /> },
-  [Skill.Database_Management]: { color: "#FF33A1", icon: <FaDatabase /> },
-  [Skill.Agile_Development]: { color: "#33FFF5", icon: <FaCogs /> },
-  [Skill.Soldering_and_Wiring_Hardware]: { color: "#FF5733", icon: <FaMicrochip /> },
-  [Skill.Communication]: { color: "#33FF57", icon: <FaUsers /> },
-  [Skill.Network_Management]: { color: "#3357FF", icon: <FaNetworkWired /> },
-  [Skill.Raspberry_Pi_Development]: { color: "#FF33A1", icon: <FaMicrochip /> },
-  [Skill.Teamwork]: { color: "#33FFF5", icon: <FaUsers /> }
+  [Skill.Web_Design]: { color: "#2EB84C", icon: <FaLaptopCode /> },
+  [Skill.Data_Structures]: { color: "#2B4EB8", icon: <FaDatabase /> },
+  [Skill.Database_Management]: { color: "#B82E8C", icon: <FaDatabase /> },
+  [Skill.Agile_Development]: { color: "#2EB8D4", icon: <FaCogs /> },
+  [Skill.Soldering_and_Wiring_Hardware]: { color: "#B84C2E", icon: <FaMicrochip /> },
+  [Skill.Communication]: { color: "#2EB84C", icon: <FaUsers /> },
+  [Skill.Network_Management]: { color: "#2B4EB8", icon: <FaNetworkWired /> },
+  [Skill.Raspberry_Pi_Development]: { color: "#B82E8C", icon: <FaMicrochip /> },
+  [Skill.Teamwork]: { color: "#2EB8D4", icon: <FaUsers /> }
 };
 
 export const technologyDetails = {
-  [Technology.OpenShift]: { color: "#FF5733", icon: <FaServer /> },
-  [Technology.Linux]: { color: "#33FF57", icon: <FaLaptopCode /> },
-  [Technology.GitHub_Git]: { color: "#3357FF", icon: <FaCode /> },
-  [Technology.GitHub_Actions_DevOps]: { color: "#FF33A1", icon: <FaCogs /> },
-  [Technology.GIS_Leaflet]: { color: "#33FFF5", icon: <FaMap /> },
-  [Technology.Docker]: { color: "#FF5733", icon: <FaDocker /> },
-  [Technology.React]: { color: "#33FF57", icon: <FaReact /> },
-  [Technology.NodeJS]: { color: "#3357FF", icon: <FaNodeJs /> },
-  [Technology.MongoDB]: { color: "#FF33A1", icon: <FaDatabase /> },
-  [Technology.Cypress]: { color: "#33FFF5", icon: <FaCogs /> },
-  [Technology.REST_API]: { color: "#FF5733", icon: <FaServer /> }
+  [Technology.OpenShift]: { color: "#B84C2E", icon: <FaServer /> },
+  [Technology.Linux]: { color: "#2EB84C", icon: <FaLaptopCode /> },
+  [Technology.GitHub_Git]: { color: "#2B4EB8", icon: <FaCode /> },
+  [Technology.GitHub_Actions_DevOps]: { color: "#B82E8C", icon: <FaCogs /> },
+  [Technology.GIS_Leaflet]: { color: "#2EB8D4", icon: <FaMap /> },
+  [Technology.Docker]: { color: "#B84C2E", icon: <FaDocker /> },
+  [Technology.React]: { color: "#2EB84C", icon: <FaReact /> },
+  [Technology.NodeJS]: { color: "#2B4EB8", icon: <FaNodeJs /> },
+  [Technology.MongoDB]: { color: "#B82E8C", icon: <FaDatabase /> },
+  [Technology.Cypress]: { color: "#2EB8D4", icon: <FaCogs /> },
+  [Technology.REST_API]: { color: "#B84C2E", icon: <FaServer /> }
 };
 
 export const languageDetails = {
-  [Language.Java]: { color: "#FF5733", icon: <FaJava /> },
-  [Language.Python]: { color: "#33FF57", icon: <FaPython /> },
-  [Language.C_CPP]: { color: "#3357FF", icon: <FaCode /> },
-  [Language.JavaScript_TypeScript]: { color: "#FF33A1", icon: <FaJsSquare /> },
-  [Language.MySQL]: { color: "#33FFF5", icon: <FaDatabase /> },
-  [Language.PostgreSQL]: { color: "#FF5733", icon: <FaDatabase /> },
-  [Language.CSS]: { color: "#33FF57", icon: <FaCss3Alt /> },
-  [Language.HTML]: { color: "#3357FF", icon: <FaHtml5 /> },
-  [Language.Bash]: { color: "#FF33A1", icon: <FaTerminal /> },
-  [Language.Mocha_Jest_Selenium]: { color: "#33FFF5", icon: <FaVial /> }
+  [Language.Java]: { color: "#B84C2E", icon: <FaJava /> },
+  [Language.Python]: { color: "#2EB84C", icon: <FaPython /> },
+  [Language.C_CPP]: { color: "#2B4EB8", icon: <FaCode /> },
+  [Language.JavaScript_TypeScript]: { color: "#B82E8C", icon: <FaJsSquare /> },
+  [Language.MySQL]: { color: "#2EB8D4", icon: <FaDatabase /> },
+  [Language.PostgreSQL]: { color: "#B84C2E", icon: <FaDatabase /> },
+  [Language.CSS]: { color: "#2EB84C", icon: <FaCss3Alt /> },
+  [Language.HTML]: { color: "#2B4EB8", icon: <FaHtml5 /> },
+  [Language.Bash]: { color: "#B82E8C", icon: <FaTerminal /> },
+  [Language.Mocha_Jest_Selenium]: { color: "#2EB8D4", icon: <FaVial /> }
 };

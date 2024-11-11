@@ -69,6 +69,7 @@ export class ChladniHandler {
       aLabel.innerHTML = `a: ${aSlider.value}`;
     });
     this.documentObjects.push(aSlider);
+    this.documentObjects.push(aLabel);
 
     const bSlider = menu.appendChild(document.createElement("input"));
 
@@ -84,6 +85,7 @@ export class ChladniHandler {
       bLabel.innerHTML = `b: ${bSlider.value}`;
     });
     this.documentObjects.push(bSlider);
+    this.documentObjects.push(bLabel);
 
     const nSlider = menu.appendChild(document.createElement("input"));
 
@@ -99,6 +101,7 @@ export class ChladniHandler {
       nLabel.innerHTML = `n: ${nSlider.value}`;
     });
     this.documentObjects.push(nSlider);
+    this.documentObjects.push(nLabel);
 
     const mSlider = menu.appendChild(document.createElement("input"));
 
@@ -114,6 +117,7 @@ export class ChladniHandler {
       mLabel.innerHTML = `m: ${mSlider.value}`;
     });
     this.documentObjects.push(mSlider);
+    this.documentObjects.push(mLabel);
 
     //color picker
     const colorOnePicker = menu.appendChild(document.createElement("input"));
@@ -127,6 +131,7 @@ export class ChladniHandler {
       colorOneLabel.innerHTML = `colorOne: ${colorOnePicker.value}`;
     });
     this.documentObjects.push(colorOnePicker);
+    this.documentObjects.push(colorOneLabel);
 
     const colorTwoPicker = menu.appendChild(document.createElement("input"));
 
@@ -139,6 +144,7 @@ export class ChladniHandler {
       colorTwoLabel.innerHTML = `colorTwo: ${colorTwoPicker.value}`;
     });
     this.documentObjects.push(colorTwoPicker);
+    this.documentObjects.push(colorTwoLabel);
 
     //opacity sliders
     const opacityOneSlider = menu.appendChild(document.createElement("input"));
@@ -155,6 +161,7 @@ export class ChladniHandler {
       opacityOneLabel.innerHTML = `opacityOne: ${opacityOneSlider.value}`;
     });
     this.documentObjects.push(opacityOneSlider);
+    this.documentObjects.push(opacityOneLabel);
 
     const opacityTwoSlider = menu.appendChild(document.createElement("input"));
 
@@ -170,6 +177,7 @@ export class ChladniHandler {
       opacityTwoLabel.innerHTML = `opacityTwo: ${opacityTwoSlider.value}`;
     });
     this.documentObjects.push(opacityTwoSlider);
+    this.documentObjects.push(opacityTwoLabel);
 
     const githubLink = menu.appendChild(document.createElement("a"));
 

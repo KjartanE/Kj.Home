@@ -220,7 +220,13 @@ export const resume: IResume = {
           position: "Junior Full Stack Developer",
           description:
             "Kjartan served as a Junior Full Stack Developer during the foundational development phase of the Habitat Restoration Tracker (HRT), a critical platform aimed at managing restoration efforts across the province. He played a pivotal role in the redesign and integration of the RESTful API system and the formulation of backend and frontend testing frameworks. His contributions were essential in establishing the initial project setup and development lifecycle, ensuring a robust integration of scientific data to deliver a transparent and comprehensive overview of land-based restoration activities.",
-          notes: [],
+          notes: [
+            "Assisted in the redesign and integration of the RESTful API system.",
+            "Formulated backend and frontend testing frameworks.",
+            "Contributed to the initial project setup and development lifecycle.",
+            "Ensured robust integration of scientific data.",
+            "Delivered a transparent and comprehensive overview of land-based restoration activities."
+          ],
           technologies: [
             "React",
             "Material-UI",
@@ -243,7 +249,11 @@ export const resume: IResume = {
           description:
             "Kjartan was responsible for the development of front-end updates to the user interface of the BuyBC issuer and verifier applications. His responsibilities included implementation of a user feedback form, search bar optimization, webpage quality of life changes, and assisting in the migration of the BuyBC application to IAF servers.",
           technologies: ["Vue.JS", "NodeJS", "TypeScript", "Docker", "Git"],
-          notes: []
+          notes: [
+            "Implemented a user feedback form to gather insights from users.",
+            "Optimized the search bar for better performance and accuracy.",
+            "Made various quality of life changes to improve the user interface."
+          ]
         }
       ]
     },

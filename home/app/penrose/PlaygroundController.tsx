@@ -76,6 +76,7 @@ export class PlaygroundController {
       aLabel.innerHTML = `generations: ${aSlider.value}`;
     });
     this.documentObjects.push(aSlider);
+    this.documentObjects.push(aLabel);
 
     // slider for speed
     const speedSlider = menu.appendChild(document.createElement("input"));
@@ -92,6 +93,7 @@ export class PlaygroundController {
       speedLabel.innerHTML = `speed: ${speedSlider.value}`;
     });
     this.documentObjects.push(speedSlider);
+    this.documentObjects.push(speedLabel);
 
     // checkbox for instant render
     const instantRender = menu.appendChild(document.createElement("input"));
@@ -118,6 +120,8 @@ export class PlaygroundController {
       this.rotation1 = Number(rotationSlider.value);
       rotationLabel.innerHTML = `rotation1: ${rotationSlider.value}`;
     });
+    this.documentObjects.push(rotationSlider);
+    this.documentObjects.push(rotationLabel);
 
     // rotation slider
     const rotationSlider2 = menu.appendChild(document.createElement("input"));
@@ -134,6 +138,8 @@ export class PlaygroundController {
       rotationLabel2.innerHTML = `rotation2: ${rotationSlider2.value}`;
     });
 
+    this.documentObjects.push(rotationSlider2);
+    this.documentObjects.push(rotationLabel2);
     // //color picker
     // const colorOnePicker = menu.appendChild(document.createElement("input"));
 
