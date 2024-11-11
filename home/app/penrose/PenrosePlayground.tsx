@@ -65,6 +65,7 @@ const PenrosePlayground: React.FC = () => {
         };
 
         penroseManager.reset();
+        penroseManager2.reset();
       }
 
       const now = Date.now();

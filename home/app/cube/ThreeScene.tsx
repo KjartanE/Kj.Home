@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from "react";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as THREE from "three";
 
-import { cubeGenerator, cameraGenerator, sphereGenerator } from "./main";
+import { CubeScene } from "./main";
 import DotMatrix from "./components/dot_matrix";
 
 const density = 16;
@@ -15,11 +15,12 @@ const ThreeScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const matrix = new DotMatrix(x_upper_bound, y_upper_bound, z_upper_bound, density);
+  const dotMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0x00ff00 });
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const { scene, camera, renderer } = cameraGenerator();
+    const { scene, camera, renderer } = new CubeScene();
 
     const container = containerRef.current;
 
@@ -33,25 +34,19 @@ const ThreeScene: React.FC = () => {
     controls.target.set(512, 512, 512);
     controls.update();
 
-    const cube = cubeGenerator();
-
-    scene.add(cube);
-
-    const sphere = sphereGenerator();
-
-    scene.add(sphere);
-
     if (matrix) {
       matrix.create_matrix();
 
       const points = matrix.generate_points();
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const dotGeometry = new THREE.BufferGeometry().setFromPoints(points);
       // const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
       // const mesh = new THREE.Mesh(geometry, material)
       // scene.add(mesh)
-      const dot_wireframe = new THREE.WireframeGeometry(geometry);
+      // const dot_wireframe = new THREE.WireframeGeometry(geometry);
 
-      const dots = new THREE.LineSegments(dot_wireframe);
+      const dots = new THREE.Points(dotGeometry, dotMaterial);
+
+      // const dots = new THREE.LineSegments(dot_wireframe);
       // dots.material.depthTest = true
       // dots.material.opacity = 0.25
       // dots.material.transparent = true
@@ -62,10 +57,6 @@ const ThreeScene: React.FC = () => {
     camera.lookAt(512, 512, 0);
     // Add this function inside the useEffect hook
     const animate = () => {
-      sphere.rotation.x += 0.001;
-      sphere.rotation.y += 0.001;
-      cube.rotation.x += 0.001;
-      cube.rotation.y -= 0.001;
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     };
@@ -88,7 +79,7 @@ const ThreeScene: React.FC = () => {
     };
   }, []);
 
-  return <div ref={containerRef} />;
+  return <div ref={containerRef} className="fixed top-0 z-10" />;
 };
 
 export default ThreeScene;
