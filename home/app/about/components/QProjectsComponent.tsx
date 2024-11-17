@@ -1,5 +1,5 @@
 "use client";
-import { Tabs, Tab, Card, CardBody, CardHeader, Divider, Accordion, AccordionItem } from "@nextui-org/react";
+import { Tabs, Tab, CardBody, CardHeader, Divider, Accordion, AccordionItem } from "@nextui-org/react";
 import { IContract, resume } from "../../../config/resume";
 import { ChipList, sortChips } from "@/components/chip";
 
@@ -11,11 +11,7 @@ const QProjectsComponent: React.FC = () => {
       <Tabs aria-label="Dynamic tabs" items={q_work.contract}>
         {(item) => (
           <Tab key={item.id} title={item.label}>
-            <Card>
-              <CardBody>
-                <ContractData contract={item} />
-              </CardBody>
-            </Card>
+            <ContractData contract={item} />
           </Tab>
         )}
       </Tabs>
@@ -32,37 +28,38 @@ export interface IContractData {
 const ContractData: React.FC<IContractData> = ({ contract }) => {
   const chipsDetails = sortChips(contract.technologies);
 
+  const isMobile = window.innerWidth < 768;
+
   return (
-    <>
-      <CardHeader />
-      <h3 className="font-bold">{contract.title}</h3>
-      <p>{contract.position}</p>
-      <p className="text-gray-400">{contract.date}</p>
+    <div className="p-4">
+      <CardHeader className="flex flex-col items-start">
+        <h2 className="font-bold">{contract.title}</h2>
+        <p>{contract.position}</p>
+        <p className="text-gray-400">{contract.date}</p>
+      </CardHeader>
       <CardBody>
-        <div className="p-2">
-          <p>{contract.description}</p>
-          <Divider className="my-2" />
-        </div>
+        <p>{contract.description}</p>
+        <Divider className="mt-4" />
         <Accordion variant="light">
-          <AccordionItem key="1" className="px-4" title="Details">
-            <CardBody>
-              <div className="flex">
-                <ul className="list-inside list-disc space-y-1 px-4">
-                  {contract.notes &&
-                    contract.notes.map((note, index) => (
-                      <li key={index} className="text-gray-500">
-                        {note}
-                      </li>
-                    ))}
-                </ul>
+          <AccordionItem key="1" title="Details">
+            <CardBody className="flex flex-row justify-between">
+              <ul className="list-inside list-disc space-y-1">
+                {contract.notes &&
+                  contract.notes.map((note, index) => (
+                    <li key={index} className="text-gray-500">
+                      {note}
+                    </li>
+                  ))}
+              </ul>
+                {!isMobile && (
                 <div>
                   <ChipList chips={chipsDetails} />
                 </div>
-              </div>
+                )}
             </CardBody>
           </AccordionItem>
         </Accordion>
       </CardBody>
-    </>
+    </div>
   );
 };
