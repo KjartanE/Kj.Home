@@ -1,7 +1,7 @@
 import { MutableRefObject } from "react";
 import * as THREE from "three";
+import { PenroseLSystem } from "@/app/penrose/components/lib/PenroseLSystem";
 import { IPosition } from "./PenroseScene";
-import { PenroseLSystem } from "@/app/lib/PenroseLSystem";
 
 export class PenroseManager {
   private theme: string;

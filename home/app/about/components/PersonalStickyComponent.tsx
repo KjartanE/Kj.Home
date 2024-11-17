@@ -1,5 +1,5 @@
 import React from "react";
-import { IPersonal } from "../resume";
+import { IPersonal } from "../../../config/resume";
 import { Link } from "@nextui-org/link";
 import { GithubIcon, LinkedInIcon, YouTubeIcon } from "@/components/icons";
 import { Card } from "@nextui-org/react";

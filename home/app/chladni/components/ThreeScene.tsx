@@ -2,8 +2,8 @@
 import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 
-import { Scene } from "../lib/Scene";
-import { ChladniHandler } from "../lib/ChladniHandler";
+import { Scene } from "../../lib/Scene";
+import { ChladniHandler } from "./ChladniHandler";
 
 const ThreeScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);

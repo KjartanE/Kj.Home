@@ -1,4 +1,4 @@
-import ThreeScene from "./ThreeScene";
+import ThreeScene from "./components/ThreeScene";
 
 export const metadata = {
   title: "Cube",
@@ -8,7 +8,6 @@ export const metadata = {
 export default function Page() {
   return (
     <section className="flex justify-center">
-      {/* <h1 className="font-semibold text-2xl mb-8 tracking-tighter">Cube</h1> */}
       <ThreeScene />
     </section>
   );

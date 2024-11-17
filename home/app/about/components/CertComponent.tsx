@@ -1,4 +1,4 @@
-import { ICertification } from "../resume";
+import { ICertification } from "../../../config/resume";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { Divider } from "@nextui-org/divider";
 import React from "react";

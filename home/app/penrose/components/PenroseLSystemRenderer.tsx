@@ -1,7 +1,7 @@
 "use client";
 
 import * as THREE from "three";
-import { PenroseLSystem } from "../lib/PenroseLSystem";
+import { PenroseLSystem } from "./lib/PenroseLSystem";
 import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { IPosition, PenroseScene } from "./PenroseScene";

@@ -1,5 +1,5 @@
 import React from "react";
-import PenrosePlayground from "./PenrosePlayground";
+import PenrosePlayground from "./components/PenrosePlayground";
 
 const HomePage: React.FC = () => {
   return (

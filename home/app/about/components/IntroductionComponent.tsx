@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Image } from "@nextui-org/react";
 import EducationComponent from "./EducationComponent";
-import { resume } from "../resume";
+import { resume } from "../../../config/resume";
 
 const IntroductionComponent: React.FC = () => {
   return (

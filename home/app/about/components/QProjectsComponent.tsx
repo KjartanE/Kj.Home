@@ -1,6 +1,6 @@
 "use client";
 import { Tabs, Tab, Card, CardBody, CardHeader, Divider, Accordion, AccordionItem } from "@nextui-org/react";
-import { IContract, resume } from "../resume";
+import { IContract, resume } from "../../../config/resume";
 import { ChipList, sortChips } from "@/components/chip";
 
 const QProjectsComponent: React.FC = () => {

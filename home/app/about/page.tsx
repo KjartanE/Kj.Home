@@ -1,6 +1,6 @@
 "use client";
 
-import { resume } from "./resume.tsx";
+import { resume } from "../../config/resume.tsx";
 import * as React from "react";
 
 import SkillComponent from "./components/SkillComponent.tsx";
