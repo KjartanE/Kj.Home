@@ -3,7 +3,7 @@
 import * as THREE from "three";
 import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
-import { IPosition, PenroseScene } from "./PenroseScene";
+import { PenroseScene } from "./PenroseScene";
 import { PenroseManager } from "./PenroseManager";
 import { PlaygroundController } from "./PlaygroundController";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -14,21 +14,15 @@ const PenrosePlayground: React.FC = () => {
   const theme = useTheme();
   const playgroundController = new PlaygroundController();
   const penroseManager = new PenroseManager(theme.resolvedTheme || "dark");
-  const penroseManager2 = new PenroseManager(theme.resolvedTheme || "dark");
 
   penroseManager.lineMaterial = new THREE.ShaderMaterial();
-  penroseManager2.lineMaterial = new THREE.ShaderMaterial();
 
   playgroundController.simulate();
 
-  let location = useRef<IPosition | null>({
-    position: new THREE.Vector3(0, 0, 0),
-    rotation: playgroundController.rotation1
-  });
-  let location2 = useRef<IPosition | null>({
-    position: new THREE.Vector3(0, 0, 0),
-    rotation: playgroundController.rotation2
-  });
+  // let location = useRef<IPosition | null>({
+  //   position: new THREE.Vector3(0, 0, 0),
+  //   rotation: playgroundController.rotation1
+  // });
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -37,7 +31,6 @@ const PenrosePlayground: React.FC = () => {
 
     scene.clear();
     penroseManager.reset();
-    penroseManager2.reset();
 
     const container = containerRef.current;
 
@@ -47,63 +40,49 @@ const PenrosePlayground: React.FC = () => {
 
     playgroundController.createInterfaces();
 
-    let lastRenderTime = 0;
-    const renderInterval = 1000 / 30; // 30 FPS
+    // let lastRenderTime = 0;
+    // const renderInterval = 1000 / 30; // 30 FPS
 
-    function animate() {
-      if (playgroundController.resetFlag) {
-        playgroundController.resetFlag = false;
+    // function animate() {
+    //   if (playgroundController.resetFlag) {
+    //     playgroundController.resetFlag = false;
 
-        location.current = {
-          position: new THREE.Vector3(0, 0, 0),
-          rotation: playgroundController.rotation1
-        };
+    //     location.current = {
+    //       position: new THREE.Vector3(0, 0, 0),
+    //       rotation: playgroundController.rotation1
+    //     };
 
-        location2.current = {
-          position: new THREE.Vector3(0, 0, 0),
-          rotation: playgroundController.rotation2
-        };
+    //     penroseManager.reset();
+    //   }
 
-        penroseManager.reset();
-        penroseManager2.reset();
-      }
+    //   const now = Date.now();
+    //   const delta = now - lastRenderTime;
 
-      const now = Date.now();
-      const delta = now - lastRenderTime;
+    //   if (delta > renderInterval) {
+    //     lastRenderTime = now;
 
-      if (delta > renderInterval) {
-        lastRenderTime = now;
+    //     if (playgroundController.instantFlag) {
+    //       penroseManager.steps = playgroundController.penroseLSystem.production.length;
+    //     } else {
+    //       if (penroseManager.steps < playgroundController.penroseLSystem.production.length) {
+    //         penroseManager.steps += playgroundController.speed;
+    //       }
+    //     }
 
-        if (playgroundController.instantFlag) {
-          penroseManager.steps = playgroundController.penroseLSystem.production.length;
-          penroseManager2.steps = playgroundController.penroseLSystem.production.length;
-        } else {
-          if (penroseManager.steps < playgroundController.penroseLSystem.production.length) {
-            penroseManager.steps += playgroundController.speed;
-          }
+    //     scene.clear();
+    //     penroseManager.generateLines(location, playgroundController.penroseLSystem);
 
-          if (penroseManager2.steps < playgroundController.penroseLSystem.production.length) {
-            penroseManager2.steps += playgroundController.speed;
-          }
-        }
+    //     const line = penroseManager.renderLines();
 
-        scene.clear();
-        penroseManager.generateLines(location, playgroundController.penroseLSystem);
-        penroseManager2.generateLines(location2, playgroundController.penroseLSystem);
+    //     scene.add(line);
 
-        const line = penroseManager.renderLines();
-        const line2 = penroseManager2.renderLines();
+    //     renderer.render(scene, camera);
+    //   }
 
-        scene.add(line);
-        scene.add(line2);
+    //   requestAnimationFrame(animate);
+    // }
 
-        renderer.render(scene, camera);
-      }
-
-      requestAnimationFrame(animate);
-    }
-
-    animate();
+    // animate();
 
     // Create a new instance of the OrbitControls class
     const controls = new OrbitControls(camera, renderer.domElement);

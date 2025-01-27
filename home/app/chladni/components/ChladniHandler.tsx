@@ -38,20 +38,26 @@ export class ChladniHandler {
   }
 
   createInterfaces(plane) {
-    const menu = document.body.appendChild(document.createElement("div"));
+    //find menu or create one
+    let menu = document.getElementById("controls");
+    console.log("menu", menu);
 
-    menu.style.position = "absolute";
-    menu.style.top = "100px";
-    menu.style.left = "0";
-    menu.style.zIndex = "1000";
-    menu.style.color = "white";
-    menu.style.padding = "20px";
-    menu.style.margin = "20px";
-    menu.style.backgroundColor = "rgba(0,0,0,0.5)";
-    menu.style.fontFamily = "sans-serif";
-    menu.style.display = "flex";
-    menu.style.flexDirection = "column";
-    menu.style.gap = "10px";
+    if (!menu) {
+      return;
+    }
+
+    // menu.style.position = "absolute";
+    // menu.style.top = "100px";
+    // menu.style.left = "0";
+    // menu.style.zIndex = "1000";
+    // menu.style.color = "white";
+    // menu.style.padding = "20px";
+    // menu.style.margin = "20px";
+    // menu.style.backgroundColor = "rgba(0,0,0,0.5)";
+    // menu.style.fontFamily = "sans-serif";
+    // menu.style.display = "flex";
+    // menu.style.flexDirection = "column";
+    // menu.style.gap = "10px";
     this.documentObjects.push(menu);
 
     //window sliders for uniforms

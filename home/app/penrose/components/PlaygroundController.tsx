@@ -28,6 +28,8 @@ export class PlaygroundController {
 
   simulate(generations?: number) {
     this.penroseLSystem.simulate(generations || this.generations);
+    // this.penroseLSystem.production
+    console.log('this.penroseLSystem.production', this.penroseLSystem.production);
   }
 
   setColor(color: string) {

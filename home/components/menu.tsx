@@ -3,6 +3,7 @@ import React from "react";
 
 interface IMenuButtonProps {
   children: React.ReactNode;
+  open?: boolean;
   onClick?: () => void;
 }
 
@@ -25,7 +26,7 @@ const MenuCard: React.FC<IMenuButtonProps> = (props) => {
 };
 
 const MenuButton: React.FC<IMenuButtonProps> = (props) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(props.open || false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -43,13 +44,11 @@ const MenuButton: React.FC<IMenuButtonProps> = (props) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12h.01M12 12h.01M18 12h.01" />
         </svg>
       </button>
-      {isOpen && (
-        <div
-          className="fixed bottom-0 left-0 z-40 w-full transform shadow-lg transition-transform duration-900 ease-in-out"
-          style={{ transform: isOpen ? "translateY(0)" : "translateY(100%)" }}>
-          <MenuCard onClick={toggleMenu}>{props.children}</MenuCard>
-        </div>
-      )}
+      <div
+        className="duration-900 fixed bottom-0 left-0 z-40 w-full transform shadow-lg transition-transform ease-in-out"
+        style={{ transform: isOpen ? "translateY(0)" : "translateY(100%)" }}>
+        <MenuCard onClick={toggleMenu}>{props.children}</MenuCard>
+      </div>
     </div>
   );
 };

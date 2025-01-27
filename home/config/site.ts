@@ -16,10 +16,10 @@ export const siteConfig = {
       label: "Cube",
       href: "/cube"
     },
-    {
-      label: "Penrose",
-      href: "/penrose"
-    },
+    // {
+    //   label: "Penrose",
+    //   href: "/penrose"
+    // },
     {
       label: "Chladni",
       href: "/chladni"
@@ -38,10 +38,10 @@ export const siteConfig = {
       label: "Cube",
       href: "/cube"
     },
-    {
-      label: "Penrose",
-      href: "/penrose"
-    },
+    // {
+    //   label: "Penrose",
+    //   href: "/penrose"
+    // },
     {
       label: "Chladni",
       href: "/chladni"
