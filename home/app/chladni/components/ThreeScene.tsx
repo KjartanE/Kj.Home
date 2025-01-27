@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 
-import { Scene } from "../../lib/Scene";
+import { Scene } from "../../../components/lib/Scene";
 import { ChladniHandler } from "./ChladniHandler";
 
 const ThreeScene: React.FC = () => {
