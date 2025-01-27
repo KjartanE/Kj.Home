@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 4444",
-    "build": "next build",
-    "start": "next start",
+    "dev": "yarn dev -p 4444",
+    "build": "yarn build",
+    "start": "yarn start",
     "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix",
     "format": "prettier --check --ignore-path .gitignore .",
     "format:fix": "prettier --write --ignore-path .gitignore ."
@@ -14,21 +14,8 @@
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.0.1",
     "@next/mdx": "^14.2.13",
-    "@nextui-org/button": "2.0.38",
-    "@nextui-org/code": "2.0.33",
-    "@nextui-org/input": "2.2.5",
-    "@nextui-org/kbd": "2.0.34",
-    "@nextui-org/link": "2.0.35",
-    "@nextui-org/listbox": "2.1.27",
-    "@nextui-org/navbar": "2.0.37",
-    "@nextui-org/react": "^2.4.8",
-    "@nextui-org/snippet": "2.0.43",
-    "@nextui-org/switch": "2.0.34",
-    "@nextui-org/system": "2.2.6",
-    "@nextui-org/theme": "2.2.11",
     "@react-aria/ssr": "3.9.4",
     "@react-aria/visually-hidden": "3.8.12",
-    "@tailwindcss/postcss": "0.0.0-development.1",
     "@types/mdx": "^2.0.13",
     "clsx": "2.1.1",
     "eslint-plugin-next": "^0.0.0",
@@ -67,10 +54,8 @@
     "eslint-plugin-unused-imports": "^3.2.0",
     "postcss": "8.4.38",
     "prettier-plugin-tailwindcss": "^0.6.6",
-    "tailwind-variants": "0.1.20",
     "tailwindcss": "3.4.3",
-    "types": "link:@nextui-org/react/types",
     "typescript": "5.0.4"
   },
-  "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee"
+  "packageManager": "yarn@4.6.0"
 }
