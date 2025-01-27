@@ -3,8 +3,8 @@
 import { Card } from "@nextui-org/card";
 import React from "react";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
-import Chip, { findChip } from "@/components/chip";
-import { resume } from "../../../config/resume";
+import Chip, { findChip } from "@/src/components/chip";
+import { resume } from "../../../../public/config/resume";
 
 const SkillComponent: React.FC = () => {
   const skillRows: { skill: string; tech: string; lang: string }[] = [];

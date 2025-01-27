@@ -1,6 +1,6 @@
 "use client";
 
-import { resume } from "../../config/resume.tsx";
+import { resume } from "../../../public/config/resume.tsx";
 import * as React from "react";
 
 import SkillComponent from "./components/SkillComponent.tsx";
@@ -8,7 +8,7 @@ import IntroductionComponent from "./components/IntroductionComponent.tsx";
 import PersonalStickyComponent from "./components/PersonalStickyComponent.tsx";
 import QuartechComponent from "./components/QuartechComponent.tsx";
 import ProjectsComponent from "./components/ProjectsComponent.tsx";
-import MenuButton from "@/components/menu.tsx";
+import MenuButton from "@/src/components/menu.tsx";
 
 export default function AboutPage() {
   return (

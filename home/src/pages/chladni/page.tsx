@@ -1,6 +1,6 @@
 "use client";
 
-import MenuButton from "@/components/menu";
+import MenuButton from "@/src/components/menu";
 import ThreeScene from "./components/ThreeScene";
 
 export default function Page() {

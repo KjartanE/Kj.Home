@@ -1,7 +1,7 @@
 "use client";
 import { Tabs, Tab, CardBody, CardHeader, Divider, Accordion, AccordionItem } from "@nextui-org/react";
-import { IContract, resume } from "../../../config/resume";
-import { ChipList, sortChips } from "@/components/chip";
+import { IContract, resume } from "../../../../public/config/resume";
+import { ChipList, sortChips } from "@/src/components/chip";
 
 const QProjectsComponent: React.FC = () => {
   const q_work = resume.work_experience[0];

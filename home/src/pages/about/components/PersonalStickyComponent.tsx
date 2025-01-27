@@ -1,7 +1,7 @@
 import React from "react";
-import { IPersonal } from "../../../config/resume";
+import { IPersonal } from "../../../../public/config/resume";
 import { Link } from "@nextui-org/link";
-import { GithubIcon, LinkedInIcon, YouTubeIcon } from "@/components/icons";
+import { GithubIcon, LinkedInIcon, YouTubeIcon } from "@/src/components/icons";
 
 export interface IPersonalStickyComponent {
   personal: IPersonal;

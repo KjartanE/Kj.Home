@@ -1,6 +1,6 @@
 "use client";
 
-import { IEducation } from "../../../config/resume";
+import { IEducation } from "../../../../public/config/resume";
 import { CardBody } from "@nextui-org/card";
 import { Image } from "@nextui-org/image";
 import React from "react";
