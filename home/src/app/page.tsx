@@ -1,5 +1,5 @@
-import { title, subtitle } from "@/components/primitives";
-import PenroseLSystemRenderer from "./penrose/components/PenroseLSystemRenderer";
+import { subtitle, title } from "../components/primitives";
+import PenroseLSystemRenderer from "../pages/penrose/components/PenroseLSystemRenderer";
 
 export default function Home() {
   return (
