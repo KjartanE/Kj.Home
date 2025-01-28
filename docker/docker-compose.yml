@@ -1,30 +1,15 @@
 version: "3.7"
 
 services:
-  dev:
+  kj-home:
     build:
-      context: ./home
-      dockerfile: Dockerfile.dev
+      context: ../home
+      dockerfile: ../docker/home/Dockerfile.dev
     container_name: kj_home
-    environment:
-      - WATCHPACK_POLLING=true
     volumes:
-      - ./home:/app
-      - /app/node_modules
-      - /app/.next
+      - ../home:/app
+      - /home/node_modules
+      - /home/.next
     ports:
       - "4444:4444"
-    env_file:
-      - .env
-  prod:
-    build:
-      context: ./home
-      dockerfile: Dockerfile.prod
-    container_name: kj_home
-    ports:
-      - "4444:4444"
-    env_file:
-      - .env
-
-volumes:
-  node_modules:
+    restart: always
