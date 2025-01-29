@@ -3,9 +3,9 @@
 import * as THREE from "three";
 import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
-import { IPosition, PenroseScene } from "./PenroseScene";
-import { PenroseManager } from "./PenroseManager";
-import { PlaygroundController } from "./PlaygroundController";
+import PenroseScene, { IPosition  }  from "./PenroseScene";
+import PenroseManager from "./PenroseManager";
+import PlaygroundController from "./PlaygroundController";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 const PenrosePlayground: React.FC = () => {

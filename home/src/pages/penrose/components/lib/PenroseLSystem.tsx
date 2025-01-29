@@ -1,6 +1,6 @@
-import { LSystem } from "./LSystem";
+import LSystem from "./LSystem";
 
-export class PenroseLSystem extends LSystem {
+export default class PenroseLSystem extends LSystem {
   steps: number = 0;
   someStep: number = 0.1;
 

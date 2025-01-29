@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 export const colour_pallet = ["#1A357A", "#A40E00", "#DE661A", "#F6D83B", "#229786"];
 
-export class CubeScene {
+export default class CubeScene {
   public scene: THREE.Scene;
   public camera: THREE.PerspectiveCamera;
   public renderer: THREE.WebGLRenderer;

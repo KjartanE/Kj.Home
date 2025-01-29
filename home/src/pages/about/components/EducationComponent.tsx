@@ -1,13 +1,10 @@
 "use client";
 
+import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { CardContent } from "@/components/ui/card";
-import { IEducation } from "@/public/config/resume";
-import { Accordion, AccordionItem } from "@radix-ui/react-accordion";
+import { IEducationComponent } from "@/src/lib/interfaces/about";
 import React from "react";
 
-export interface IEducationComponent {
-  education: IEducation[];
-}
 
 const EducationComponent: React.FC<IEducationComponent> = (props) => {
   const { education } = props;

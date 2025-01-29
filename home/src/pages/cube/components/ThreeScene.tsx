@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from "react";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as THREE from "three";
 
-import { CubeScene } from "./main";
+import CubeScene from "./main";
 import DotMatrix from "./dot_matrix";
 
 const density = 16;

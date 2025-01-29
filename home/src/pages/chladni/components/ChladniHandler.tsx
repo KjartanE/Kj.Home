@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export class ChladniHandler {
+export default class ChladniHandler {
   public geometry: THREE.PlaneGeometry;
   public material: THREE.ShaderMaterial;
   public documentObjects: any[] = [];

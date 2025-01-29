@@ -1,4 +1,4 @@
-export class LSystem {
+export default class LSystem {
   axiom: string;
   rule: string;
   production: string;

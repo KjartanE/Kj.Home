@@ -1,11 +1,11 @@
 "use client";
 
 import * as THREE from "three";
-import { PenroseLSystem } from "./lib/PenroseLSystem";
+import PenroseLSystem from "./lib/PenroseLSystem";
 import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
-import { IPosition, PenroseScene } from "./PenroseScene";
-import { PenroseManager } from "./PenroseManager";
+import PenroseScene, { IPosition } from "./PenroseScene";
+import PenroseManager from "./PenroseManager";
 
 const PenroseLSystemRenderer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);

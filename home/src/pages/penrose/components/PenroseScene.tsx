@@ -8,7 +8,7 @@ export interface IPosition {
   rotation: number;
 }
 
-export class PenroseScene {
+export default class PenroseScene {
   public scene: THREE.Scene;
   public camera: THREE.PerspectiveCamera;
   public renderer: THREE.WebGLRenderer;
