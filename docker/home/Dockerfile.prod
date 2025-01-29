@@ -1,19 +1,11 @@
 # Build stage
-FROM node:22-slim AS build-stage
+FROM oven/bun:1 AS base
 
 WORKDIR /build
 
-RUN corepack enable
-
-RUN corepack prepare yarn@4.3.1 --activate
-
-COPY package*.json yarn.lock .yarnrc.yml ./
-
-RUN yarn install
-
 COPY . .
 
-RUN yarn build --sourcemap
+RUN bun install
 
 # production stage
 FROM caddy:alpine AS production-stage
@@ -21,3 +13,5 @@ FROM caddy:alpine AS production-stage
 COPY --from=build-stage /build/dist /srv
 
 EXPOSE 4444
+
+CMD ["bun", "start"]
