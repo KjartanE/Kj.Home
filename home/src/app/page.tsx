@@ -1,4 +1,3 @@
-import { subtitle, title } from "../components/primitives";
 import PenroseLSystemRenderer from "../pages/penrose/components/PenroseLSystemRenderer";
 
 export default function Home() {
@@ -8,9 +7,9 @@ export default function Home() {
         <PenroseLSystemRenderer />
       </div>
       <div className="z-20 inline-block max-w-xl justify-center text-center">
-        <span className={title()}>Kjartan Einarsson</span>
+        <span className="">Kjartan Einarsson</span>
         <br />
-        <div className={subtitle({ class: "mt-4" })}>
+        <div className="">
           {`
             hi,
             
