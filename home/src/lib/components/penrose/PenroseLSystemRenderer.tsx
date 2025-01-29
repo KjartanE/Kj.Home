@@ -4,8 +4,8 @@ import * as THREE from "three";
 import PenroseLSystem from "./lib/PenroseLSystem";
 import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
-import PenroseScene, { IPosition } from "./PenroseScene";
 import PenroseManager from "./PenroseManager";
+import PenroseScene, { IPosition } from "./PenroseScene";
 
 const PenroseLSystemRenderer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);

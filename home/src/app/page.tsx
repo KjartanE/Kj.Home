@@ -1,4 +1,4 @@
-import PenroseLSystemRenderer from "../pages/penrose/components/PenroseLSystemRenderer";
+import PenroseLSystemRenderer from "../lib/components/penrose/PenroseLSystemRenderer";
 
 export default function Home() {
   return (

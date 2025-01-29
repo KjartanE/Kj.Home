@@ -1,4 +1,4 @@
-import ThreeScene from "./components/ThreeScene";
+import ThreeScene from "@/src/lib/components/cube/ThreeScene";
 
 export default function Page() {
   return (

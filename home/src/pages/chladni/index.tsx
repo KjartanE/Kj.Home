@@ -1,4 +1,4 @@
-import ThreeScene from "./components/ThreeScene";
+import ThreeScene from "@/src/lib/components/chladni/ThreeScene";
 
 export default function Page() {
   return (
