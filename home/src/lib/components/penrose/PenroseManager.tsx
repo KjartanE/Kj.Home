@@ -55,7 +55,7 @@ export default class PenroseManager {
 
       const drawLength = penroseLSystem.drawLength;
       const theta = penroseLSystem.theta;
-      let production = penroseLSystem.production;
+      const production = penroseLSystem.production;
 
       this.steps > production.length ? (this.steps = production.length) : this.steps;
 

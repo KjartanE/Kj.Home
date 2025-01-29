@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { resume } from "@/public/config/resume";
 import React from "react";
 
@@ -26,7 +26,11 @@ const SkillComponent: React.FC = () => {
         </TableHeader>
         <TableBody>
           {skillRows.map((item, index) => (
-            <TableRow key={index}></TableRow>
+            <TableRow key={index}>
+              <td className="text-lg">{item.skill}</td>
+              <td className="text-lg">{item.tech}</td>
+              <td className="text-lg">{item.lang}</td>
+            </TableRow>
           ))}
         </TableBody>
       </Table>

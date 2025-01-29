@@ -8,9 +8,9 @@ const CertComponent: React.FC<ICertComponent> = (props) => {
 
   const cardContent = (data: ICertification[]) => {
     {
-      return data.map((certification) => {
+      return data.map((certification, key) => {
         return (
-          <CardContent>
+          <CardContent key={key}>
             <CardTitle className="flex gap-3" key={certification.title}>
               <h1>{certification.title}</h1>
             </CardTitle>

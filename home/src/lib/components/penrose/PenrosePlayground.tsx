@@ -3,7 +3,7 @@
 import * as THREE from "three";
 import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
-import PenroseScene, { IPosition } from "./PenroseScene";
+import PenroseScene from "./PenroseScene";
 import PenroseManager from "./PenroseManager";
 import PlaygroundController from "./PlaygroundController";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -20,15 +20,6 @@ const PenrosePlayground: React.FC = () => {
   penroseManager2.lineMaterial = new THREE.ShaderMaterial();
 
   playgroundController.simulate();
-
-  let location = useRef<IPosition | null>({
-    position: new THREE.Vector3(0, 0, 0),
-    rotation: playgroundController.rotation1
-  });
-  let location2 = useRef<IPosition | null>({
-    position: new THREE.Vector3(0, 0, 0),
-    rotation: playgroundController.rotation2
-  });
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -54,16 +45,6 @@ const PenrosePlayground: React.FC = () => {
       if (playgroundController.resetFlag) {
         playgroundController.resetFlag = false;
 
-        location.current = {
-          position: new THREE.Vector3(0, 0, 0),
-          rotation: playgroundController.rotation1
-        };
-
-        location2.current = {
-          position: new THREE.Vector3(0, 0, 0),
-          rotation: playgroundController.rotation2
-        };
-
         penroseManager.reset();
         penroseManager2.reset();
       }
@@ -88,8 +69,6 @@ const PenrosePlayground: React.FC = () => {
         }
 
         scene.clear();
-        penroseManager.generateLines(location, playgroundController.penroseLSystem);
-        penroseManager2.generateLines(location2, playgroundController.penroseLSystem);
 
         const line = penroseManager.renderLines();
         const line2 = penroseManager2.renderLines();

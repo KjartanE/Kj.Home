@@ -55,7 +55,6 @@ export default class PenroseLSystem extends LSystem {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   iterate(prod_: string, rule_?: string) {
     let newProduction = "";
 
