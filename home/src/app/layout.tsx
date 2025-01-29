@@ -1,7 +1,7 @@
 import { Metadata, Viewport } from "next";
 import clsx from "clsx";
-import { Providers } from "../utils/providers";
-import { Navbar } from "../components/navbar";
+import { Providers } from "../lib/providers";
+import { Navbar } from "../lib/components/navbar";
 import { siteConfig } from "../../public/config/site";
 import { fontSans } from "../../public/config/fonts";
 

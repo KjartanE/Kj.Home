@@ -7,7 +7,7 @@ import IntroductionComponent from "./components/IntroductionComponent.tsx";
 import PersonalStickyComponent from "./components/PersonalStickyComponent.tsx";
 import QuartechComponent from "./components/QuartechComponent.tsx";
 import ProjectsComponent from "./components/ProjectsComponent.tsx";
-import MenuButton from "@/src/components/menu.tsx";
+import MenuButton from "@/src/lib/components/menu.jsx";
 import { resume } from "@/public/config/resume.tsx";
 
 export default function AboutPage() {
