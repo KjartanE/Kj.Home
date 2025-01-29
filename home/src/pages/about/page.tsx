@@ -1,14 +1,14 @@
 "use client";
 
+import MenuButton from "@/src/lib/components/menu";
 import * as React from "react";
+import PersonalStickyComponent from "./components/PersonalStickyComponent";
+import { resume } from "@/public/config/resume";
+import IntroductionComponent from "./components/IntroductionComponent";
+import QuartechComponent from "./components/QuartechComponent";
+import ProjectsComponent from "./components/ProjectsComponent";
+import SkillComponent from "./components/SkillComponent";
 
-import SkillComponent from "./components/SkillComponent.tsx";
-import IntroductionComponent from "./components/IntroductionComponent.tsx";
-import PersonalStickyComponent from "./components/PersonalStickyComponent.tsx";
-import QuartechComponent from "./components/QuartechComponent.tsx";
-import ProjectsComponent from "./components/ProjectsComponent.tsx";
-import MenuButton from "@/src/lib/components/menu.jsx";
-import { resume } from "@/public/config/resume.tsx";
 
 export default function AboutPage() {
   return (

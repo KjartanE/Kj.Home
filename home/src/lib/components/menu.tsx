@@ -1,4 +1,4 @@
-import { Card } from "@nextui-org/react";
+import { Card } from "@/components/ui/card";
 import React from "react";
 
 interface IMenuButtonProps {

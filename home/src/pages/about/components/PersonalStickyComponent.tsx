@@ -1,7 +1,8 @@
+import { IPersonal } from "@/public/config/resume";
+import { Icons } from "@/src/lib/components/icons";
+import { Link } from "lucide-react";
 import React from "react";
-import { IPersonal } from "../../../config/resume";
-import { Link } from "@nextui-org/link";
-import { GithubIcon, LinkedInIcon, YouTubeIcon } from "@/components/icons";
+
 
 export interface IPersonalStickyComponent {
   personal: IPersonal;
@@ -19,14 +20,14 @@ const PersonalStickyComponent: React.FC<IPersonalStickyComponent> = (props) => {
       <p>{description}</p>
       <p>{location}</p>
       <div className="flex flex-row gap-3">
-        <Link isExternal aria-label="Github" href={github}>
-          <GithubIcon className="text-default-500" />
+        <Link aria-label="Github" href={github}>
+          {Icons.info.GitHubIcon}
         </Link>
-        <Link isExternal aria-label="Youtube" href={youtube}>
-          <YouTubeIcon className="text-default-500" />
+        <Link aria-label="Youtube" href={youtube}>
+          {Icons.info.YoutubeIcon}
         </Link>
-        <Link isExternal aria-label="Linkedin" href={linkedin}>
-          <LinkedInIcon className="text-default-500" />
+        <Link aria-label="Linkedin" href={linkedin}>
+          {Icons.info.LinkedInIcon}s
         </Link>
       </div>
     </>

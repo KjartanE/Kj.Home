@@ -1,10 +1,9 @@
 "use client";
 
-import { IEducation } from "../../../config/resume";
-import { CardBody } from "@nextui-org/card";
-import { Image } from "@nextui-org/image";
+import { CardContent } from "@/components/ui/card";
+import { IEducation } from "@/public/config/resume";
+import { Accordion, AccordionItem } from "@radix-ui/react-accordion";
 import React from "react";
-import { Accordion, AccordionItem } from "@nextui-org/react";
 
 export interface IEducationComponent {
   education: IEducation[];
@@ -14,15 +13,15 @@ const EducationComponent: React.FC<IEducationComponent> = (props) => {
   const { education } = props;
 
   return (
-    <Accordion variant="light">
+    <Accordion type="single" collapsible>
       {education.map((item, index) => (
         <AccordionItem
           key={index}
           className="px-4"
           aria-label="logo"
-          startContent={<Image alt="logo" height={40} radius="sm" src={item.logo} width={40} />}
+          value="logo"
           title={item.title}>
-          <CardBody>
+          <CardContent>
             <div className="flex flex-col">
               <p className="text-md font-bold">{item.school}</p>
               <p className="text-md">{item.degree}</p>
@@ -30,7 +29,7 @@ const EducationComponent: React.FC<IEducationComponent> = (props) => {
                 {item.major} | {item.graduation}
               </p>
             </div>
-          </CardBody>
+          </CardContent>
         </AccordionItem>
       ))}
     </Accordion>

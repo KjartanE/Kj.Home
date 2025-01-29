@@ -1,6 +1,7 @@
 import React from "react";
-import { Card, Image } from "@nextui-org/react";
 import QProjectsComponent from "./QProjectsComponent";
+import { Card } from "@/components/ui/card";
+import Image from "next/image";
 
 const QuartechComponent: React.FC = () => {
   return (

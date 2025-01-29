@@ -18,6 +18,7 @@ import SoundCloudIcon from "./info/sound_cloud.svg";
 import SpotifyIcon from "./info/spotify.svg";
 import GitHubIcon from "./info/github.svg";
 import GmailIcon from "./info/gmail.svg";
+import YoutubeIcon from "./info/youtube.svg";
 
 import OpenShiftIcon from "./deployment/openshift.svg";
 import AzureIcon from "./deployment/azure.svg";
@@ -94,6 +95,7 @@ export const Icons = {
     SpotifyIcon,
     GitHubIcon,
     GmailIcon,
+    YoutubeIcon,
   },
   deployment: {
     OpenShiftIcon,
