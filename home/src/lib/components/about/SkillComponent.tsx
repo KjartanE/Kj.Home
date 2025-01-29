@@ -26,9 +26,7 @@ const SkillComponent: React.FC = () => {
         </TableHeader>
         <TableBody>
           {skillRows.map((item, index) => (
-        <TableRow key={index}>
-          
-        </TableRow>
+            <TableRow key={index}></TableRow>
           ))}
         </TableBody>
       </Table>

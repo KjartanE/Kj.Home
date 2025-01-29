@@ -5,7 +5,6 @@ import { Navbar } from "../lib/components/nav/navbar";
 import { siteConfig } from "../../public/config/site";
 import { fontSans } from "../../public/config/fonts";
 
-
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
@@ -28,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html suppressHydrationWarning lang="en">
       <head />
-      <body className={clsx("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
+      <body className={clsx("bg-background min-h-screen font-sans antialiased", fontSans.variable)}>
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex h-screen flex-col">
             <Navbar />

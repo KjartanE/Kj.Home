@@ -3,8 +3,6 @@ import { IPersonalStickyComponent } from "@/src/lib/interfaces/about";
 import Link from "next/link";
 import React from "react";
 
-
-
 const PersonalStickyComponent: React.FC<IPersonalStickyComponent> = (props) => {
   const { name, email, phone, description, location, linkedin, github, youtube } = props.personal;
 

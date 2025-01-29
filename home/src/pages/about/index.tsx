@@ -9,7 +9,6 @@ import QuartechComponent from "../../lib/components/about/QuartechComponent";
 import ProjectsComponent from "../../lib/components/about/ProjectsComponent";
 import SkillComponent from "../../lib/components/about/SkillComponent";
 
-
 export default function AboutPage() {
   return (
     <div>

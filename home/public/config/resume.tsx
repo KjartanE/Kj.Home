@@ -259,11 +259,7 @@ export const resume: IResume = {
           position: "Junior Web Developer",
           description: "Developed front-end updates for BuyBC applications.",
           technologies: ["Vue.JS", "NodeJS", "TypeScript", "Docker", "Git"],
-          notes: [
-            "Implemented user feedback form.",
-            "Optimized search bar.",
-            "Improved user interface."
-          ]
+          notes: ["Implemented user feedback form.", "Optimized search bar.", "Improved user interface."]
         }
       ]
     },

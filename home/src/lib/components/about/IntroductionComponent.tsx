@@ -7,7 +7,7 @@ import Image from "next/image";
 const IntroductionComponent: React.FC = () => {
   return (
     <Card className="flex flex-col justify-center">
-      <div className="flex flex-row items-center p-4 space-x-4">
+      <div className="flex flex-row items-center space-x-4 p-4">
         <Image src="/clancy.png" alt="Profile Image" className="rounded-full" />
         <div className="grow flex-col justify-center">
           <p className="p-2 text-2xl font-bold">Kjartan Robert Einarsson</p>

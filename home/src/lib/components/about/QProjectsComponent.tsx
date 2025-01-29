@@ -16,16 +16,13 @@ const QProjectsComponent: React.FC = () => {
         </TabsContent>
       );
     });
-  }
+  };
 
   return (
     <div className="flex w-full flex-col">
-      <Tabs aria-label="Dynamic tabs">
-        {createTabs(q_work.contract)}
-      </Tabs>
+      <Tabs aria-label="Dynamic tabs">{createTabs(q_work.contract)}</Tabs>
     </div>
   );
 };
 
 export default QProjectsComponent;
-

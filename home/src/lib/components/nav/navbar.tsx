@@ -1,4 +1,3 @@
-
 export const Navbar = () => {
   return (
     // <NextUINavbar maxWidth="xl" position="sticky" isBlurred={false} className="bg-opacity-0">

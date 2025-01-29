@@ -9,7 +9,7 @@ interface IMenuButtonProps {
 const MenuCard: React.FC<IMenuButtonProps> = (props) => {
   return (
     <Card className="flex-shrink gap-3 p-6">
-      <button className="absolute right-2 top-2 text-gray-500" onClick={props.onClick}>
+      <button className="absolute top-2 right-2 text-gray-500" onClick={props.onClick}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
