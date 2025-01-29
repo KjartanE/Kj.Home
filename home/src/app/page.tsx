@@ -11,7 +11,7 @@ export default function Home() {
         <br />
         <div className="">
           {`
-            hi,ASD
+            hi,
             
             this is my website. I like to build things.
             

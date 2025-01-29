@@ -1,30 +1,17 @@
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1 AS base
+FROM imbios/bun-node:latest-hydrogen-slim AS base
 WORKDIR /app
 
 # Step 1 - install dependencies
-FROM base AS install
-RUN mkdir -p /temp/dev
-COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
+COPY package.json bun.lock ./
+RUN bun install
 
 # Step 2 - Copy source code
-FROM base AS prerelease
-COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
-# Step 3 - Build the app
-RUN bun run build
-
-# Step 4 - Copy production dependencies and source code
-FROM base AS release
-COPY --from=prerelease /app/index.ts .
-COPY --from=prerelease /app/package.json .
-
-# Step 5 - Set the user and expose the port
-USER bun
+# Step 3 - expose the port
 EXPOSE 4444
 
 # run the app
-ENTRYPOINT ["bun", "--hot", "run", "index.ts"]
+CMD ["bun", "run", "dev"]
