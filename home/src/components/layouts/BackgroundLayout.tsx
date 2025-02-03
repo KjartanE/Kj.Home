@@ -8,7 +8,8 @@ const excludedPaths = [
   "/projects/chladni",
   "/projects/penrose",
   "/projects/cube",
-  "/projects/pendulum"
+  "/projects/pendulum",
+  "/projects/solar"
 ];
 
 function BackgroundLayout({ children }: { children: React.ReactNode }) {

@@ -30,7 +30,14 @@ const projects = [
     image: "/projects/pendulum-preview.png",
     link: "/projects/pendulum",
     tech: ["Three.js", "Physics", "TypeScript"]
-  }
+  },
+  {
+    title: "Solar System",
+    description: "Interactive 3D solar system visualization",
+    image: "/projects/solar-preview.png",
+    link: "/projects/solar",
+    tech: ["Three.js", "React", "TypeScript"]
+  },
 ];
 
 export default function ProjectsPage() {
@@ -38,7 +45,7 @@ export default function ProjectsPage() {
     <div className="container mx-auto max-w-7xl px-4 py-8 mt-14">
       <h1 className="mb-2 text-3xl font-bold">Projects</h1>
       <p className="mb-8 text-muted-foreground">
-        Here are some of the projects I've worked on.
+        Here are some of the projects I&apos;ve worked on.
       </p>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (

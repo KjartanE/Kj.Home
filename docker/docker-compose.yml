@@ -6,10 +6,13 @@ services:
     container_name: kj_home
     volumes:
       - ../home:/app
-      - /home/node_modules
-      - /home/.next
+      - /app/node_modules
+      - /app/.next
     ports:
       - "4444:4444"
+    environment:
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
     networks:
       - kj-network
     restart: always

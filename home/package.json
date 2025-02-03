@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack -p 4444",
+    "dev": "next dev --turbopack -p 4444 --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "bunx eslint .",
@@ -63,7 +63,7 @@
     "recharts": "^2.15.1",
     "sonner": "^1.7.3",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.168.0",
+    "three": "^0.173.0",
     "vaul": "^1.1.2",
     "zod": "^3.24.1"
   },
@@ -71,7 +71,7 @@
     "@eslint/compat": "^1.2.5",
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
-    "@types/three": "^0.168.0",
+    "@types/three": "^0.173.0",
     "@types/web": "^0.0.200",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
