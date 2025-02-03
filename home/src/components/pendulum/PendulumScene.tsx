@@ -41,16 +41,34 @@ class Pendulum {
 
     // Create geometries and materials
     const jointGeometry = new THREE.SphereGeometry(this.armLength * 0.05);
-    const jointMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const hingeGeometry = new THREE.RingGeometry(
+      this.armLength * 0.04, // inner radius
+      this.armLength * 0.05, // outer radius
+      32 // segments
+    );
+    
+    // Create materials
+    const joint1Material = new THREE.MeshBasicMaterial({ color: new THREE.Color("#ff6b6b") });
+    const joint2Material = new THREE.MeshBasicMaterial({ color: new THREE.Color("#4ecdc4") });
+    const hingeMaterial = new THREE.LineBasicMaterial({ 
+      color: 0xffffff,
+      linewidth: 2
+    });
+    
     const armMaterial = new THREE.LineBasicMaterial({
       color: 0xffffff,
       linewidth: 2
     });
 
     // Create joints
-    this.joint1 = new THREE.Mesh(jointGeometry, jointMaterial);
-    this.joint2 = new THREE.Mesh(jointGeometry, jointMaterial);
-    this.bob = new THREE.Mesh(jointGeometry, jointMaterial);
+    this.joint1 = new THREE.Mesh(jointGeometry, joint1Material);
+    this.joint2 = new THREE.Mesh(jointGeometry, joint2Material);
+    this.bob = new THREE.Mesh(jointGeometry, joint2Material);
+
+    // Create hinge (origin point) as a line ring instead of a mesh
+    const hinge = new THREE.LineLoop(hingeGeometry, hingeMaterial);
+    this.scene.add(hinge);
+    hinge.position.set(0, 0, 0);
 
     // Create arms
     this.arm1 = new THREE.Line(new THREE.BufferGeometry(), armMaterial);
@@ -62,13 +80,6 @@ class Pendulum {
     this.scene.add(this.bob);
     this.scene.add(this.arm1);
     this.scene.add(this.arm2);
-
-    // Create origin point
-    const originGeometry = new THREE.SphereGeometry(this.armLength * 0.05);
-    const originMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const origin = new THREE.Mesh(originGeometry, originMaterial);
-    this.scene.add(origin);
-    origin.position.set(0, 0, 0);
 
     // Create tracers with different colors
     const tracerGeometry1 = new THREE.BufferGeometry();
@@ -276,6 +287,11 @@ class Pendulum {
   setTracerColors(color1: string, color2: string) {
     (this.tracer1.material as THREE.ShaderMaterial).uniforms.color.value = new THREE.Color(color1);
     (this.tracer2.material as THREE.ShaderMaterial).uniforms.color.value = new THREE.Color(color2);
+    
+    // Update joint colors
+    (this.joint1.material as THREE.MeshBasicMaterial).color = new THREE.Color(color1);
+    (this.joint2.material as THREE.MeshBasicMaterial).color = new THREE.Color(color2);
+    (this.bob.material as THREE.MeshBasicMaterial).color = new THREE.Color(color2);
   }
 
   setTracerLength(length: number) {
@@ -296,9 +312,16 @@ class Pendulum {
   }
 
   updateThemeColors(isDark: boolean) {
-    // Update arm colors based on theme
-    (this.arm1.material as THREE.LineBasicMaterial).color.setHex(isDark ? 0xffffff : 0x000000);
-    (this.arm2.material as THREE.LineBasicMaterial).color.setHex(isDark ? 0xffffff : 0x000000);
+    const themeColor = isDark ? 0xffffff : 0x000000;
+    // Update arm colors
+    (this.arm1.material as THREE.LineBasicMaterial).color.setHex(themeColor);
+    (this.arm2.material as THREE.LineBasicMaterial).color.setHex(themeColor);
+    
+    // Update hinge color (find the LineLoop in scene children)
+    const hinge = this.scene.children.find(child => child instanceof THREE.LineLoop);
+    if (hinge) {
+        (hinge.material as THREE.LineBasicMaterial).color.setHex(themeColor);
+    }
   }
 
   // Add method to update arm length when window resizes
