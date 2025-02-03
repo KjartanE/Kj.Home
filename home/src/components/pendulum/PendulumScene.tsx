@@ -37,7 +37,7 @@ class Pendulum {
   constructor(scene: THREE.Scene) {
     this.scene = scene;
     this.mouse = new THREE.Vector2();
-    this.armLength = Math.min(window.innerWidth, window.innerHeight - 64) / 5;
+    this.armLength = Math.min(window.innerWidth, window.innerHeight - 128) / 5;
 
     // Create geometries and materials
     const jointGeometry = new THREE.SphereGeometry(this.armLength * 0.05);
@@ -326,7 +326,7 @@ class Pendulum {
 
   // Add method to update arm length when window resizes
   updateArmLength() {
-    this.armLength = Math.min(window.innerWidth, window.innerHeight - 64) / 5;
+    this.armLength = Math.min(window.innerWidth, window.innerHeight - 128) / 5;
     this.updatePositions();
   }
 }
@@ -341,7 +341,7 @@ const PendulumScene: React.FC = () => {
     damping: 0.999,
     color1: "#ff6b6b",
     color2: "#4ecdc4",
-    tracerLength: 500,
+    tracerLength: 2000,
     tracerFade: 5
   };
 
@@ -364,12 +364,16 @@ const PendulumScene: React.FC = () => {
       1,
       1000
     );
-    camera.position.y = -32; // Offset camera down by half the header height
+    camera.position.y = 0;
     camera.position.z = 100;
 
     // Create renderer with full size
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true,
+      alpha: true
+    });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
     containerRef.current.appendChild(renderer.domElement);
 
     const pendulum = new Pendulum(scene);
@@ -479,7 +483,7 @@ const PendulumScene: React.FC = () => {
         onTracerLengthChange={(value) => pendulumRef.current?.setTracerLength(value)}
         onTracerFadeChange={(value) => pendulumRef.current?.setTracerFade(value)}
       />
-      <div ref={containerRef} className="fixed inset-0" />
+      <div ref={containerRef} className="fixed inset-0 mt-14" />
     </div>
   );
 };

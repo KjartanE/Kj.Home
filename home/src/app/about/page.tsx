@@ -11,8 +11,8 @@ export default function AboutPage() {
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8 mt-14">
       <div className="grid gap-6 md:grid-cols-[300px_1fr]">
-        <div className="relative">
-          <div className="sticky top-20 w-[300px]">
+        <div className="relative md:block">
+          <div className="sticky top-20 backface-visibility-hidden transform-gpu will-change-transform">
             <PersonalStickyComponent personal={resume.personal} />
           </div>
         </div>

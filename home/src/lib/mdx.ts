@@ -5,7 +5,14 @@ import { compileMDX } from 'next-mdx-remote/rsc';
 
 const rootDirectory = path.join(process.cwd(), 'src/assets/blog');
 
+// Add check for server-side execution
+const isServer = typeof window === 'undefined';
+
 export async function getBlogPosts() {
+    if (!isServer) {
+        throw new Error('getBlogPosts should only be called on the server side');
+    }
+
     const files = fs.readdirSync(rootDirectory);
 
     const posts = await Promise.all(
@@ -26,6 +33,10 @@ export async function getBlogPosts() {
 }
 
 export async function getBlogPost(slug: string) {
+    if (!isServer) {
+        throw new Error('getBlogPost should only be called on the server side');
+    }
+
     const filePath = path.join(rootDirectory, `${slug}.mdx`);
     const fileContent = fs.readFileSync(filePath, 'utf8');
 

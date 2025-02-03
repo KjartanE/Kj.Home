@@ -8,7 +8,7 @@ const PersonalStickyComponent: React.FC<IPersonalStickyComponent> = (props) => {
   const { name, email, phone, description, location, linkedin, github, youtube } = props.personal;
 
   return (
-    <Card>
+    <Card className="will-change-transform translate-z-0 backface-visibility-hidden">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">{name}</CardTitle>
       </CardHeader>

@@ -16,6 +16,12 @@ const nextConfig = {
   webpack: (config) => {
     config.optimization.splitChunks.chunks = 'all';
     config.optimization.minimize = true;
+    // Add fallback for fs and path
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false
+    };
     return config;
   },
 };

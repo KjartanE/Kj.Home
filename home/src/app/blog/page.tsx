@@ -1,19 +1,15 @@
-"use client"
-
 import { getBlogPosts } from "@/lib/mdx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import PenroseLSystemRenderer from "@/components/penrose/PenroseLSystemRenderer";
+import PenroseBackground from "@/components/penrose/PenroseBackground";
 
 export default async function BlogPage() {
   const posts = await getBlogPosts();
 
   return (
     <>
-      <div className="fixed inset-0 z-100">
-        <PenroseLSystemRenderer />
-      </div>
-      <div className="container relative z-10 mx-auto max-w-7xl px-4 py-8 mt-14">
+      <PenroseBackground />
+      <div className="container mx-auto max-w-7xl px-4 py-8 mt-14">
         <h1 className="mb-2 text-3xl font-bold">Blog</h1>
         <p className="mb-8 text-muted-foreground">
           I write about my experiences and thoughts on software development, technology, and other topics.
