@@ -186,7 +186,7 @@ export function Controls({
                 />
               </div>
               <div className="pt-2">
-                <Button variant="outline" className="w-full" onClick={resetToDefaults}>
+                <Button variant="default" className="w-full" onClick={resetToDefaults}>
                   Reset to Defaults
                 </Button>
               </div>
