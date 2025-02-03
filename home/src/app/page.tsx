@@ -1,24 +1,35 @@
-import PenroseLSystemRenderer from "../lib/components/penrose/PenroseLSystemRenderer";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import PenroseBackground from "@/components/penrose/PenroseBackground";
 
 export default function Home() {
   return (
-    <section className="flex h-5/6 flex-col items-center justify-center gap-4 py-8">
-      <div className="flex justify-center">
-        <PenroseLSystemRenderer />
-      </div>
-      <div className="z-20 inline-block max-w-xl justify-center text-center">
-        <span className="">Kjartan Einarsson</span>
-        <br />
-        <div className="">
-          {`
-            hi,
-            
-            this is my website. I like to build things.
-            
-            wanted to start tracking some of my projects and thoughts to share with others.
-            `}
+    <>
+      <PenroseBackground />
+      <div className="flex h-[calc(100vh-3.5rem)] items-center overflow-hidden">
+        <div className="container mx-auto flex flex-col items-center justify-center px-4">
+          <h1 className="text-balance text-center text-4xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
+            Hi, I'm Kjartan.
+          </h1>
+
+          <p className="mt-4 max-w-[42rem] text-center text-muted-foreground sm:text-xl">
+            I like to build things. Welcome to my collection of projects and experiments.
+          </p>
+
+          <div className="mt-8 flex gap-4">
+            <Link href="/projects">
+              <Button size="lg" className="rounded-full">
+                Current Projects
+              </Button>
+            </Link>
+            <Link href="/contact">
+              <Button size="lg" variant="outline" className="rounded-full">
+                Get in touch
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
-    </section>
+    </>
   );
 }

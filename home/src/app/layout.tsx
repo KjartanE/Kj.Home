@@ -1,39 +1,24 @@
-import { Metadata, Viewport } from "next";
-import clsx from "clsx";
-import { Providers } from "../lib/providers";
-import { Navbar } from "../lib/components/nav/navbar";
-import { siteConfig } from "../../public/config/site";
-import { fontSans } from "../../public/config/fonts";
+import type { Metadata } from "next";
+import "./globals.css";
+import { ThemeProvider } from "../components/providers/theme-provider";
+import { Header } from "@/components/layout/header";
 
 export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`
-  },
-  description: siteConfig.description,
+  title: "kj.home",
+  description: "kj.home",
   icons: {
-    icon: "/icons/favicon.ico"
+    icon: "/favicon.svg"
   }
-};
-
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" }
-  ]
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html suppressHydrationWarning lang="en">
-      <head />
-      <body className={clsx("bg-background min-h-screen font-sans antialiased", fontSans.variable)}>
-        <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          <div className="relative flex h-screen flex-col">
-            <Navbar />
-            <main className="container mx-auto w-full flex-grow px-4">{children}</main>
-          </div>
-        </Providers>
+    <html lang="en" suppressHydrationWarning>
+      <body className="flex min-h-screen flex-col">
+        <ThemeProvider attribute="class" defaultTheme="dark">
+          <Header />
+          <main className="flex-1">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );
