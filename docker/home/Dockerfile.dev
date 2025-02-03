@@ -1,6 +1,6 @@
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM imbios/bun-node:latest-hydrogen-slim AS base
+FROM imbios/bun-node:latest-jod-slim AS base
 WORKDIR /app
 
 # Step 1 - install dependencies
