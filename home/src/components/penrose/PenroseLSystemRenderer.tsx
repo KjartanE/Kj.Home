@@ -12,9 +12,8 @@ import { ThreeCleanup } from "@/lib/three/cleanup";
 const PenroseLSystemRenderer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const lastRenderTimeRef = useRef<number>(0);
   const isInitializedRef = useRef(false);
-  
+  const frameCountRef = useRef(0);
   const sceneRef = useRef<{
     scene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
@@ -23,7 +22,7 @@ const PenroseLSystemRenderer: React.FC = () => {
   } | null>(null);
 
   const theme = useTheme();
-  
+
   const { penroseLSystem, penroseManager } = useMemo(() => {
     const system = new PenroseLSystem();
     const manager = new PenroseManager(theme.resolvedTheme || "dark");
@@ -39,7 +38,6 @@ const PenroseLSystemRenderer: React.FC = () => {
 
     let isPageVisible = true;
     let lastTime: number | null = null;
-    let frameCount = 0;
 
     const { scene, camera, renderer, resize } = new PenroseScene();
     sceneRef.current = { scene, camera, renderer, resize };
@@ -73,9 +71,9 @@ const PenroseLSystemRenderer: React.FC = () => {
           scene.add(line);
           shouldRender = true;
         }
-        
+
         accumulatedTime -= renderInterval;
-        frameCount++;
+        frameCountRef.current++;
       }
 
       if (shouldRender) {
@@ -112,7 +110,7 @@ const PenroseLSystemRenderer: React.FC = () => {
 
     return () => {
       isInitializedRef.current = false;
-      
+
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -135,7 +133,7 @@ const PenroseLSystemRenderer: React.FC = () => {
     };
   }, [theme.resolvedTheme, penroseLSystem, penroseManager]);
 
-  return <div ref={containerRef} className="fixed inset-0 top-0 z-10" />;
+  return <div ref={containerRef} className="fixed inset-0 top-0 -z-10" />;
 };
 
 export default memo(PenroseLSystemRenderer);
