@@ -17,7 +17,7 @@ import HomeLogo from "@/assets/icons/HomeLogo";
 
 export function NavMenu() {
   return (
-    <NavigationMenu>
+    <NavigationMenu className="relative z-30">
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger className="bg-transparent">Projects</NavigationMenuTrigger>

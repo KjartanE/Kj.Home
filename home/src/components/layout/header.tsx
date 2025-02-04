@@ -1,15 +1,11 @@
 "use client";
 
-import { Terminal } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import HomeLogo from "@/assets/icons/HomeLogo";
 import { NavMenu } from "./nav-menu";
 import { ModeToggle } from "./mode-toggle";
-export const Header = () => {
-  const router = useRouter();
+import Link from "next/link";
 
+export const Header = () => {
   return (
     <header className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center justify-between px-4">
