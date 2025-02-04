@@ -101,7 +101,7 @@ export function Controls({
                 <Slider
                   value={[values.generations]}
                   min={0}
-                  max={5}
+                  max={8}
                   step={1}
                   onValueChange={([value]) => {
                     setValues((prev) => ({ ...prev, generations: value }));

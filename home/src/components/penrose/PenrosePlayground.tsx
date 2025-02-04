@@ -7,9 +7,7 @@ import PenroseScene, { IPosition } from "./PenroseScene";
 import PenroseManager from "./PenroseManager";
 import PlaygroundController from "./PlaygroundController";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { ThreeCleanup } from '@/lib/three/cleanup';
 import { Controls } from "./Controls";
-import PenroseLSystem from "./lib/PenroseLSystem";
 
 const initialControlValues = {
   generations: 1,
@@ -101,7 +99,7 @@ const PenrosePlayground: React.FC = () => {
     controls.update();
 
     scene.background = new THREE.Color(
-      theme.resolvedTheme === "dark" ? 0x000000 : 0xffffff
+      0xff0000
     );
 
     function animate() {
