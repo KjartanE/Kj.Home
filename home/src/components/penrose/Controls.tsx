@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { DndContext, useDraggable } from "@dnd-kit/core";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useHasMounted } from "@/hooks/useHasMounted";
@@ -12,14 +13,11 @@ interface ControlsProps {
   onGenerationsChange: (value: number) => void;
   onSpeedChange: (value: number) => void;
   onInstantChange: (value: boolean) => void;
-  onRotationChange: (rotation1: number, rotation2: number) => void;
   onRender: () => void;
   initialValues: {
     generations: number;
     speed: number;
     instant: boolean;
-    rotation1: number;
-    rotation2: number;
   };
 }
 
@@ -72,7 +70,6 @@ export function Controls({
   onGenerationsChange,
   onSpeedChange,
   onInstantChange,
-  onRotationChange,
   onRender,
   initialValues
 }: ControlsProps) {
@@ -125,44 +122,19 @@ export function Controls({
                   }}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Rotation 1: {values.rotation1}</Label>
-                <Slider
-                  value={[values.rotation1]}
-                  min={0}
-                  max={39}
-                  step={1}
-                  onValueChange={([value]) => {
-                    setValues((prev) => ({ ...prev, rotation1: value }));
-                    onRotationChange(value, values.rotation2);
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Rotation 2: {values.rotation2}</Label>
-                <Slider
-                  value={[values.rotation2]}
-                  min={0}
-                  max={39}
-                  step={1}
-                  onValueChange={([value]) => {
-                    setValues((prev) => ({ ...prev, rotation2: value }));
-                    onRotationChange(values.rotation1, value);
-                  }}
-                />
-              </div>
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  className={values.instant ? "bg-primary" : ""}
-                  onClick={() => {
-                    setValues((prev) => ({ ...prev, instant: !prev.instant }));
-                    onInstantChange(!values.instant);
-                  }}>
-                  Instant Mode
-                </Button>
-                <Button onClick={onRender}>Render</Button>
+                <Switch
+                  checked={values.instant}
+                  onCheckedChange={(checked) => {
+                    setValues((prev) => ({ ...prev, instant: checked }));
+                    onInstantChange(checked);
+                  }}
+                />
+                <Label>Instant Render</Label>
               </div>
+              <Button variant="default" className="w-full" onClick={onRender}>
+                Render
+              </Button>
             </div>
           </CardContent>
         )}
