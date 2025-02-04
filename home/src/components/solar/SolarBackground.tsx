@@ -4,6 +4,19 @@ import { useEffect, useRef, useMemo } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+interface Moon {
+  name: string;
+  radius: number;
+  distance: number;
+  speed: number;
+  color: string;
+  mesh?: THREE.Mesh;
+  orbit?: THREE.Line;
+  tracer?: THREE.Points;
+  tracerPositions: number[];
+  parent: string; // Name of the parent planet
+}
+
 interface Planet {
   name: string;
   radius: number;
@@ -12,6 +25,7 @@ interface Planet {
   color: string;
   mesh?: THREE.Mesh;
   orbit?: THREE.Line;
+  moons: Moon[]; // Add moons array to Planet interface
 }
 
 // Update sun shaders for a more realistic appearance
@@ -128,16 +142,117 @@ export default function SolarBackground() {
   const rendererRef = useRef<THREE.WebGLRenderer>(new THREE.WebGLRenderer({ antialias: true }));
   const controlsRef = useRef<OrbitControls>(new OrbitControls(cameraRef.current, rendererRef.current.domElement));
 
-  const planets = useMemo<Planet[]>(() => [
-    { name: "Mercury", radius: 0.383, distance: 5, speed: 0.00137, color: "#8B7355" },  // 88 days
-    { name: "Venus", radius: 0.949, distance: 7, speed: 0.00054, color: "#DAA520" },   // 225 days
-    { name: "Earth", radius: 1, distance: 10, speed: 0.00033, color: "#4169E1" },      // 365.26 days (1rpm)
-    { name: "Mars", radius: 0.532, distance: 15, speed: 0.00018, color: "#CD5C5C" },   // 687 days
-    { name: "Jupiter", radius: 11.21, distance: 25, speed: 0.000028, color: "#DEB887" }, // 11.86 years
-    { name: "Saturn", radius: 9.45, distance: 35, speed: 0.000011, color: "#F4A460" },  // 29.46 years
-    { name: "Uranus", radius: 4.01, distance: 45, speed: 0.0000039, color: "#87CEEB" }, // 84.01 years
-    { name: "Neptune", radius: 3.88, distance: 55, speed: 0.0000020, color: "#4682B4" }  // 164.79 years
-  ], []);
+  const planets = useMemo<Planet[]>(
+    () => [
+      {
+        name: "Mercury",
+        radius: 0.383,
+        distance: 5,
+        speed: 0.00137,
+        color: "#8B7355",
+        moons: []
+      },
+      {
+        name: "Venus",
+        radius: 0.949,
+        distance: 7,
+        speed: 0.00054,
+        color: "#DAA520",
+        moons: []
+      },
+      {
+        name: "Earth",
+        radius: 1,
+        distance: 10,
+        speed: 0.00033,
+        color: "#4169E1",
+        moons: [
+          {
+            name: "Moon",
+            radius: 0.2,
+            distance: 2,
+            speed: 0.002,
+            color: "#888888",
+            tracerPositions: [],
+            parent: "Earth"
+          }
+        ]
+      },
+      {
+        name: "Mars",
+        radius: 0.532,
+        distance: 15,
+        speed: 0.00018,
+        color: "#CD5C5C",
+        moons: [
+          {
+            name: "Phobos",
+            radius: 0.1,
+            distance: 1.4,
+            speed: 0.003,
+            color: "#A0522D",
+            tracerPositions: [],
+            parent: "Mars"
+          },
+          {
+            name: "Deimos",
+            radius: 0.08,
+            distance: 1.8,
+            speed: 0.002,
+            color: "#8B4513",
+            tracerPositions: [],
+            parent: "Mars"
+          }
+        ]
+      },
+      {
+        name: "Jupiter",
+        radius: 11.21,
+        distance: 25,
+        speed: 0.000028,
+        color: "#DEB887",
+        moons: [
+          { name: "Io", radius: 0.285, distance: 3.5, speed: 0.004, color: "#FFD700", tracerPositions: [], parent: "Jupiter" },
+          { name: "Europa", radius: 0.246, distance: 4.5, speed: 0.003, color: "#F5F5DC", tracerPositions: [], parent: "Jupiter" },
+          { name: "Ganymede", radius: 0.413, distance: 5.5, speed: 0.002, color: "#D2B48C", tracerPositions: [], parent: "Jupiter" },
+          { name: "Callisto", radius: 0.378, distance: 6.5, speed: 0.001, color: "#A0522D", tracerPositions: [], parent: "Jupiter" }
+        ]
+      },
+      {
+        name: "Saturn",
+        radius: 9.45,
+        distance: 35,
+        speed: 0.000011,
+        color: "#F4A460",
+        moons: [
+          { name: "Titan", radius: 0.404, distance: 4.0, speed: 0.003, color: "#DAA520", tracerPositions: [], parent: "Saturn" },
+          { name: "Rhea", radius: 0.12, distance: 3.0, speed: 0.004, color: "#C0C0C0", tracerPositions: [], parent: "Saturn" }
+        ]
+      },
+      {
+        name: "Uranus",
+        radius: 4.01,
+        distance: 45,
+        speed: 0.0000039,
+        color: "#87CEEB",
+        moons: [
+          { name: "Titania", radius: 0.124, distance: 2.5, speed: 0.003, color: "#D3D3D3", tracerPositions: [], parent: "Uranus" },
+          { name: "Oberon", radius: 0.119, distance: 3.0, speed: 0.002, color: "#A9A9A9", tracerPositions: [], parent: "Uranus" }
+        ]
+      },
+      {
+        name: "Neptune",
+        radius: 3.88,
+        distance: 55,
+        speed: 0.000002,
+        color: "#4682B4",
+        moons: [
+          { name: "Triton", radius: 0.212, distance: 2.8, speed: 0.003, color: "#B8860B", tracerPositions: [], parent: "Neptune" }
+        ]
+      }
+    ],
+    []
+  );
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -169,7 +284,7 @@ export default function SolarBackground() {
     controls.panSpeed = 0.5;
     controls.minDistance = 10;
     controls.maxDistance = 200;
-    controls.enablePan = false;  // Disable OrbitControls panning
+    controls.enablePan = false; // Disable OrbitControls panning
     controlsRef.current = controls;
 
     // Create sun layers
@@ -204,7 +319,7 @@ export default function SolarBackground() {
     scene.add(sunCore);
 
     // Brighter point light from sun
-    const sunLight = new THREE.PointLight(0xFF4400, 10, 500);  // Increased intensity and range
+    const sunLight = new THREE.PointLight(0xff4400, 10, 500); // Increased intensity and range
     scene.add(sunLight);
 
     // Add planets
@@ -214,7 +329,7 @@ export default function SolarBackground() {
       const material = new THREE.ShaderMaterial({
         uniforms: {
           baseColor: { value: new THREE.Color(planet.color) },
-          sunPosition: { value: new THREE.Vector3(0, 0, 0) }  // Sun is at center
+          sunPosition: { value: new THREE.Vector3(0, 0, 0) } // Sun is at center
         },
         vertexShader: planetVertexShader,
         fragmentShader: planetFragmentShader
@@ -239,6 +354,51 @@ export default function SolarBackground() {
       const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
       scene.add(orbit);
       planet.orbit = orbit;
+
+      // Add moons for each planet
+      planet.moons.forEach((moon) => {
+        // Moon mesh
+        const moonGeometry = new THREE.SphereGeometry(moon.radius * 0.5, 32, 32);
+        const moonMaterial = new THREE.ShaderMaterial({
+          uniforms: {
+            baseColor: { value: new THREE.Color(moon.color) },
+            sunPosition: { value: new THREE.Vector3(0, 0, 0) }
+          },
+          vertexShader: planetVertexShader,
+          fragmentShader: planetFragmentShader
+        });
+        const moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
+        scene.add(moonMesh);
+        moon.mesh = moonMesh;
+
+        // Moon orbit
+        const moonOrbitGeometry = new THREE.BufferGeometry();
+        const moonOrbitPoints: number[] = [];
+        for (let i = 0; i <= 360; i++) {
+          const angle = (i * Math.PI) / 180;
+          moonOrbitPoints.push(Math.cos(angle) * moon.distance, 0, Math.sin(angle) * moon.distance);
+        }
+        moonOrbitGeometry.setAttribute("position", new THREE.Float32BufferAttribute(moonOrbitPoints, 3));
+        const moonOrbitMaterial = new THREE.LineBasicMaterial({
+          color: 0x222222,
+          transparent: true,
+          opacity: 0.2
+        });
+        const moonOrbit = new THREE.Line(moonOrbitGeometry, moonOrbitMaterial);
+        moon.orbit = moonOrbit;
+
+        // Create moon tracer
+        const tracerGeometry = new THREE.BufferGeometry();
+        const tracerMaterial = new THREE.PointsMaterial({
+          color: moon.color,
+          size: 0.05,
+          transparent: true,
+          opacity: 0.6
+        });
+        const tracer = new THREE.Points(tracerGeometry, tracerMaterial);
+        moon.tracer = tracer;
+        scene.add(tracer);
+      });
     });
 
     // Animation
@@ -260,10 +420,47 @@ export default function SolarBackground() {
           const time = Date.now() * planet.speed;
           planet.mesh.position.x = Math.cos(time) * planet.distance;
           planet.mesh.position.z = Math.sin(time) * planet.distance;
-          
+
           // Update the sun position uniform for each planet's shader
           (planet.mesh.material as THREE.ShaderMaterial).uniforms.sunPosition.value.set(0, 0, 0);
         }
+
+        // Update moons
+        planet.moons.forEach((moon) => {
+          if (moon.mesh && planet.mesh) {
+            const time = Date.now() * moon.speed;
+
+            // Calculate moon position relative to its planet
+            const moonX = Math.cos(time) * moon.distance;
+            const moonZ = Math.sin(time) * moon.distance;
+
+            // Add planet's position to get final moon position
+            moon.mesh.position.x = planet.mesh.position.x + moonX;
+            moon.mesh.position.z = planet.mesh.position.z + moonZ;
+
+            // Update moon orbit position to follow planet
+            if (moon.orbit) {
+              moon.orbit.position.copy(planet.mesh.position);
+            }
+
+            // Update moon shader uniforms
+            (moon.mesh.material as THREE.ShaderMaterial).uniforms.sunPosition.value.set(0, 0, 0);
+
+            // Update tracer
+            moon.tracerPositions.push(moon.mesh.position.x, moon.mesh.position.y, moon.mesh.position.z);
+
+            // Keep only last 100 positions for the trailer
+            const maxPoints = 100 * 3; // 3 values per point (x, y, z)
+            if (moon.tracerPositions.length > maxPoints) {
+              moon.tracerPositions = moon.tracerPositions.slice(-maxPoints);
+            }
+
+            // Update tracer geometry
+            if (moon.tracer) {
+              moon.tracer.geometry.setAttribute("position", new THREE.Float32BufferAttribute(moon.tracerPositions, 3));
+            }
+          }
+        });
       });
 
       controls.update();
@@ -286,7 +483,7 @@ export default function SolarBackground() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!cameraRef.current) return;
       const speed = 2;
-      
+
       // Get the camera's right vector for proper left/right movement
       const rightVector = new THREE.Vector3();
       cameraRef.current.getWorldDirection(rightVector);
