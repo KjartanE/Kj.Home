@@ -1,7 +1,71 @@
 ---
 title: "Audio Visualizers"
-publishedAt: "2024-02-24"
+publishedAt: "2025-02-05"
 summary: "Creating reactive audio visualizations with Web Audio API"
 ---
 
-Content coming soon... 
+# Exploring Milkdrop 2.0 Integration for Live Music Visualization
+
+As a DJ and developer, I've always been fascinated by the intersection of audio and visual experiences. Recently, I've been exploring ways to integrate Milkdrop 2.0, the legendary Winamp visualizer, into modern web applications for live music visualization.
+
+## What is Milkdrop?
+
+Milkdrop, originally created by Ryan Geiss for Winamp, is one of the most sophisticated real-time music visualization engines ever created. Its second iteration, Milkdrop 2.0, offers an incredible array of psychedelic visual effects that react to audio input in real-time.
+
+## The Technical Challenge
+
+Integrating Milkdrop 2.0 with modern DJ equipment like Pioneer CDJs or synthesizers presents several interesting challenges:
+
+1. **Audio Input Processing**: Capturing live audio from physical devices requires careful handling of the Web Audio API
+2. **WebGL Rendering**: Converting Milkdrop's DirectX-based rendering to work with WebGL
+3. **Performance Optimization**: Ensuring smooth 60fps performance while processing audio and rendering complex visualizations
+
+## Implementation Approach
+
+The core implementation involves several key components:
+
+1. **Audio Input Handling**: Using the Web Audio API to capture live audio from the device
+2. **Visualization Rendering**: Implementing Milkdrop's rendering engine in WebGL
+3. **Performance Optimization**: Implementing efficient audio processing and rendering techniques
+
+## Integration Challenges
+
+The main challenge was to convert Milkdrop's DirectX-based rendering to work with WebGL. This required a deep understanding of the Milkdrop shader language and how to translate it to WebGL.
+
+## Performance Optimization
+
+To ensure smooth 60fps performance, I implemented several techniques:
+
+1. **Audio Processing**: Using the Web Audio API to capture live audio from the device
+2. **Visualization Rendering**: Implementing Milkdrop's rendering engine in WebGL
+3. **Performance Optimization**: Implementing efficient audio processing and rendering techniques
+
+### Butterchurn Integration
+
+[Butterchurn](https://github.com/jberg/butterchurn), a WebGL implementation of Milkdrop 2.0, has been invaluable in this project. It provides a modern, web-friendly way to render Milkdrop presets.
+
+## Current Status
+
+The project is currently in R&D phase, with working prototypes showing promising results. Key achievements include:
+
+- Successful real-time audio capture from external sources
+- Minimal latency between audio input and visual response
+- Smooth rendering of complex Milkdrop presets
+- Support for custom preset loading
+
+## Next Steps
+
+Future development will focus on:
+
+1. Improving audio input flexibility for various devices
+2. Creating a user-friendly interface for preset management
+3. Optimizing performance for lower-end devices
+4. Adding MIDI control support for live visual manipulation
+
+Stay tuned for updates as this project develops further!
+
+## Resources
+
+- [Butterchurn GitHub Repository](https://github.com/jberg/butterchurn)
+- [Web Audio API Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+- [WebGL Fundamentals](https://webglfundamentals.org/)

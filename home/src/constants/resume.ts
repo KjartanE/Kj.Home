@@ -37,7 +37,7 @@ export const resume: IResume = {
     "Azure",
     "Helm",
     "React",
-    "React Native",
+    "React-Native",
     "Vue.js",
     "Next.js",
     "Node.js",
@@ -57,8 +57,7 @@ export const resume: IResume = {
     "Traction",
     "Caddy",
     "Nextcloud",
-    "Portainer",
-    "Adguard"
+    "Portainer"
   ],
   languages: [
     "Java",
@@ -77,9 +76,7 @@ export const resume: IResume = {
     "MariaDB",
     "MongoDB",
     "Jest/Mocha/Selenium",
-    "Cypress",
-    "JMeter",
-    "Playwright"
+    "Cypress"
   ],
   education: [
     {

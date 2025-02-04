@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Briefcase, ExternalLink, ChevronRight, GraduationCap } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { resume } from "@/constants/resume";
+import { getSkillsSection } from "./SkillsSection";
 
 const QuartechComponent: React.FC = () => {
   const renderListSection = (title: string, items: string[]) => (
@@ -20,6 +21,13 @@ const QuartechComponent: React.FC = () => {
           </li>
         ))}
       </ul>
+    </div>
+  );
+
+  const renderSkillsSection = (title: string, items: string[]) => (
+    <div className="space-y-2">
+      <h4 className="text-lg font-semibold text-primary">{title}</h4>
+      <div className="flex flex-wrap gap-3">{getSkillsSection(items)}</div>
     </div>
   );
 
@@ -39,9 +47,9 @@ const QuartechComponent: React.FC = () => {
         <div className="flex flex-col gap-6">
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              <Image 
+              <Image
                 src="/images/quartech_logo.png"
-                alt="Quartech Logo" 
+                alt="Quartech Logo"
                 width={40}
                 height={40}
                 className="rounded-lg"
@@ -49,13 +57,13 @@ const QuartechComponent: React.FC = () => {
               <h3 className="text-xl font-semibold">Full-stack Software Engineer</h3>
             </div>
             <p className="text-muted-foreground">
-              Currently employed at Quartech Systems Ltd., working on various BC Government and internal company services.
+              Currently employed at Quartech Systems Ltd., working on various BC Government and internal company
+              services.
             </p>
             <div>
-              <Link 
-                href="https://quartech.com/" 
-                className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
-              >
+              <Link
+                href="https://quartech.com/"
+                className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
                 <span>quartech.com</span>
                 <ExternalLink className="h-4 w-4" />
               </Link>
@@ -80,14 +88,14 @@ const QuartechComponent: React.FC = () => {
                     <p className="text-sm text-muted-foreground">{contract.date}</p>
                     <p className="text-sm">{contract.description}</p>
                   </div>
-                  
+
                   <Accordion type="single" collapsible>
                     <AccordionItem value="details" className="border-b-0">
                       <AccordionTrigger>Project Details</AccordionTrigger>
                       <AccordionContent>
                         <div className="space-y-4">
                           {contract.notes && renderListSection("Responsibilities", contract.notes)}
-                          {contract.technologies && renderListSection("Technologies Used", contract.technologies)}
+                          {contract.technologies && renderSkillsSection("Technologies Used", contract.technologies)}
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -96,7 +104,7 @@ const QuartechComponent: React.FC = () => {
               ))}
             </Tabs>
           </div>
-          
+
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="rounded-lg border border-border/50 bg-background p-2">
@@ -107,24 +115,22 @@ const QuartechComponent: React.FC = () => {
 
             <Accordion type="single" collapsible className="w-full">
               {positions.map((position, index) => (
-                <AccordionItem 
-                  key={index} 
+                <AccordionItem
+                  key={index}
                   value={`position-${index}`}
-                  className={index === positions.length - 1 ? 'border-b-0' : ''}
-                >
+                  className={index === positions.length - 1 ? "border-b-0" : ""}>
                   <AccordionTrigger className="text-lg font-semibold hover:text-primary">
                     {position.title}
                   </AccordionTrigger>
                   <AccordionContent className="space-y-6 px-4">
-                    {position.requirements.education && 
-                      renderListSection("Education", position.requirements.education)}
-                    {position.requirements.experience && 
+                    {position.requirements.education && renderListSection("Education", position.requirements.education)}
+                    {position.requirements.experience &&
                       renderListSection("Experience", position.requirements.experience)}
-                    {position.requirements.technicalSkills && 
+                    {position.requirements.technicalSkills &&
                       renderListSection("Technical Skills", position.requirements.technicalSkills)}
-                    {position.requirements.softSkills && 
+                    {position.requirements.softSkills &&
                       renderListSection("Soft Skills", position.requirements.softSkills)}
-                    {position.requirements.responsibilities && 
+                    {position.requirements.responsibilities &&
                       renderListSection("Additional Responsibilities", position.requirements.responsibilities)}
                   </AccordionContent>
                 </AccordionItem>
