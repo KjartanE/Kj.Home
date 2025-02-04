@@ -4,4 +4,70 @@ publishedAt: "2024-02-18"
 summary: "Setting up a home server with Debian, Docker, and various services"
 ---
 
-Content coming soon... 
+# Home Server Infrastructure
+
+I've set up a home server running various containerized services managed through Portainer Community Edition. Here's an overview of my current setup and the services I'm running.
+
+## Infrastructure Overview
+
+- **Server Management**: Portainer CE for Docker container management
+- **Container Orchestration**: Docker Compose
+- **Access Control**: Administrator-level access management
+
+## Active Services
+
+### Security & Network
+- **Adguard**: Running as a network-wide ad blocker and DNS manager
+- **Homer**: A sleek dashboard for organizing and accessing all server services
+
+### Media & Entertainment
+- **Plex Multi-Stack**: Media server setup for streaming personal content
+- **Minecraft**: Self-hosted game server for personal use
+
+### File Management
+- **Nextcloud**: Personal cloud storage and file synchronization solution
+
+## Technical Implementation
+
+All services are deployed using Docker Compose, which allows for easy service management and configuration. Each stack is isolated and can be managed independently through Portainer's intuitive interface.
+
+### Service Configuration Highlights
+
+1. **Homer Dashboard**
+   - Deployed: October 28, 2024
+   - Purpose: Central access point for all services
+   - Configuration: Total container control
+
+2. **Adguard Home**
+   - Deployed: October 28, 2024
+   - Features: Network-wide ad blocking and DNS management
+   - Control: Full administrative access
+
+3. **Nextcloud**
+   - Deployed: October 28, 2024
+   - Purpose: Personal cloud storage
+   - Integration: Fully containerized setup
+
+4. **Plex Media Server**
+   - Deployed: December 30, 2024
+   - Configuration: Multi-stack setup for optimal performance
+   - Management: Total container control
+
+## Future Plans
+
+I'm continuously looking to expand and improve my home server setup. Some potential additions might include:
+
+- Backup automation services
+- Monitoring and alerting systems
+- Additional self-hosted applications
+- Enhanced security measures
+
+## Management & Maintenance
+
+The server is managed through Portainer's web interface, which provides:
+- Real-time container status monitoring
+- Easy stack deployment and updates
+- Resource usage tracking
+- Simple service management
+
+This setup provides a robust foundation for home server needs while maintaining flexibility for future expansion and modifications. 

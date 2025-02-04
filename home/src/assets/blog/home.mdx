@@ -1,27 +1,65 @@
 ---
-title: "Kj.Home Init"
-publishedAt: "2024-09-05"
-summary: "Initial setup for website"
+title: "KJ.HOME"
+publishedAt: "2024-02-20"
+summary: "Building my personal website with Next.js and TailwindCSS"
 ---
 
-My goals and plans for this site is to track procedures of any personal projects.
+# KJ.HOME
 
-Hoping to keep screenshots and information on setup procedures for any home server needs.
+## Overview
+I recently built my personal website using Next.js 14 and TailwindCSS, creating a modern and responsive platform to showcase my projects and experiences. The site features a clean, dark-mode friendly design with interactive 3D visualizations and a comprehensive blog system.
 
-Displaying some unique fun projects and integration that into the style of the site.
+## Tech Stack
+- **Framework**: Next.js 14
+- **Styling**: TailwindCSS with shadcn/ui components
+- **3D Graphics**: Three.js
+- **Content**: MDX for blog posts
+- **Containerization**: Docker with Bun runtime
+- **Development**: TypeScript
 
-## Synth
+## Key Features
 
-I have a lot of pictures, videos and links for the history and creation of my synth. I want to show the full progress of what pictures I do have documented.
+### Dynamic Blog System
+The blog system is built using MDX, allowing for rich content mixing markdown with React components. Posts are stored as MDX files and dynamically rendered using Next.js's server components. The blog listing page displays cards with post previews, making it easy to browse through content.
 
-## Portfolio
+### Interactive Projects
+The projects section showcases various interactive demonstrations, including:
+- Solar System Visualization
+- Penrose Tiling Generator
+- 3D Cube Visualization
+- Chladni Pattern Simulator
+- Double Pendulum Physics
 
-Tracking work experience, project tech stacks and utilities I have worked with.
+Each project utilizes Three.js for 3D rendering and includes interactive controls for user engagement.
 
-Thoughts on integrating old school projects that were built in next. Might host on home server with each project containerized.
+### Responsive Design
+The site is fully responsive and features a clean, modern interface. The navigation system adapts seamlessly between desktop and mobile views, and all content is optimized for different screen sizes.
 
-## Website
+### About Section
+The about page includes:
+- Professional experience timeline
+- Skills and technologies
+- Education history
+- Project showcase
+- Contact information
 
-I want to have fun with this site and do something fun and new. It's hard to be original but I like trying new things.
+### Docker Development Environment
+The development environment is containerized using Docker, making it easy to maintain consistency across different development machines:
 
-> :D
+## Performance Optimizations
+- Server-side rendering for improved initial load times
+- Image optimization using Next.js Image component
+- Code splitting and lazy loading for larger components
+- Efficient asset management with static file serving
+
+## Future Enhancements
+- Add interactive blog post comments
+- Implement a search system for blog posts
+- Add more interactive 3D visualizations
+- Create a project showcase portfolio
+- Integrate a contact form with backend API
+
+## Conclusion
+Building this personal website has been an exciting journey in combining modern web technologies. The modular architecture allows for easy additions and modifications, while the Docker setup ensures consistent development and deployment environments.
+
+The source code is available on GitHub, and I welcome any feedback or suggestions for improvement.

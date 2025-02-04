@@ -34,19 +34,18 @@ export default function ContactPage() {
       console.log(values);
       toast.success("Message sent successfully!");
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Failed to send message. Please try again.");
+      console.error(error);
     }
   }
 
   return (
-    <div className="container mx-auto flex min-h-[80vh] items-center justify-center px-4 py-8 mt-14">
+    <div className="container mx-auto mt-14 flex min-h-[80vh] items-center justify-center px-4 py-8">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Contact Me</CardTitle>
-          <CardDescription>
-            Send me a message and I'll get back to you as soon as possible.
-          </CardDescription>
+          <CardDescription>Send me a message and I&apos;ll get back to you as soon as possible.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -97,11 +96,7 @@ export default function ContactPage() {
                   <FormItem>
                     <FormLabel>Message</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Your message here..."
-                        className="min-h-[120px]"
-                        {...field}
-                      />
+                      <Textarea placeholder="Your message here..." className="min-h-[120px]" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

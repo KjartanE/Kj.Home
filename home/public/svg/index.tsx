@@ -70,3 +70,11 @@ export { default as HomeAssistantIcon } from "./design/home_assistant.svg";
 export { default as EspIcon } from "./hardware/esp.svg";
 export { default as ArduinoIcon } from "./hardware/arduino.svg";
 export { default as RpiIcon } from "./hardware/rpi.svg";
+
+export { default as HelmIcon } from "./deployment/helm.svg";
+export { default as PortainerIcon } from "./deployment/portainer.svg";
+
+export { default as OAuthIcon } from "./auth/oauth.svg";
+
+export { default as DynamoDBIcon } from "./database/dynamodb.svg";
+export { default as MariaDBIcon } from "./database/mariadb.svg";

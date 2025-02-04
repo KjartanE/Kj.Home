@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import PenroseBackground from "@/components/penrose/PenroseBackground";
 
 export default function Home() {
   return (
     <>
-      <PenroseBackground />
       <div className="flex h-[calc(100vh-3.5rem)] items-center overflow-hidden">
         <div className="container mx-auto flex flex-col items-center justify-center px-4">
           <h1 className="text-balance text-center text-4xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
