@@ -31,7 +31,7 @@ export function NavMenu() {
                     <HomeLogo />
                     <div className="mb-2 mt-4 text-lg font-medium">Projects</div>
                     <p className="text-sm leading-tight text-muted-foreground">
-                      Check out some interesting projects I've worked on.
+                      Check out some interesting projects I&apos;ve worked on.
                     </p>
                   </Link>
                 </NavigationMenuLink>
@@ -48,6 +48,9 @@ export function NavMenu() {
               <ListItem href="/projects/pendulum" title="Pendulum">
                 Double Pendulum Physics.
               </ListItem>
+              <ListItem href="/projects/solar" title="Solar">
+                Solar System.
+              </ListItem>
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
@@ -60,9 +63,7 @@ export function NavMenu() {
         </NavigationMenuItem>
         <NavigationMenuItem>
           <Link href="/blog" legacyBehavior passHref>
-            <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
-              Blog
-            </NavigationMenuLink>
+            <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>Blog</NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
