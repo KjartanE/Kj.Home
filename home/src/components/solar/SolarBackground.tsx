@@ -135,12 +135,10 @@ const planetFragmentShader = `
 
 export default function SolarBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<THREE.Scene>(new THREE.Scene());
-  const cameraRef = useRef<THREE.PerspectiveCamera>(
-    new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-  );
-  const rendererRef = useRef<THREE.WebGLRenderer>(new THREE.WebGLRenderer({ antialias: true }));
-  const controlsRef = useRef<OrbitControls>(new OrbitControls(cameraRef.current, rendererRef.current.domElement));
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
 
   const planets = useMemo<Planet[]>(
     () => [
@@ -255,6 +253,15 @@ export default function SolarBackground() {
   );
 
   useEffect(() => {
+    // Initialize Three.js components inside useEffect
+    sceneRef.current = new THREE.Scene();
+    cameraRef.current = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    rendererRef.current = new THREE.WebGLRenderer({ antialias: true });
+    
+    if (rendererRef.current && cameraRef.current) {
+      controlsRef.current = new OrbitControls(cameraRef.current, rendererRef.current.domElement);
+    }
+
     if (!containerRef.current) return;
 
     const container = containerRef.current; // Store ref value

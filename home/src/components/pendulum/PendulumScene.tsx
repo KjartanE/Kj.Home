@@ -46,15 +46,15 @@ class Pendulum {
       this.armLength * 0.05, // outer radius
       32 // segments
     );
-    
+
     // Create materials
     const joint1Material = new THREE.MeshBasicMaterial({ color: new THREE.Color("#ff6b6b") });
     const joint2Material = new THREE.MeshBasicMaterial({ color: new THREE.Color("#4ecdc4") });
-    const hingeMaterial = new THREE.LineBasicMaterial({ 
+    const hingeMaterial = new THREE.LineBasicMaterial({
       color: 0xffffff,
       linewidth: 2
     });
-    
+
     const armMaterial = new THREE.LineBasicMaterial({
       color: 0xffffff,
       linewidth: 2
@@ -121,20 +121,20 @@ class Pendulum {
     if (this.isGrabbed) {
       // When grabbed, point arms directly at mouse
       const mouseAngle = Math.atan2(this.mouse.y, this.mouse.x);
-      
+
       // First joint is halfway to mouse
       x1 = this.armLength * Math.cos(mouseAngle);
       y1 = this.armLength * Math.sin(mouseAngle);
-      
+
       // Second joint is at mouse position (maintaining arm length)
       x2 = 2 * this.armLength * Math.cos(mouseAngle);
       y2 = 2 * this.armLength * Math.sin(mouseAngle);
 
       // Store angles for physics simulation when released
       // Convert from mouse angle to pendulum angle coordinate system
-      this.angle1 = mouseAngle + Math.PI/2;  // This is the key change
-      this.angle2 = this.angle1;  // Both arms aligned when grabbed
-      
+      this.angle1 = mouseAngle + Math.PI / 2; // This is the key change
+      this.angle2 = this.angle1; // Both arms aligned when grabbed
+
       // Reset velocities
       this.velocity1 = 0;
       this.velocity2 = 0;
@@ -231,7 +231,6 @@ class Pendulum {
       const a1 = this.angle1;
       const a2 = this.angle2;
       const v1 = this.velocity1;
-      const v2 = this.velocity2;
 
       // Calculate accelerations using the full double pendulum equations
       const num1 = -g * (2 * m1 + m2) * Math.sin(a1) - m2 * g * Math.sin(a1 - 2 * a2);
@@ -287,7 +286,7 @@ class Pendulum {
   setTracerColors(color1: string, color2: string) {
     (this.tracer1.material as THREE.ShaderMaterial).uniforms.color.value = new THREE.Color(color1);
     (this.tracer2.material as THREE.ShaderMaterial).uniforms.color.value = new THREE.Color(color2);
-    
+
     // Update joint colors
     (this.joint1.material as THREE.MeshBasicMaterial).color = new THREE.Color(color1);
     (this.joint2.material as THREE.MeshBasicMaterial).color = new THREE.Color(color2);
@@ -316,11 +315,13 @@ class Pendulum {
     // Update arm colors
     (this.arm1.material as THREE.LineBasicMaterial).color.setHex(themeColor);
     (this.arm2.material as THREE.LineBasicMaterial).color.setHex(themeColor);
-    
+
     // Update hinge color (find the LineLoop in scene children)
-    const hinge = this.scene.children.find(child => child instanceof THREE.LineLoop);
+    const hinge = this.scene.children.find((child): child is THREE.LineLoop => 
+      child instanceof THREE.LineLoop
+    );
     if (hinge) {
-        (hinge.material as THREE.LineBasicMaterial).color.setHex(themeColor);
+      (hinge.material as THREE.LineBasicMaterial).color.setHex(themeColor);
     }
   }
 
@@ -347,7 +348,9 @@ const PendulumScene: React.FC = () => {
 
   useEffect(() => {
     if (!containerRef.current) return;
-
+    
+    const container = containerRef.current; // Store ref value
+    
     let isPageVisible = true;
     let lastTime: number | null = null;
 
@@ -368,13 +371,13 @@ const PendulumScene: React.FC = () => {
     camera.position.z = 100;
 
     // Create renderer with full size
-    const renderer = new THREE.WebGLRenderer({ 
+    const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    containerRef.current.appendChild(renderer.domElement);
+    container.appendChild(renderer.domElement);
 
     const pendulum = new Pendulum(scene);
     pendulumRef.current = pendulum;
@@ -465,8 +468,8 @@ const PendulumScene: React.FC = () => {
       ThreeCleanup.disposeScene(scene);
       renderer.dispose();
 
-      if (containerRef.current?.contains(renderer.domElement)) {
-        containerRef.current.removeChild(renderer.domElement);
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
       }
     };
   }, [theme.resolvedTheme]);
