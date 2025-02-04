@@ -1,0 +1,19 @@
+# use the official Bun image
+# see all versions at https://hub.docker.com/r/oven/bun/tags
+FROM imbios/bun-node:latest-jod-slim AS base
+WORKDIR /app
+
+# Step 1 - install dependencies
+COPY package.json bun.lock ./
+RUN bun install
+
+# Step 2 - Copy source code
+COPY . .
+
+# Step 3 - expose the port
+EXPOSE 4444
+
+USER bun
+
+# run the app
+CMD ["bun", "run", "dev"]
