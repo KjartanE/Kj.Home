@@ -12,7 +12,6 @@ import {
   Database,
   DatabaseZap,
   SquareKanban,
-  Plug,
   Cable,
   MessageSquare,
   Network,
@@ -115,6 +114,20 @@ const SkillsSection: React.FC = () => {
         return <HardDrive className={iconStyle} />;
       case "Teamwork":
         return <Users className={iconStyle} />;
+      case "Kubernetes":
+        return <Image src={iconPath("deployment/kubernetes")} alt="Kubernetes" width={20} height={20} className={iconStyle} />;
+      case "Helm":
+        return <Image src={iconPath("deployment/helm")} alt="Helm" width={20} height={20} className={iconStyle} />;
+      case "FastAPI":
+        return <Image src={iconPath("framework/fast-api")} alt="FastAPI" width={20} height={20} className={iconStyle} />;
+      case "Flask":
+        return <Image src={iconPath("framework/flask")} alt="Flask" width={20} height={20} className={iconStyle} />;
+      case "Keycloak":
+        return <Image src={iconPath("auth/keycloak")} alt="Keycloak" width={20} height={20} className={iconStyle} />;
+      case "OAuth2":
+        return <Image src={iconPath("auth/oauth")} alt="OAuth2" width={20} height={20} className={iconStyle} />;
+      case "Portainer":
+        return <Image src={iconPath("deployment/portainer")} alt="Portainer" width={20} height={20} className={iconStyle} />;
       default:
         return <Layers className={iconStyle} />;
     }

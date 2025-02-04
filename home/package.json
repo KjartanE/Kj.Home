@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack -p 4444 --turbo",
+    "dev": "next dev --turbopack -p 4444",
     "build": "next build",
     "start": "next start -p 4444",
     "lint": "bunx eslint .",
