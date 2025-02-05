@@ -4,7 +4,7 @@ import { MutableRefObject } from "react";
 import PenroseLSystem from "./lib/PenroseLSystem";
 import { shadeLineMaterial } from "./shaders/lineMaterial";
 
-export default class PenroseManager {
+export default class PenroseManagerBasic {
   private theme: string;
   private themeColor: number;
   private lineGeometry: THREE.BufferGeometry;
