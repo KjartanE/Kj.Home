@@ -73,9 +73,13 @@ const QuartechComponent: React.FC = () => {
 
           <div className="space-y-6">
             <Tabs defaultValue={contracts[0].id}>
-              <TabsList className="justify-start">
+              <TabsList className="flex justify-start space-x-4 border-b border-gray-700">
                 {contracts.map((contract) => (
-                  <TabsTrigger key={contract.id} value={contract.id}>
+                  <TabsTrigger
+                    key={contract.id}
+                    value={contract.id}
+                    className="text-white hover:text-gray-400 transition-colors duration-300"
+                  >
                     {contract.label}
                   </TabsTrigger>
                 ))}
@@ -89,10 +93,12 @@ const QuartechComponent: React.FC = () => {
                     <p className="text-sm">{contract.description}</p>
                   </div>
 
-                  <Accordion type="single" collapsible>
+                  <Accordion type="single" collapsible className="mt-6">
                     <AccordionItem value="details" className="border-b-0">
-                      <AccordionTrigger>Project Details</AccordionTrigger>
-                      <AccordionContent>
+                      <AccordionTrigger className="rounded-md py-4 px-2 text-base font-semibold transition-colors hover:bg-muted/50 hover:text-primary [&[data-state=open]>svg]:rotate-180">
+                        Project Details
+                      </AccordionTrigger>
+                      <AccordionContent className="px-2">
                         <div className="space-y-4">
                           {contract.notes && renderListSection("Responsibilities", contract.notes)}
                           {contract.technologies && renderSkillsSection("Technologies Used", contract.technologies)}

@@ -13,7 +13,5 @@ COPY . .
 # Step 3 - expose the port
 EXPOSE 4444
 
-USER bun
-
 # run the app
 CMD ["bun", "run", "dev"]

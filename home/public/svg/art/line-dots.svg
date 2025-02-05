@@ -1,0 +1,85 @@
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="black" />
+
+  <!-- Dots for Bifurcation Diagram -->
+  <g fill="white">
+    <!-- Initial dots -->
+    <circle cx="50" cy="200" r="2" />
+    <circle cx="150" cy="180" r="2" />
+    <circle cx="250" cy="220" r="2" />
+    <circle cx="350" cy="160" r="2" />
+    <circle cx="450" cy="210" r="2" />
+
+    <!-- First iteration -->
+    <circle cx="70" cy="190" r="2" />
+    <circle cx="70" cy="210" r="2" />
+    <circle cx="130" cy="170" r="2" />
+    <circle cx="130" cy="190" r="2" />
+    <circle cx="170" cy="200" r="2" />
+    <circle cx="170" cy="220" r="2" />
+    <circle cx="230" cy="210" r="2" />
+    <circle cx="230" cy="230" r="2" />
+    <circle cx="270" cy="150" r="2" />
+    <circle cx="270" cy="170" r="2" />
+    <circle cx="330" cy="200" r="2" />
+    <circle cx="330" cy="220" r="2" />
+    <circle cx="370" cy="150" r="2" />
+    <circle cx="370" cy="170" r="2" />
+    <circle cx="430" cy="200" r="2" />
+    <circle cx="430" cy="220" r="2" />
+    <circle cx="470" cy="160" r="2" />
+    <circle cx="470" cy="180" r="2" />
+
+    <!-- Second iteration -->
+    <circle cx="90" cy="185" r="2" />
+    <circle cx="90" cy="195" r="2" />
+    <circle cx="90" cy="205" r="2" />
+    <circle cx="90" cy="215" r="2" />
+    <circle cx="110" cy="175" r="2" />
+    <circle cx="110" cy="185" r="2" />
+    <circle cx="110" cy="195" r="2" />
+    <circle cx="110" cy="205" r="2" />
+    <circle cx="190" cy="195" r="2" />
+    <circle cx="190" cy="205" r="2" />
+    <circle cx="190" cy="215" r="2" />
+    <circle cx="190" cy="225" r="2" />
+    <circle cx="210" cy="205" r="2" />
+    <circle cx="210" cy="215" r="2" />
+    <circle cx="210" cy="225" r="2" />
+    <circle cx="210" cy="235" r="2" />
+    <circle cx="290" cy="145" r="2" />
+    <circle cx="290" cy="155" r="2" />
+    <circle cx="290" cy="165" r="2" />
+    <circle cx="290" cy="175" r="2" />
+    <circle cx="310" cy="155" r="2" />
+    <circle cx="310" cy="165" r="2" />
+    <circle cx="310" cy="175" r="2" />
+    <circle cx="310" cy="185" r="2" />
+    <circle cx="390" cy="195" r="2" />
+    <circle cx="390" cy="205" r="2" />
+    <circle cx="390" cy="215" r="2" />
+    <circle cx="390" cy="225" r="2" />
+    <circle cx="410" cy="205" r="2" />
+    <circle cx="410" cy="215" r="2" />
+    <circle cx="410" cy="225" r="2" />
+    <circle cx="410" cy="235" r="2" />
+    <circle cx="490" cy="155" r="2" />
+    <circle cx="490" cy="165" r="2" />
+    <circle cx="490" cy="175" r="2" />
+    <circle cx="490" cy="185" r="2" />
+    <circle cx="510" cy="165" r="2" />
+    <circle cx="510" cy="175" r="2" />
+    <circle cx="510" cy="185" r="2" />
+    <circle cx="510" cy="195" r="2" />
+  </g>
+
+  <!-- Lines -->
+  <line x1="30" y1="250" x2="570" y2="250" stroke="white" stroke-width="1" />
+  <line x1="300" y1="100" x2="300" y2="250" stroke="white" stroke-width="1" />
+
+  <!-- Text -->
+  <text x="10" y="20" fill="white" font-size="10">Bifurcation Diagram</text>
+  <text x="10" y="380" fill="white" font-size="10">Parameter</text>
+  <text x="520" y="380" fill="white" font-size="10">State</text>
+</svg>
