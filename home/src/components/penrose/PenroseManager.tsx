@@ -65,7 +65,7 @@ export default class PenroseManager {
       const theta = penroseLSystem.theta;
       const production = penroseLSystem.production;
 
-      this.steps > production.length ? (this.steps = production.length) : this.steps;
+      this.steps = Math.min(this.steps, production.length);
 
       for (let i = 0; i < this.steps; i++) {
         const step = production[i];
