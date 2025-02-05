@@ -33,9 +33,6 @@ class Pendulum {
   private tracerAlphas2: number[] = [];
   private maxTracerPoints = 1000;
   private tracerFadeRate: number = 0.99;
-  private lastFrameTime: number = 0;
-  private readonly frameInterval: number = 1000 / 60; // Target 60 FPS
-  private frameCount: number = 0;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
@@ -173,27 +170,48 @@ class Pendulum {
   }
 
   private updateTracers() {
-    // Only update if we have new positions
-    if (this.tracerPositions1.length === 0 && this.tracerPositions2.length === 0) {
-      return;
+    // Add new positions
+    this.tracerPositions1.unshift(new THREE.Vector3(this.joint1.position.x, this.joint1.position.y, 0));
+    this.tracerPositions2.unshift(new THREE.Vector3(this.bob.position.x, this.bob.position.y, 0));
+
+    // Add new alphas
+    this.tracerAlphas1.unshift(1.0);
+    this.tracerAlphas2.unshift(1.0);
+
+    // Limit array sizes
+    if (this.tracerPositions1.length > this.maxTracerPoints) {
+      this.tracerPositions1.pop();
+      this.tracerAlphas1.pop();
+    }
+    if (this.tracerPositions2.length > this.maxTracerPoints) {
+      this.tracerPositions2.pop();
+      this.tracerAlphas2.pop();
     }
 
-    // Use TypedArrays for better performance
+    // Update fade rate
+    for (let i = 0; i < this.tracerAlphas1.length; i++) {
+      this.tracerAlphas1[i] *= this.tracerFadeRate;
+      this.tracerAlphas2[i] *= this.tracerFadeRate;
+    }
+
+    // Update geometries
     const positions1 = new Float32Array(this.tracerPositions1.length * 3);
     const positions2 = new Float32Array(this.tracerPositions2.length * 3);
     const alphas1 = new Float32Array(this.tracerAlphas1);
     const alphas2 = new Float32Array(this.tracerAlphas2);
 
-    // Batch updates
-    for (let i = 0; i < this.tracerPositions1.length; i++) {
-      const pos = this.tracerPositions1[i];
-      const idx = i * 3;
-      positions1[idx] = pos.x;
-      positions1[idx + 1] = pos.y;
-      positions1[idx + 2] = pos.z;
-    }
+    this.tracerPositions1.forEach((pos, i) => {
+      positions1[i * 3] = pos.x;
+      positions1[i * 3 + 1] = pos.y;
+      positions1[i * 3 + 2] = pos.z;
+    });
 
-    // Update geometries in batch
+    this.tracerPositions2.forEach((pos, i) => {
+      positions2[i * 3] = pos.x;
+      positions2[i * 3 + 1] = pos.y;
+      positions2[i * 3 + 2] = pos.z;
+    });
+
     this.tracer1.geometry.setAttribute("position", new THREE.BufferAttribute(positions1, 3));
     this.tracer1.geometry.setAttribute("alpha", new THREE.BufferAttribute(alphas1, 1));
     this.tracer2.geometry.setAttribute("position", new THREE.BufferAttribute(positions2, 3));
@@ -201,18 +219,11 @@ class Pendulum {
   }
 
   update(deltaTime: number) {
-    // Limit update rate
-    const currentTime = performance.now();
-    if (currentTime - this.lastFrameTime < this.frameInterval) {
-      return;
-    }
-    this.lastFrameTime = currentTime;
-
     if (!this.isGrabbed) {
-      // Fixed timestep for physics
-      const fixedDt = Math.min(deltaTime, 16) / 1000; // Cap at 16ms, convert to seconds
-      
-      // Physics simulation with fixed timestep
+      // Physics simulation
+      const dt = deltaTime / 1000; // Convert to seconds
+
+      // Double pendulum physics equations
       const g = this.gravity;
       const l = this.armLength;
       const m1 = this.mass1;
@@ -221,7 +232,7 @@ class Pendulum {
       const a2 = this.angle2;
       const v1 = this.velocity1;
 
-      // Calculate accelerations
+      // Calculate accelerations using the full double pendulum equations
       const num1 = -g * (2 * m1 + m2) * Math.sin(a1) - m2 * g * Math.sin(a1 - 2 * a2);
       const den1 = l * (2 * m1 + m2 - m2 * Math.cos(2 * a1 - 2 * a2));
       const acc1 = num1 / den1;
@@ -230,24 +241,21 @@ class Pendulum {
       const den2 = l * (2 * m1 + m2 - m2 * Math.cos(2 * a1 - 2 * a2));
       const acc2 = num2 / den2;
 
-      // Update with fixed timestep
-      this.velocity1 += acc1 * fixedDt;
-      this.velocity2 += acc2 * fixedDt;
+      // Update velocities and angles
+      this.velocity1 += acc1 * dt;
+      this.velocity2 += acc2 * dt;
+
+      // Apply damping
       this.velocity1 *= this.damping;
       this.velocity2 *= this.damping;
-      this.angle1 += this.velocity1 * fixedDt;
-      this.angle2 += this.velocity2 * fixedDt;
+
+      // Update angles
+      this.angle1 += this.velocity1 * dt;
+      this.angle2 += this.velocity2 * dt;
     }
 
-    // Optimize tracer updates
-    if (!this.isGrabbed && (this.frameCount % 2 === 0)) {
-      this.updatePositions();
-      this.updateTracers();
-    } else {
-      this.updatePositions();
-    }
-    
-    this.frameCount++;
+    this.updatePositions();
+    this.updateTracers();
   }
 
   setMousePosition(x: number, y: number) {
