@@ -1,27 +1,19 @@
 import { IPersonalStickyComponent } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Github, Linkedin, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Github, Linkedin, Youtube, MapPin } from "lucide-react";
 import Link from "next/link";
 
 const PersonalStickyComponent: React.FC<IPersonalStickyComponent> = (props) => {
-  const { name, email, phone, description, location, linkedin, github, youtube } = props.personal;
+  const { name, description, location, linkedin, github, youtube } = props.personal;
 
   return (
-    <Card className="will-change-transform translate-z-0 backface-visibility-hidden">
+    <Card className="translate-z-0 backface-visibility-hidden will-change-transform">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">{name}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4" />
-            <span>{email}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4" />
-            <span>{phone}</span>
-          </div>
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
             <span>{location}</span>
