@@ -5,5 +5,7 @@
       "destination": "/home/api/:path"
     },
     { "source": "/home/(.*)", "destination": "/" }
-  ]
+  ],
+  "installCommand": "bun install",
+  "buildCommand": "bun run build"
 }
