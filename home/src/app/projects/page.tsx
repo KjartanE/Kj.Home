@@ -38,6 +38,13 @@ const projects = [
     link: "/projects/solar",
     tech: ["Three.js", "React", "TypeScript"]
   },
+  {
+    title: "Spirograph",
+    description: "Interactive spirograph simulation",
+    image: "/projects/spiro-preview.png",
+    link: "/projects/spirograph",
+    tech: ["Three.js", "React", "TypeScript"]
+  },
 ];
 
 export default function ProjectsPage() {
@@ -60,7 +67,7 @@ export default function ProjectsPage() {
                   <Image src={project.image} alt={project.title} fill className="object-cover" priority />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {project.tech.map((tech) => (
+                  {project.tech?.map((tech) => (
                     <span key={tech} className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
                       {tech}
                     </span>

@@ -93,7 +93,7 @@ const QuartechComponent: React.FC = () => {
                     <p className="text-sm">{contract.description}</p>
                   </div>
 
-                  <Accordion type="single" collapsible className="mt-6">
+                  <Accordion type="single" collapsible className="mt-6" defaultValue="details">
                     <AccordionItem value="details" className="border-b-0">
                       <AccordionTrigger className="rounded-md py-4 px-2 text-base font-semibold transition-colors hover:bg-muted/50 hover:text-primary [&[data-state=open]>svg]:rotate-180">
                         Project Details
