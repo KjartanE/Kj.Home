@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import PenroseBackground from "@/components/penrose/PenroseBackground";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 const excludedPaths = [
   "/projects/chladni",
@@ -14,7 +14,11 @@ const excludedPaths = [
 
 function BackgroundLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const showBackground = !excludedPaths.some(path => pathname.startsWith(path));
+  
+  // Memoize the showBackground calculation
+  const showBackground = useMemo(() => {
+    return !excludedPaths.some(path => pathname.startsWith(path));
+  }, [pathname]);
 
   return (
     <>
