@@ -4,12 +4,9 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   typescript: {
-    ignoreBuildErrors: true // Temporarily ignore TypeScript errors during build
+    ignoreBuildErrors: true
   },
-  output: "standalone",
-  experimental: {
-    serverActions: true
-  }
+  output: "standalone"
 };
 
 export default nextConfig;
