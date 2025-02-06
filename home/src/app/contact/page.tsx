@@ -30,8 +30,19 @@ export default function ContactPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // Here you would typically send the form data to your backend
-      console.log(values);
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ...values, timestamp: new Date().toISOString() })
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send message");
+      }
+
       toast.success("Message sent successfully!");
       form.reset();
     } catch (error: any) {
