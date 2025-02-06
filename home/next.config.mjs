@@ -1,3 +1,12 @@
+import createMDX from '@next/mdx'
+
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+  },
+})
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -6,7 +15,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true
   },
-  output: "standalone"
+  output: "standalone",
+  pageExtensions: ['js', 'jsx', 'mdx', 'ts', 'tsx']
 };
 
-export default nextConfig;
+export default withMDX(nextConfig);
