@@ -1,7 +1,7 @@
 import PenroseBackground from "@/components/penrose/PenroseBackground";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
+// main page
 export default function Home() {
   return (
     <>
