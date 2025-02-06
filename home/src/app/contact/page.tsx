@@ -8,27 +8,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  subject: z.string().min(5, "Subject must be at least 5 characters"),
   message: z.string().min(10, "Message must be at least 10 characters")
 });
 
 export default function ContactPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
-      subject: "",
       message: ""
     }
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -37,17 +40,56 @@ export default function ContactPage() {
         },
         body: JSON.stringify({ ...values, timestamp: new Date().toISOString() })
       });
-      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to send message");
+      // Handle common HTTP errors with friendly messages
+      if (response.status === 404) {
+        throw new Error("Contact form service is temporarily unavailable. Please try again later.");
       }
 
-      toast.success("Message sent successfully!");
+      if (response.status === 429) {
+        throw new Error("Too many requests. Please wait a moment before trying again.");
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        // Handle non-JSON responses with a user-friendly message
+        if (!response.ok) {
+          throw new Error(
+            response.status === 500
+              ? "Server error. Please try again later."
+              : "Unable to send message. Please try again."
+          );
+        }
+        throw new Error("Unable to process server response. Please try again.");
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || 
+          "Unable to send message. Please check your input and try again."
+        );
+      }
+
+      toast({
+        title: "Message Sent",
+        description: "Thanks for reaching out! I'll get back to you soon.",
+        variant: "default",
+      });
       form.reset();
     } catch (error: any) {
-      toast.error("Failed to send message. Please try again.");
-      console.error(error);
+      // Log the full error for debugging
+      console.error("Contact form error:", error);
+      
+      // Show a user-friendly error message
+      toast({
+        title: "Unable to Send",
+        description: error.message || "Failed to send message. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -87,19 +129,7 @@ export default function ContactPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="subject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Subject</FormLabel>
-                    <FormControl>
-                      <Input placeholder="What's this about?" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
               <FormField
                 control={form.control}
                 name="message"
@@ -113,8 +143,15 @@ export default function ContactPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Send Message
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Message"
+                )}
               </Button>
             </form>
           </Form>

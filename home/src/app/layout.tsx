@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "../components/providers/theme-provider";
 import { Header } from "@/components/layout/header";
 import BackgroundLayout from "@/components/layouts/BackgroundLayout";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "kj.home",
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main className="flex-1">{children}</main>
           </BackgroundLayout>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );
