@@ -12,6 +12,8 @@ interface SpirographParams {
   d: number;
   speed: number;
   b: number;
+  thirdCircle: boolean;
+  thirdRadius: number;
 }
 
 interface SpirographSceneProps {
@@ -98,7 +100,7 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
     let currentPoint = 0;
     const basePointsPerFrame = 2;
     
-            const animate = () => {
+    const animate = () => {
       if (!isPageVisible) {
         animationFrameRef.current = requestAnimationFrame(animate);
         return;
@@ -110,13 +112,25 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
       for (let i = 0; i < pointsThisFrame && currentPoint < totalPoints; i++) {
         const t = (currentPoint / totalPoints) * Math.PI * 2 * revolutions;
         
-        // Updated calculations for better closure
         const k = params.r / params.R;
-        const l = params.d / params.r; // Changed to use r instead of R for better scaling
+        const l = params.d / params.r;
         
-        const x = params.R * ((1 - k) * Math.cos(t) + l * k * Math.cos((1 - k) * t / k));
-        const y = params.R * ((1 - k) * Math.sin(t) - l * k * Math.sin((1 - k) * t / k));
-        const z = Math.sin(t) * params.b; // Use the same t value without k multiplier
+        let x, y;
+        if (params.thirdCircle) {
+          const innerT = t * 2;
+          const innerRadius = params.r * params.thirdRadius;
+          
+          const secondX = params.R * ((1 - k) * Math.cos(t) + l * k * Math.cos((1 - k) * t / k));
+          const secondY = params.R * ((1 - k) * Math.sin(t) - l * k * Math.sin((1 - k) * t / k));
+          
+          x = secondX + innerRadius * Math.cos(innerT);
+          y = secondY + innerRadius * Math.sin(innerT);
+        } else {
+          x = params.R * ((1 - k) * Math.cos(t) + l * k * Math.cos((1 - k) * t / k));
+          y = params.R * ((1 - k) * Math.sin(t) - l * k * Math.sin((1 - k) * t / k));
+        }
+        
+        const z = Math.sin(t) * params.b;
 
         const idx = currentPoint * 3;
         positions[idx] = x;

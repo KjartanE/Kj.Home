@@ -51,6 +51,9 @@ export function NavMenu() {
               <ListItem href="/projects/solar" title="Solar">
                 Solar System.
               </ListItem>
+              <ListItem href="/projects/spirograph" title="Spirograph">
+                Spirograph.
+              </ListItem>
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>

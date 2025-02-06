@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { DndContext, useDraggable } from "@dnd-kit/core";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useHasMounted } from "@/hooks/useHasMounted";
+import { Switch } from "@/components/ui/switch";
 
 interface ControlsProps {
   onRChange: (value: number) => void;
@@ -14,6 +15,8 @@ interface ControlsProps {
   onDChange: (value: number) => void;
   onSpeedChange: (value: number) => void;
   onBChange: (value: number) => void;
+  onThirdCircleToggle: (value: boolean) => void;
+  onThirdRadiusChange: (value: number) => void;
   onRender: () => void;
   initialValues: {
     R: number;
@@ -21,6 +24,8 @@ interface ControlsProps {
     d: number;
     speed: number;
     b: number;
+    thirdCircle: boolean;
+    thirdRadius: number;
   };
 }
 
@@ -75,6 +80,8 @@ export function Controls({
   onDChange,
   onSpeedChange,
   onBChange,
+  onThirdCircleToggle,
+  onThirdRadiusChange,
   onRender,
   initialValues,
 }: ControlsProps) {
@@ -105,7 +112,7 @@ export function Controls({
                 <Label>Outer Circle (R): {values.R}</Label>
                 <Slider
                   value={[values.R]}
-                  min={1}
+                  min={Math.max(1, values.r)}
                   max={10}
                   step={1}
                   onValueChange={([value]) => {
@@ -119,7 +126,7 @@ export function Controls({
                 <Slider
                   value={[values.r]}
                   min={1}
-                  max={10}
+                  max={values.R}
                   step={1}
                   onValueChange={([value]) => {
                     setValues((prev) => ({ ...prev, r: value }));
@@ -145,7 +152,7 @@ export function Controls({
                 <Slider
                   min={0}
                   max={10}
-                  step={0.1}
+                  step={0.5}
                   value={[values.b]}
                   onValueChange={([value]) => {
                     setValues((prev) => ({ ...prev, b: value }));
@@ -165,6 +172,33 @@ export function Controls({
                     onSpeedChange(value);
                   }}
                 />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Third Circle</Label>
+                  <Switch
+                    checked={values.thirdCircle}
+                    onCheckedChange={(checked) => {
+                      setValues((prev) => ({ ...prev, thirdCircle: checked }));
+                      onThirdCircleToggle(checked);
+                    }}
+                  />
+                </div>
+                {values.thirdCircle && (
+                  <div className="space-y-2 mt-2">
+                    <Label>Third Circle Radius: {values.thirdRadius}</Label>
+                    <Slider
+                      value={[values.thirdRadius]}
+                      min={0}
+                      max={values.r / values.R * 2}
+                      step={0.2}
+                      onValueChange={([value]) => {
+                        setValues((prev) => ({ ...prev, thirdRadius: value }));
+                        onThirdRadiusChange(value);
+                      }}
+                    />
+                  </div>
+                )}
               </div>
               <Button 
                 className="w-full" 
