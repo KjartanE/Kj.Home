@@ -45,6 +45,13 @@ const projects = [
     link: "/projects/spirograph",
     tech: ["Three.js", "React", "TypeScript"]
   },
+  {
+    title: "Mandelbrot Set",
+    description: "Interactive Mandelbrot set visualization",
+    image: "/projects/mandelbrot-preview.png",
+    link: "/projects/mandelbrot",
+    tech: ["Three.js", "WebGL", "TypeScript"]
+  }
 ];
 
 export default function ProjectsPage() {
