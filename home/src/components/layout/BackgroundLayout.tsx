@@ -9,12 +9,14 @@ const excludedPaths = [
   "/projects/penrose",
   "/projects/cube",
   "/projects/pendulum",
-  "/projects/solar"
+  "/projects/solar",
+  "/projects/mandelbrot",
+  "/projects/spirograph"
 ];
 
 function BackgroundLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const showBackground = !excludedPaths.some(path => pathname.startsWith(path));
+  const showBackground = !excludedPaths.some((path) => pathname.startsWith(path));
 
   return (
     <>
@@ -24,4 +26,4 @@ function BackgroundLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default memo(BackgroundLayout); 
+export default memo(BackgroundLayout);
