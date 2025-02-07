@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useTheme } from "next-themes";
+import { MandelbrotControls } from "./MandelbrotControls";
 
 const mandelbrotVertexShader = `
   varying vec2 vUv;
@@ -71,8 +72,6 @@ const mandelbrotFragmentShader = `
 export default function MandelbrotBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
-  const isDraggingRef = useRef(false);
-  const lastMousePosRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -109,66 +108,9 @@ export default function MandelbrotBackground() {
     const plane = new THREE.Mesh(geometry, material);
     scene.add(plane);
 
-    let currentZoom = 1.0;
-
-    const handleMouseDown = (event: MouseEvent) => {
-      isDraggingRef.current = true;
-      lastMousePosRef.current = {
-        x: event.clientX,
-        y: event.clientY
-      };
-    };
-
-    const handleMouseMove = (event: MouseEvent) => {
-      if (!isDraggingRef.current) return;
-
-      const dx = event.clientX - lastMousePosRef.current.x;
-      const dy = event.clientY - lastMousePosRef.current.y;
-
-      // Convert screen pixels to Mandelbrot coordinate space
-      const scaleFactor = 2.0 / (currentZoom * window.innerWidth);
-      const moveX = -dx * scaleFactor;
-      const moveY = dy * scaleFactor;
-
-      material.uniforms.center.value.x += moveX;
-      material.uniforms.center.value.y += moveY;
-
-      lastMousePosRef.current = {
-        x: event.clientX,
-        y: event.clientY
-      };
-    };
-
-    const handleMouseUp = () => {
-      isDraggingRef.current = false;
-    };
-
-    const handleWheel = (event: WheelEvent) => {
-      event.preventDefault();
-      
-      const rect = container.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      
-      const mandelbrotX = (x * 2.0) / currentZoom + material.uniforms.center.value.x;
-      const mandelbrotY = (y * 2.0 / aspect) / currentZoom + material.uniforms.center.value.y;
-      
-      const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
-      const newZoom = currentZoom * zoomFactor;
-      
-      const newCenterX = mandelbrotX - (x * 2.0) / newZoom;
-      const newCenterY = mandelbrotY - (y * 2.0 / aspect) / newZoom;
-      
-      currentZoom = newZoom;
-      material.uniforms.zoom.value = currentZoom;
-      material.uniforms.center.value.set(newCenterX, newCenterY);
-    };
-
-    renderer.domElement.addEventListener("wheel", handleWheel);
-    renderer.domElement.addEventListener("mousedown", handleMouseDown);
-    renderer.domElement.addEventListener("mousemove", handleMouseMove);
-    renderer.domElement.addEventListener("mouseup", handleMouseUp);
-    renderer.domElement.addEventListener("mouseleave", handleMouseUp);
+    // Initialize controls
+    const controls = new MandelbrotControls(material, renderer.domElement, aspect);
+    controls.init();
 
     const animate = () => {
       requestAnimationFrame(animate);
@@ -189,7 +131,6 @@ export default function MandelbrotBackground() {
 
       renderer.setSize(width, height);
 
-      // Update plane geometry to match new aspect ratio
       plane.geometry.dispose();
       plane.geometry = new THREE.PlaneGeometry(2, 2/newAspect);
     };
@@ -199,11 +140,7 @@ export default function MandelbrotBackground() {
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      renderer.domElement.removeEventListener("wheel", handleWheel);
-      renderer.domElement.removeEventListener("mousedown", handleMouseDown);
-      renderer.domElement.removeEventListener("mousemove", handleMouseMove);
-      renderer.domElement.removeEventListener("mouseup", handleMouseUp);
-      renderer.domElement.removeEventListener("mouseleave", handleMouseUp);
+      controls.cleanup();
       geometry.dispose();
       material.dispose();
       renderer.dispose();
