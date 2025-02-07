@@ -135,9 +135,9 @@ export default function MandelbrotBackground() {
         zoom: { value: 1.0 },
         center: { value: new THREE.Vector2(0.0, 0.0) },
         screenSize: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-        maxIterations: { value: 1000000.0 },
-        iterationScale: { value: 1000000.0 },
-        pixelSizeThreshold: { value: 0.0001 }
+        maxIterations: { value: 1e10000000 },
+        iterationScale: { value: 1e10000000 },
+        pixelSizeThreshold: { value: 1e-10000000 }
       },
       vertexShader: mandelbrotVertexShader,
       fragmentShader: mandelbrotFragmentShader
