@@ -73,8 +73,9 @@ export class MandelbrotControls {
     const mandelbrotX = (x * 2.0) / this.currentZoom + this.material.uniforms.center.value.x;
     const mandelbrotY = (y * 2.0 / this.aspect) / this.currentZoom + this.material.uniforms.center.value.y;
     
-    // Dynamic zoom factor that increases with zoom level
-    const baseZoomFactor = 0.15 * Math.log10(this.currentZoom + 1) + 0.1;
+    // Replace the baseZoomFactor calculation with a constant value
+    const baseZoomFactor = 0.15; // Constant zoom factor
+
     const zoomFactor = event.deltaY > 0 
       ? 1.0 / (1.0 + baseZoomFactor)
       : 1.0 + baseZoomFactor;
