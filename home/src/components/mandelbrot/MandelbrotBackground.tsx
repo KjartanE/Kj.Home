@@ -14,9 +14,14 @@ const mandelbrotVertexShader = `
 `;
 
 const mandelbrotFragmentShader = `
+  #ifdef GL_FRAGMENT_PRECISION_HIGH
+    precision highp float;
+  #endif
+
   varying vec2 vUv;
   uniform float zoom;
   uniform vec2 center;
+  uniform vec2 screenSize;
   
   vec3 hsv2rgb(vec3 c) {
     vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -27,15 +32,14 @@ const mandelbrotFragmentShader = `
   vec2 squareComplex(vec2 z) {
     return vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y);
   }
-  
-  void main() {
-    vec2 c = (vUv * 4.0 - vec2(2.0)) / zoom + center;
+
+  vec3 mandelbrot(vec2 c, float maxIterations) {
     vec2 z = vec2(0.0);
-    
     float iterations = 0.0;
-    const float maxIterations = 200.0;
     
-    for(float i = 0.0; i < maxIterations; i++) {
+    for(float i = 0.0; i < 2000.0; i++) {
+      if(i >= maxIterations) break;
+      
       z = squareComplex(z) + c;
       if(length(z) > 2.0) {
         iterations = i;
@@ -44,20 +48,33 @@ const mandelbrotFragmentShader = `
       iterations = maxIterations;
     }
     
+    return vec3(iterations, z);
+  }
+  
+  void main() {
+    // Calculate pixel size in Mandelbrot space
+    float pixelSize = 4.0 / (zoom * screenSize.x);
+    
+    // Adjust detail level based on zoom
+    float maxIterations = min(2000.0, 200.0 * log(zoom + 1.0));
+    
+    // Calculate Mandelbrot coordinates with higher precision
+    vec2 c = (vUv * 4.0 - vec2(2.0)) / zoom + center;
+    
+    vec3 result = mandelbrot(c, maxIterations);
+    float iterations = result.x;
+    vec2 z = result.yz;
+    
     if (iterations == maxIterations) {
-      // Deep indigo for the main set
       gl_FragColor = vec4(0.01, 0.0, 0.05, 1.0);
     } else {
       float smoothed = iterations + 1.0 - log(log(length(z))) / log(2.0);
       
-      // Create an indigo to yellow gradient
-      float baseHue = 0.68; // indigo base
-      float hue = baseHue + smoothed * 0.0005; // Smaller variation for more consistent color
+      float baseHue = 0.68;
+      float hue = baseHue + smoothed * 0.0005;
       float saturation = 0.98;
-      float value = 0.3 + sin(smoothed * 0.05) * 0.1; // Gentler brightness variation
-      //increase purple and yellow
+      float value = 0.3 + sin(smoothed * 0.05) * 0.1;
       
-      // Subtle color bands
       if (mod(smoothed, 12.0) < 6.0) {
         value *= 0.85;
         saturation *= 0.99;
@@ -99,7 +116,8 @@ export default function MandelbrotBackground() {
     const material = new THREE.ShaderMaterial({
       uniforms: {
         zoom: { value: 1.0 },
-        center: { value: new THREE.Vector2(0.0, 0.0) }
+        center: { value: new THREE.Vector2(0.0, 0.0) },
+        screenSize: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
       },
       vertexShader: mandelbrotVertexShader,
       fragmentShader: mandelbrotFragmentShader
@@ -130,6 +148,7 @@ export default function MandelbrotBackground() {
       camera.updateProjectionMatrix();
 
       renderer.setSize(width, height);
+      material.uniforms.screenSize.value.set(width, height);
 
       plane.geometry.dispose();
       plane.geometry = new THREE.PlaneGeometry(2, 2/newAspect);

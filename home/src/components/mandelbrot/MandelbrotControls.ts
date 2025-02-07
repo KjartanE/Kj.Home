@@ -1,73 +1,66 @@
 import * as THREE from "three";
 
 export class MandelbrotControls {
-  private isDragging: boolean;
-  private lastMousePos: { x: number; y: number };
   private currentZoom: number;
+  private targetZoom: number;
+  private targetCenter: THREE.Vector2;
   private material: THREE.ShaderMaterial;
   private container: HTMLElement;
   private aspect: number;
+  private animationFrameId: number | null;
+  private isAnimating: boolean;
 
   constructor(material: THREE.ShaderMaterial, container: HTMLElement, aspect: number) {
-    this.isDragging = false;
-    this.lastMousePos = { x: 0, y: 0 };
     this.currentZoom = 1.0;
+    this.targetZoom = 1.0;
+    this.targetCenter = new THREE.Vector2(0.0, 0.0);
     this.material = material;
     this.container = container;
     this.aspect = aspect;
+    this.animationFrameId = null;
+    this.isAnimating = false;
 
-    this.handleMouseDown = this.handleMouseDown.bind(this);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseUp = this.handleMouseUp.bind(this);
     this.handleWheel = this.handleWheel.bind(this);
+    this.animate = this.animate.bind(this);
+  }
+
+  private animate() {
+    if (!this.isAnimating) {
+      this.animationFrameId = null;
+      return;
+    }
+
+    const zoomDiff = this.targetZoom - this.currentZoom;
+    const centerDiff = new THREE.Vector2().subVectors(this.targetCenter, this.material.uniforms.center.value);
+
+    // Smooth interpolation factors
+    const zoomFactor = 0.15;
+    const centerFactor = 0.15;
+
+    // Update current values with smooth interpolation
+    if (Math.abs(zoomDiff) > 1e-10 || centerDiff.length() > 1e-10) {
+      this.currentZoom += zoomDiff * zoomFactor;
+      this.material.uniforms.zoom.value = this.currentZoom;
+      
+      this.material.uniforms.center.value.add(centerDiff.multiplyScalar(centerFactor));
+      
+      this.animationFrameId = requestAnimationFrame(this.animate);
+    } else {
+      this.isAnimating = false;
+      this.animationFrameId = null;
+    }
   }
 
   init() {
     this.container.addEventListener("wheel", this.handleWheel);
-    this.container.addEventListener("mousedown", this.handleMouseDown);
-    this.container.addEventListener("mousemove", this.handleMouseMove);
-    this.container.addEventListener("mouseup", this.handleMouseUp);
-    this.container.addEventListener("mouseleave", this.handleMouseUp);
   }
 
   cleanup() {
     this.container.removeEventListener("wheel", this.handleWheel);
-    this.container.removeEventListener("mousedown", this.handleMouseDown);
-    this.container.removeEventListener("mousemove", this.handleMouseMove);
-    this.container.removeEventListener("mouseup", this.handleMouseUp);
-    this.container.removeEventListener("mouseleave", this.handleMouseUp);
-  }
-
-  private handleMouseDown(event: MouseEvent) {
-    this.isDragging = true;
-    this.lastMousePos = {
-      x: event.clientX,
-      y: event.clientY
-    };
-  }
-
-  private handleMouseMove(event: MouseEvent) {
-    if (!this.isDragging) return;
-
-    const dx = event.clientX - this.lastMousePos.x;
-    const dy = event.clientY - this.lastMousePos.y;
-
-    // Convert screen pixels to Mandelbrot coordinate space
-    const scaleFactor = 2.0 / (this.currentZoom * window.innerWidth);
-    const moveX = -dx * scaleFactor;
-    const moveY = dy * scaleFactor;
-
-    this.material.uniforms.center.value.x += moveX;
-    this.material.uniforms.center.value.y += moveY;
-
-    this.lastMousePos = {
-      x: event.clientX,
-      y: event.clientY
-    };
-  }
-
-  private handleMouseUp() {
-    this.isDragging = false;
+    
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
   }
 
   private handleWheel(event: WheelEvent) {
@@ -80,14 +73,26 @@ export class MandelbrotControls {
     const mandelbrotX = (x * 2.0) / this.currentZoom + this.material.uniforms.center.value.x;
     const mandelbrotY = (y * 2.0 / this.aspect) / this.currentZoom + this.material.uniforms.center.value.y;
     
-    const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
+    // Dynamic zoom factor that increases with zoom level
+    const baseZoomFactor = 0.15 * Math.log10(this.currentZoom + 1) + 0.1;
+    const zoomFactor = event.deltaY > 0 
+      ? 1.0 / (1.0 + baseZoomFactor)
+      : 1.0 + baseZoomFactor;
+    
     const newZoom = this.currentZoom * zoomFactor;
     
-    const newCenterX = mandelbrotX - (x * 2.0) / newZoom;
-    const newCenterY = mandelbrotY - (y * 2.0 / this.aspect) / newZoom;
-    
-    this.currentZoom = newZoom;
-    this.material.uniforms.zoom.value = this.currentZoom;
-    this.material.uniforms.center.value.set(newCenterX, newCenterY);
+    // Increased zoom range
+    if (newZoom >= 1e-15 && newZoom <= 1e15) {
+      const newCenterX = mandelbrotX - (x * 2.0) / newZoom;
+      const newCenterY = mandelbrotY - (y * 2.0 / this.aspect) / newZoom;
+      
+      this.targetZoom = newZoom;
+      this.targetCenter.set(newCenterX, newCenterY);
+      
+      if (!this.isAnimating) {
+        this.isAnimating = true;
+        this.animationFrameId = requestAnimationFrame(this.animate);
+      }
+    }
   }
 } 
