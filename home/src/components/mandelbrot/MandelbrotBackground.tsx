@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { useTheme } from "next-themes";
 import { MandelbrotControls } from "./MandelbrotControls";
+import { ZoomIndicator } from "./ZoomIndicator";
 
 const mandelbrotVertexShader = `
   varying vec2 vUv;
@@ -15,7 +16,9 @@ const mandelbrotVertexShader = `
 
 const mandelbrotFragmentShader = `
   #ifdef GL_FRAGMENT_PRECISION_HIGH
-    precision highp float;
+  precision highp float;
+  #else
+  precision mediump float;
   #endif
 
   varying vec2 vUv;
@@ -25,6 +28,9 @@ const mandelbrotFragmentShader = `
   uniform float maxIterations;
   uniform float iterationScale;
   
+  const float EPSILON = 1e-10;
+  const float MAX_VALUE = 1e10;
+
   vec3 hsv2rgb(vec3 c) {
     vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
@@ -50,7 +56,14 @@ const mandelbrotFragmentShader = `
       if(i >= maxIterations) break;
       
       z = squareComplex(z) + c;
-      if(dot(z, z) > 4.0) {  // Using dot product instead of length for better performance
+      
+      // Enhanced escape conditions
+      if(dot(z, z) > MAX_VALUE || dot(z, z) < EPSILON) {
+        iterations = i;
+        break;
+      }
+      
+      if(dot(z, z) > 4.0) {
         iterations = i;
         break;
       }
@@ -79,7 +92,6 @@ const mandelbrotFragmentShader = `
     float pixelSize = 4.0 / (zoom * screenSize.x);
     vec2 c = (vUv * 4.0 - vec2(2.0)) / zoom + center;
     
-    // Dynamic iteration calculation with a lower base
     float dynamicIterations = min(maxIterations, iterationScale * (log(zoom + 1.0) + 1.0));
     
     vec3 result = mandelbrot(c, dynamicIterations);
@@ -110,6 +122,7 @@ const mandelbrotFragmentShader = `
 export default function MandelbrotBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
+  const [currentZoom, setCurrentZoom] = useState(1.0);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -135,9 +148,9 @@ export default function MandelbrotBackground() {
         zoom: { value: 1.0 },
         center: { value: new THREE.Vector2(0.0, 0.0) },
         screenSize: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-        maxIterations: { value: 1e10000000 },
-        iterationScale: { value: 1e10000000 },
-        pixelSizeThreshold: { value: 1e-10000000 }
+        maxIterations: { value: 2000.0 },
+        iterationScale: { value: 100.0 },
+        pixelSizeThreshold: { value: Number.EPSILON }
       },
       vertexShader: mandelbrotVertexShader,
       fragmentShader: mandelbrotFragmentShader
@@ -146,8 +159,11 @@ export default function MandelbrotBackground() {
     const plane = new THREE.Mesh(geometry, material);
     scene.add(plane);
 
-    // Initialize controls
+    // Initialize controls with zoom callback
     const controls = new MandelbrotControls(material, renderer.domElement, aspect);
+    controls.onZoomChange = (zoom: number) => {
+      setCurrentZoom(zoom);
+    };
     controls.init();
 
     const animate = () => {
@@ -189,5 +205,10 @@ export default function MandelbrotBackground() {
     };
   }, [theme.resolvedTheme]);
 
-  return <div ref={containerRef} className="fixed inset-0" />;
+  return (
+    <>
+      <div ref={containerRef} className="fixed inset-0" />
+      <ZoomIndicator zoom={currentZoom} />
+    </>
+  );
 }

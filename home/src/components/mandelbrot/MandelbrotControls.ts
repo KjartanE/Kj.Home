@@ -9,6 +9,7 @@ export class MandelbrotControls {
   private aspect: number;
   private animationFrameId: number | null;
   private isAnimating: boolean;
+  public onZoomChange?: (zoom: number) => void;
 
   constructor(material: THREE.ShaderMaterial, container: HTMLElement, aspect: number) {
     this.currentZoom = 1.0;
@@ -41,6 +42,7 @@ export class MandelbrotControls {
     if (Math.abs(zoomDiff) > 1e-10 || centerDiff.length() > 1e-10) {
       this.currentZoom += zoomDiff * zoomFactor;
       this.material.uniforms.zoom.value = this.currentZoom;
+      this.onZoomChange?.(this.currentZoom);
       
       this.material.uniforms.center.value.add(centerDiff.multiplyScalar(centerFactor));
       
@@ -83,7 +85,7 @@ export class MandelbrotControls {
     const newZoom = this.currentZoom * zoomFactor;
     
     // Increased zoom range
-    if (newZoom >= 1e-15 && newZoom <= 1e15) {
+    if (newZoom >= Number.EPSILON && newZoom <= 1e308) {  // Using JavaScript's maximum safe number
       const newCenterX = mandelbrotX - (x * 2.0) / newZoom;
       const newCenterY = mandelbrotY - (y * 2.0 / this.aspect) / newZoom;
       

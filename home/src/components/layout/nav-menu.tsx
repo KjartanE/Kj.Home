@@ -54,6 +54,9 @@ export function NavMenu() {
               <ListItem href="/projects/spirograph" title="Spirograph">
                 Spirograph.
               </ListItem>
+              <ListItem href="/projects/mandelbrot" title="Mandelbrot">
+                Mandelbrot Set.
+              </ListItem>
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
