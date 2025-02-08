@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { resume } from "@/constants/resume";
 import { getSkillsSection } from "./SkillsSection";
 
-const QuartechComponent: React.FC = () => {
+const QuartechComponent = () => {
   const renderListSection = (title: string, items: string[]) => (
     <div className="space-y-2">
       <h4 className="text-lg font-semibold text-primary">{title}</h4>
@@ -73,13 +73,12 @@ const QuartechComponent: React.FC = () => {
 
           <div className="space-y-6">
             <Tabs defaultValue={contracts[0].id}>
-              <TabsList className="flex justify-start space-x-4 border-b border-gray-700">
+              <TabsList className="flex w-full flex-wrap items-center justify-start gap-1 border-b border-gray-700 bg-muted/50 rounded-t-lg p-2">
                 {contracts.map((contract) => (
                   <TabsTrigger
                     key={contract.id}
                     value={contract.id}
-                    className="text-white hover:text-gray-400 transition-colors duration-300"
-                  >
+                    className="min-h-[2.5rem] px-4 text-foreground transition-colors duration-300 hover:text-muted-foreground text-sm sm:text-base data-[state=active]:border-b-2 data-[state=active]:border-primary">
                     {contract.label}
                   </TabsTrigger>
                 ))}
@@ -95,7 +94,7 @@ const QuartechComponent: React.FC = () => {
 
                   <Accordion type="single" collapsible className="mt-6" defaultValue="details">
                     <AccordionItem value="details" className="border-b-0">
-                      <AccordionTrigger className="rounded-md py-4 px-2 text-base font-semibold transition-colors hover:bg-muted/50 hover:text-primary [&[data-state=open]>svg]:rotate-180">
+                      <AccordionTrigger className="rounded-md px-2 py-4 text-base font-semibold transition-colors hover:bg-muted/50 hover:text-primary [&[data-state=open]>svg]:rotate-180">
                         Project Details
                       </AccordionTrigger>
                       <AccordionContent className="px-2">
@@ -149,4 +148,4 @@ const QuartechComponent: React.FC = () => {
   );
 };
 
-export default QuartechComponent;
+export default React.memo(QuartechComponent);

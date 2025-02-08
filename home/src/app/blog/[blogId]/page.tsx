@@ -34,10 +34,17 @@ export default async function BlogPage({ params }: { params: Params }) {
   const { frontmatter, content } = post;
 
   return (
-    <div className="container mx-auto mt-14 max-w-7xl py-8">
+    <div className="container mx-auto mt-14 max-w-7xl py-8 px-4">
       <div className="mx-auto max-w-3xl space-y-6">
         <div className="mb-8">
-          <p className="text-muted-foreground">{frontmatter.publishedAt}</p>
+          <p className="text-muted-foreground">
+            <Link
+              href="/blog"
+              className="mb-4 inline-flex items-center text-muted-foreground transition-colors hover:text-foreground">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              {frontmatter.publishedAt}
+            </Link>
+          </p>
           <h1 className="text-4xl font-bold tracking-tight">{frontmatter.title}</h1>
         </div>
 

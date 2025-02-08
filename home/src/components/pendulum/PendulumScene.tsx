@@ -317,9 +317,7 @@ class Pendulum {
     (this.arm2.material as THREE.LineBasicMaterial).color.setHex(themeColor);
 
     // Update hinge color (find the LineLoop in scene children)
-    const hinge = this.scene.children.find((child): child is THREE.LineLoop => 
-      child instanceof THREE.LineLoop
-    );
+    const hinge = this.scene.children.find((child): child is THREE.LineLoop => child instanceof THREE.LineLoop);
     if (hinge) {
       (hinge.material as THREE.LineBasicMaterial).color.setHex(themeColor);
     }
@@ -335,6 +333,8 @@ class Pendulum {
 const PendulumScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const pendulumRef = useRef<Pendulum | null>(null);
+  const animationFrameId = useRef<number>(null);
+
   const theme = useTheme();
 
   const initialControlValues = {
@@ -348,9 +348,9 @@ const PendulumScene: React.FC = () => {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    
+
     const container = containerRef.current; // Store ref value
-    
+
     let isPageVisible = true;
     let lastTime: number | null = null;
 
@@ -401,11 +401,10 @@ const PendulumScene: React.FC = () => {
     };
     window.addEventListener("resize", handleResize);
 
-    // Animation loop
     const animate = (time: number) => {
       if (!isPageVisible) {
         lastTime = null;
-        requestAnimationFrame(animate);
+        animationFrameId.current = requestAnimationFrame(animate);
         return;
       }
 
@@ -414,7 +413,7 @@ const PendulumScene: React.FC = () => {
 
       pendulum.update(deltaTime);
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+      animationFrameId.current = requestAnimationFrame(animate);
     };
 
     // Event listeners
