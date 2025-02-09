@@ -78,7 +78,7 @@ function DraggableCard({
 export function Controls({ onValueChange, initialValues }: ControlsProps) {
   const hasMounted = useHasMounted();
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const [isExpanded, setIsExpanded] = useState(!isMobile);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 80 });
   const [sliderValues, setSliderValues] = useState(initialValues);
 

@@ -8,6 +8,7 @@ import { DndContext, useDraggable } from "@dnd-kit/core";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useHasMounted } from "@/hooks/useHasMounted";
 import { Switch } from "@/components/ui/switch";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface ControlsProps {
   onRChange: (value: number) => void;
@@ -33,19 +34,28 @@ function DraggableCard({
   children,
   position,
   isExpanded,
-  setIsExpanded
+  setIsExpanded,
+  isMobile
 }: {
   children: React.ReactNode;
   position: { x: number; y: number };
   isExpanded: boolean;
   setIsExpanded: (value: boolean) => void;
+  isMobile: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "spirograph-controls"
   });
 
-  const style = {
-    position: 'fixed' as const,
+  const style: React.CSSProperties = isMobile ? {
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 40,
+    opacity: 0.8,
+  } : {
+    position: 'fixed',
     top: 0,
     left: 0,
     zIndex: 40,
@@ -54,11 +64,10 @@ function DraggableCard({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className="w-80">
+      <Card className={`${isMobile ? "w-full rounded-b-none backdrop-blur-sm bg-background/80" : "w-80"}`}>
         <div
-          {...attributes}
-          {...listeners}
-          className={`flex h-16 cursor-move items-center justify-between px-3 ${isExpanded ? 'border-b' : ''}`}>
+          {...(isMobile ? {} : { ...attributes, ...listeners })}
+          className={`flex h-16 ${!isMobile && "cursor-move"} items-center justify-between px-3 ${isExpanded ? 'border-b' : ''}`}>
           <h3 className="font-semibold">Spirograph Controls</h3>
           <Button
             variant="ghost"
@@ -86,7 +95,8 @@ export function Controls({
   initialValues,
 }: ControlsProps) {
   const hasMounted = useHasMounted();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const [isExpanded, setIsExpanded] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 80 });
   const [values, setValues] = useState(initialValues);
 
@@ -104,9 +114,14 @@ export function Controls({
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <DraggableCard position={position} isExpanded={isExpanded} setIsExpanded={setIsExpanded}>
+      <DraggableCard 
+        position={position} 
+        isExpanded={isExpanded} 
+        setIsExpanded={setIsExpanded}
+        isMobile={isMobile}
+      >
         {isExpanded && (
-          <CardContent className="p-4">
+          <CardContent className={`p-4 ${isMobile ? "max-h-[70vh] overflow-y-auto" : ""}`}>
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label>Outer Circle (R): {values.R}</Label>

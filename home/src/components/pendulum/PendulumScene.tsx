@@ -417,7 +417,7 @@ const PendulumScene: React.FC = () => {
     };
 
     // Event listeners
-    const handleMouseMove = (event: MouseEvent) => {
+    const handlePointerMove = (event: PointerEvent) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const x = event.clientX - (rect.left + rect.width / 2);
@@ -425,7 +425,7 @@ const PendulumScene: React.FC = () => {
       pendulum.setMousePosition(x, y);
     };
 
-    const handleMouseDown = (event: MouseEvent) => {
+    const handlePointerDown = (event: PointerEvent) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const x = event.clientX - (rect.left + rect.width / 2);
@@ -434,13 +434,14 @@ const PendulumScene: React.FC = () => {
       pendulum.setGrabbed(true);
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       pendulum.setGrabbed(false);
     };
 
-    renderer.domElement.addEventListener("mousemove", handleMouseMove);
-    renderer.domElement.addEventListener("mousedown", handleMouseDown);
-    renderer.domElement.addEventListener("mouseup", handleMouseUp);
+    renderer.domElement.addEventListener("pointermove", handlePointerMove);
+    renderer.domElement.addEventListener("pointerdown", handlePointerDown);
+    renderer.domElement.addEventListener("pointerup", handlePointerUp);
+    renderer.domElement.addEventListener("pointerleave", handlePointerUp);
 
     // Visibility change handler
     const handleVisibilityChange = () => {
@@ -460,9 +461,10 @@ const PendulumScene: React.FC = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationId);
-      renderer.domElement.removeEventListener("mousemove", handleMouseMove);
-      renderer.domElement.removeEventListener("mousedown", handleMouseDown);
-      renderer.domElement.removeEventListener("mouseup", handleMouseUp);
+      renderer.domElement.removeEventListener("pointermove", handlePointerMove);
+      renderer.domElement.removeEventListener("pointerdown", handlePointerDown);
+      renderer.domElement.removeEventListener("pointerup", handlePointerUp);
+      renderer.domElement.removeEventListener("pointerleave", handlePointerUp);
 
       ThreeCleanup.disposeScene(scene);
       renderer.dispose();
