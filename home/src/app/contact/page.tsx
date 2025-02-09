@@ -56,6 +56,7 @@ export default function ContactPage() {
       } catch (parseError) {
         // Handle non-JSON responses with a user-friendly message
         if (!response.ok) {
+          console.error("Parse error:", parseError);
           throw new Error(
             response.status === 500
               ? "Server error. Please try again later."

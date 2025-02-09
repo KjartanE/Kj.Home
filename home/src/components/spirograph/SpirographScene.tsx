@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { useTheme } from "next-themes";
 import { ThreeCleanup } from "@/lib/three/cleanup";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface SpirographParams {
   R: number;
@@ -42,6 +43,7 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const theme = useTheme();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -54,18 +56,29 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
     scene.background = new THREE.Color(theme.resolvedTheme === "dark" ? "#09090b" : "#ffffff");
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(15, 15, 15);
+    if (isMobile) {
+      camera.position.set(25, 25, 25);
+    } else {
+      camera.position.set(15, 15, 15);
+    }
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: !isMobile,
+      powerPreference: "high-performance"
+    });
     rendererRef.current = renderer;
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+    controls.enableZoom = true;
+    controls.enablePan = !isMobile;
+    controls.maxDistance = isMobile ? 50 : 100;
+    controls.minDistance = 5;
 
     const gridHelper = new THREE.GridHelper(20, 20);
     const gridMaterial = gridHelper.material as THREE.Material;
@@ -187,7 +200,7 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
       sceneRef.current = null;
       rendererRef.current = null;
     };
-  }, [params, theme.resolvedTheme]);
+  }, [params, theme.resolvedTheme, isMobile]);
 
   return <div ref={containerRef} className="fixed inset-0" />;
 }

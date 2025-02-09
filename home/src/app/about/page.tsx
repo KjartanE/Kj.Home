@@ -9,10 +9,13 @@ import SkillsSection from "@/components/about/SkillsSection";
 
 export default function AboutPage() {
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 mt-14">
-      <div className="grid gap-6 md:grid-cols-[300px_1fr]">
+    <div className="container mx-auto mt-14 py-8">
+      {/*
+        Show for desktop and tablet
+      */}
+      <div className="hidden md:grid gap-6 md:grid-cols-[300px_1fr]">
         <div className="relative md:block">
-          <div className="sticky top-20 backface-visibility-hidden transform-gpu will-change-transform">
+          <div className="backface-visibility-hidden sticky top-20 transform-gpu will-change-transform">
             <PersonalStickyComponent personal={resume.personal} />
           </div>
         </div>
@@ -21,6 +24,16 @@ export default function AboutPage() {
           <QuartechComponent />
           <SkillsSection />
         </main>
+      </div>
+
+      {/*
+        Show for mobile
+      */}
+      <div className="space-y-4 px-4 md:hidden">
+        <IntroductionComponent />
+        <QuartechComponent />
+        <SkillsSection />
+        <PersonalStickyComponent personal={resume.personal} />
       </div>
     </div>
   );

@@ -98,4 +98,45 @@ export class MandelbrotControls {
       }
     }
   }
+
+  public zoomIn() {
+    const zoomFactor = 1.2;
+    this.targetZoom = this.currentZoom * zoomFactor;
+    this.startAnimation();
+  }
+
+  public zoomOut() {
+    const zoomFactor = 1.2;
+    this.targetZoom = this.currentZoom / zoomFactor;
+    this.startAnimation();
+  }
+
+  public move(direction: 'up' | 'down' | 'left' | 'right') {
+    const moveAmount = 0.5 / this.currentZoom;
+    const currentCenter = this.material.uniforms.center.value;
+    
+    switch (direction) {
+      case 'up':
+        this.targetCenter.set(currentCenter.x, currentCenter.y + moveAmount);
+        break;
+      case 'down':
+        this.targetCenter.set(currentCenter.x, currentCenter.y - moveAmount);
+        break;
+      case 'left':
+        this.targetCenter.set(currentCenter.x - moveAmount, currentCenter.y);
+        break;
+      case 'right':
+        this.targetCenter.set(currentCenter.x + moveAmount, currentCenter.y);
+        break;
+    }
+    
+    this.startAnimation();
+  }
+
+  private startAnimation() {
+    if (!this.isAnimating) {
+      this.isAnimating = true;
+      this.animationFrameId = requestAnimationFrame(this.animate);
+    }
+  }
 } 

@@ -317,9 +317,7 @@ class Pendulum {
     (this.arm2.material as THREE.LineBasicMaterial).color.setHex(themeColor);
 
     // Update hinge color (find the LineLoop in scene children)
-    const hinge = this.scene.children.find((child): child is THREE.LineLoop => 
-      child instanceof THREE.LineLoop
-    );
+    const hinge = this.scene.children.find((child): child is THREE.LineLoop => child instanceof THREE.LineLoop);
     if (hinge) {
       (hinge.material as THREE.LineBasicMaterial).color.setHex(themeColor);
     }
@@ -335,6 +333,8 @@ class Pendulum {
 const PendulumScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const pendulumRef = useRef<Pendulum | null>(null);
+  const animationFrameId = useRef<number>(null);
+
   const theme = useTheme();
 
   const initialControlValues = {
@@ -348,9 +348,9 @@ const PendulumScene: React.FC = () => {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    
+
     const container = containerRef.current; // Store ref value
-    
+
     let isPageVisible = true;
     let lastTime: number | null = null;
 
@@ -401,11 +401,10 @@ const PendulumScene: React.FC = () => {
     };
     window.addEventListener("resize", handleResize);
 
-    // Animation loop
     const animate = (time: number) => {
       if (!isPageVisible) {
         lastTime = null;
-        requestAnimationFrame(animate);
+        animationFrameId.current = requestAnimationFrame(animate);
         return;
       }
 
@@ -414,11 +413,11 @@ const PendulumScene: React.FC = () => {
 
       pendulum.update(deltaTime);
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+      animationFrameId.current = requestAnimationFrame(animate);
     };
 
     // Event listeners
-    const handleMouseMove = (event: MouseEvent) => {
+    const handlePointerMove = (event: PointerEvent) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const x = event.clientX - (rect.left + rect.width / 2);
@@ -426,7 +425,7 @@ const PendulumScene: React.FC = () => {
       pendulum.setMousePosition(x, y);
     };
 
-    const handleMouseDown = (event: MouseEvent) => {
+    const handlePointerDown = (event: PointerEvent) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const x = event.clientX - (rect.left + rect.width / 2);
@@ -435,13 +434,14 @@ const PendulumScene: React.FC = () => {
       pendulum.setGrabbed(true);
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       pendulum.setGrabbed(false);
     };
 
-    renderer.domElement.addEventListener("mousemove", handleMouseMove);
-    renderer.domElement.addEventListener("mousedown", handleMouseDown);
-    renderer.domElement.addEventListener("mouseup", handleMouseUp);
+    renderer.domElement.addEventListener("pointermove", handlePointerMove);
+    renderer.domElement.addEventListener("pointerdown", handlePointerDown);
+    renderer.domElement.addEventListener("pointerup", handlePointerUp);
+    renderer.domElement.addEventListener("pointerleave", handlePointerUp);
 
     // Visibility change handler
     const handleVisibilityChange = () => {
@@ -461,9 +461,10 @@ const PendulumScene: React.FC = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationId);
-      renderer.domElement.removeEventListener("mousemove", handleMouseMove);
-      renderer.domElement.removeEventListener("mousedown", handleMouseDown);
-      renderer.domElement.removeEventListener("mouseup", handleMouseUp);
+      renderer.domElement.removeEventListener("pointermove", handlePointerMove);
+      renderer.domElement.removeEventListener("pointerdown", handlePointerDown);
+      renderer.domElement.removeEventListener("pointerup", handlePointerUp);
+      renderer.domElement.removeEventListener("pointerleave", handlePointerUp);
 
       ThreeCleanup.disposeScene(scene);
       renderer.dispose();

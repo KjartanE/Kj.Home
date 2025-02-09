@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import * as THREE from "three";
-import { ThreeCleanup } from '@/lib/three/cleanup';
+import { ThreeCleanup } from "@/lib/three/cleanup";
 import CubeScene from "./main";
 import DotMatrix from "./dot_matrix";
 
@@ -19,10 +19,10 @@ const ThreeScene: React.FC = () => {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    
+
     const container = containerRef.current;
     const scene = new CubeScene(container.clientWidth, container.clientHeight);
-    
+
     container.appendChild(scene.renderer.domElement);
 
     scene.camera.position.set(512, 512, 512.1);
@@ -63,7 +63,7 @@ const ThreeScene: React.FC = () => {
 
     return () => {
       cancelAnimationFrame(animationId);
-      
+
       // Clean up Three.js resources
       if (dots) {
         dots.geometry.dispose();
@@ -72,15 +72,17 @@ const ThreeScene: React.FC = () => {
       ThreeCleanup.disposeScene(scene.scene);
       scene.renderer.dispose();
       controls.dispose();
-      
+
       window.removeEventListener("resize", handleResize);
       if (container.contains(scene.renderer.domElement)) {
         container.removeChild(scene.renderer.domElement);
       }
     };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <div ref={containerRef} className="w-full h-full" />;
+  return <div ref={containerRef} className="h-full w-full" />;
 };
 
 export default ThreeScene;
