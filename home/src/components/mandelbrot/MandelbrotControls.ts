@@ -9,8 +9,6 @@ export class MandelbrotControls {
   private aspect: number;
   private animationFrameId: number | null;
   private isAnimating: boolean;
-  private isTouching: boolean;
-  private lastTouchDistance: number;
   public onZoomChange?: (zoom: number) => void;
 
   constructor(material: THREE.ShaderMaterial, container: HTMLElement, aspect: number) {
@@ -22,72 +20,9 @@ export class MandelbrotControls {
     this.aspect = aspect;
     this.animationFrameId = null;
     this.isAnimating = false;
-    this.isTouching = false;
-    this.lastTouchDistance = 0;
 
     this.handleWheel = this.handleWheel.bind(this);
-    this.handleTouchStart = this.handleTouchStart.bind(this);
-    this.handleTouchMove = this.handleTouchMove.bind(this);
-    this.handleTouchEnd = this.handleTouchEnd.bind(this);
     this.animate = this.animate.bind(this);
-  }
-
-  private getTouchDistance(touches: TouchList): number {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-
-  private getTouchCenter(touches: TouchList): { x: number, y: number } {
-    const rect = this.container.getBoundingClientRect();
-    const centerX = (touches[0].clientX + touches[1].clientX) / 2;
-    const centerY = (touches[0].clientY + touches[1].clientY) / 2;
-    
-    const x = ((centerX - rect.left) / rect.width) * 2 - 1;
-    const y = -((centerY - rect.top) / rect.height) * 2 + 1;
-    
-    return { x, y };
-  }
-
-  private handleTouchStart(event: TouchEvent) {
-    if (event.touches.length === 2) {
-      event.preventDefault();
-      this.isTouching = true;
-      this.lastTouchDistance = this.getTouchDistance(event.touches);
-    }
-  }
-
-  private handleTouchMove(event: TouchEvent) {
-    if (!this.isTouching || event.touches.length !== 2) return;
-    event.preventDefault();
-
-    const newDistance = this.getTouchDistance(event.touches);
-    const touchCenter = this.getTouchCenter(event.touches);
-    
-    const zoomFactor = newDistance / this.lastTouchDistance;
-    this.lastTouchDistance = newDistance;
-
-    const mandelbrotX = (touchCenter.x * 2.0) / this.currentZoom + this.material.uniforms.center.value.x;
-    const mandelbrotY = (touchCenter.y * 2.0 / this.aspect) / this.currentZoom + this.material.uniforms.center.value.y;
-    
-    const newZoom = this.currentZoom * zoomFactor;
-    
-    if (newZoom >= Number.EPSILON && newZoom <= 1e308) {
-      const newCenterX = mandelbrotX - (touchCenter.x * 2.0) / newZoom;
-      const newCenterY = mandelbrotY - (touchCenter.y * 2.0 / this.aspect) / newZoom;
-      
-      this.targetZoom = newZoom;
-      this.targetCenter.set(newCenterX, newCenterY);
-      
-      if (!this.isAnimating) {
-        this.isAnimating = true;
-        this.animationFrameId = requestAnimationFrame(this.animate);
-      }
-    }
-  }
-
-  private handleTouchEnd() {
-    this.isTouching = false;
   }
 
   private animate() {
@@ -120,16 +55,10 @@ export class MandelbrotControls {
 
   init() {
     this.container.addEventListener("wheel", this.handleWheel);
-    this.container.addEventListener("touchstart", this.handleTouchStart, { passive: false });
-    this.container.addEventListener("touchmove", this.handleTouchMove, { passive: false });
-    this.container.addEventListener("touchend", this.handleTouchEnd);
   }
 
   cleanup() {
     this.container.removeEventListener("wheel", this.handleWheel);
-    this.container.removeEventListener("touchstart", this.handleTouchStart);
-    this.container.removeEventListener("touchmove", this.handleTouchMove);
-    this.container.removeEventListener("touchend", this.handleTouchEnd);
     
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
@@ -167,6 +96,47 @@ export class MandelbrotControls {
         this.isAnimating = true;
         this.animationFrameId = requestAnimationFrame(this.animate);
       }
+    }
+  }
+
+  public zoomIn() {
+    const zoomFactor = 1.2;
+    this.targetZoom = this.currentZoom * zoomFactor;
+    this.startAnimation();
+  }
+
+  public zoomOut() {
+    const zoomFactor = 1.2;
+    this.targetZoom = this.currentZoom / zoomFactor;
+    this.startAnimation();
+  }
+
+  public move(direction: 'up' | 'down' | 'left' | 'right') {
+    const moveAmount = 0.5 / this.currentZoom;
+    const currentCenter = this.material.uniforms.center.value;
+    
+    switch (direction) {
+      case 'up':
+        this.targetCenter.set(currentCenter.x, currentCenter.y + moveAmount);
+        break;
+      case 'down':
+        this.targetCenter.set(currentCenter.x, currentCenter.y - moveAmount);
+        break;
+      case 'left':
+        this.targetCenter.set(currentCenter.x - moveAmount, currentCenter.y);
+        break;
+      case 'right':
+        this.targetCenter.set(currentCenter.x + moveAmount, currentCenter.y);
+        break;
+    }
+    
+    this.startAnimation();
+  }
+
+  private startAnimation() {
+    if (!this.isAnimating) {
+      this.isAnimating = true;
+      this.animationFrameId = requestAnimationFrame(this.animate);
     }
   }
 } 

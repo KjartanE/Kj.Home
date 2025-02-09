@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { useTheme } from "next-themes";
 import { MandelbrotControls } from "./MandelbrotControls";
 import { ZoomIndicator } from "./ZoomIndicator";
+import { NavigationControls } from "./NavigationControls";
 
 const mandelbrotVertexShader = `
   varying vec2 vUv;
@@ -123,6 +124,7 @@ export default function MandelbrotBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
   const [currentZoom, setCurrentZoom] = useState(1.0);
+  const controlsRef = useRef<MandelbrotControls | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -161,6 +163,7 @@ export default function MandelbrotBackground() {
 
     // Initialize controls with zoom callback
     const controls = new MandelbrotControls(material, renderer.domElement, aspect);
+    controlsRef.current = controls;
     controls.onZoomChange = (zoom: number) => {
       setCurrentZoom(zoom);
     };
@@ -208,6 +211,11 @@ export default function MandelbrotBackground() {
   return (
     <>
       <div ref={containerRef} className="fixed inset-0" />
+      <NavigationControls
+        onZoomIn={() => controlsRef.current?.zoomIn()}
+        onZoomOut={() => controlsRef.current?.zoomOut()}
+        onMove={(direction) => controlsRef.current?.move(direction)}
+      />
       <ZoomIndicator zoom={currentZoom} />
     </>
   );
