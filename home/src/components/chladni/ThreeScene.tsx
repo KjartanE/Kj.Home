@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import * as THREE from "three";
 import { useTheme } from "next-themes";
-import { ThreeCleanup } from '@/lib/three/cleanup';
+import { ThreeCleanup } from "@/lib/three/cleanup";
 
 import ChladniHandler from "@/components/chladni/ChladniHandler";
 import { Scene } from "@/lib/three/scene";
@@ -13,6 +13,11 @@ const ThreeScene: React.FC = () => {
   const sceneRef = useRef<Scene | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const { theme, systemTheme } = useTheme();
+
+  const [color, setColor] = useState(
+    theme === "dark" || (theme === "system" && systemTheme === "dark") ? "#ffffff" : "#000000"
+  );
+
   const [uniforms, setUniforms] = useState({
     u_a: 100,
     u_b: 100,
@@ -20,19 +25,16 @@ const ThreeScene: React.FC = () => {
     u_m: 5,
     opacityOne: 1,
     opacityTwo: 1,
-    colorOne: new THREE.Color("#ffffff"),
-    colorTwo: new THREE.Color("#ffffff")
+    colorOne: new THREE.Color(color),
+    colorTwo: new THREE.Color(color)
   });
+
 
   const updateBackgroundColor = useCallback(() => {
     if (sceneRef.current) {
-      const isDark = 
-        theme === 'dark' || 
-        (theme === 'system' && systemTheme === 'dark');
-        
-      sceneRef.current.scene.background = new THREE.Color(
-        isDark ? '#09090b' : '#ffffff'
-      );
+      const isDark = theme === "dark" || (theme === "system" && systemTheme === "dark");
+      sceneRef.current.scene.background = new THREE.Color(isDark ? "#09090b" : "#ffffff");
+      setColor(isDark ? "#ffffff" : "#000000");
     }
   }, [theme, systemTheme]);
 
@@ -45,8 +47,8 @@ const ThreeScene: React.FC = () => {
     // Set fixed size for renderer
     scene.renderer.setSize(800, 800);
     container.appendChild(scene.renderer.domElement);
-    
-    const chladni = new ChladniHandler(4);
+
+    const chladni = new ChladniHandler(4, color);
     const plane = new THREE.Mesh(chladni.geometry, chladni.material);
 
     Object.entries(uniforms).forEach(([key, value]) => {
@@ -57,16 +59,16 @@ const ThreeScene: React.FC = () => {
 
     scene.scene.add(plane);
 
-    scene.camera = new THREE.OrthographicCamera(
-      -2, 2,
-      2, -2,
-      0.1,
-      1000
-    );
+    scene.camera = new THREE.OrthographicCamera(-2, 2, 2, -2, 0.1, 1000);
     scene.camera.position.z = 3;
 
     updateBackgroundColor();
 
+    //check if color needs to be updated
+    if (color !== uniforms.colorOne.getHexString()) {
+      chladni.material.uniforms.colorOne.value = new THREE.Color(color);
+      chladni.material.uniforms.colorTwo.value = new THREE.Color(color);
+    }
     let time = 0;
 
     function animate() {
@@ -95,7 +97,7 @@ const ThreeScene: React.FC = () => {
       }
       ThreeCleanup.disposeScene(scene.scene);
       scene.renderer.dispose();
-      
+
       window.removeEventListener("resize", handleResize);
       if (container.contains(scene.renderer.domElement)) {
         container.removeChild(scene.renderer.domElement);
@@ -103,7 +105,7 @@ const ThreeScene: React.FC = () => {
 
       sceneRef.current = null;
     };
-  }, [uniforms, updateBackgroundColor]);
+  }, [uniforms, updateBackgroundColor, color, theme, systemTheme]);
 
   const handleValueChange = (key: string, value: number | string) => {
     setUniforms((prev) => ({
@@ -117,7 +119,7 @@ const ThreeScene: React.FC = () => {
   };
 
   return (
-    <div ref={containerRef} className="w-full h-full">
+    <div ref={containerRef} className="h-full w-full">
       <Controls
         onValueChange={handleValueChange}
         initialValues={{
@@ -128,6 +130,7 @@ const ThreeScene: React.FC = () => {
           opacityOne: uniforms.opacityOne,
           opacityTwo: uniforms.opacityTwo
         }}
+        color={color}
       />
     </div>
   );

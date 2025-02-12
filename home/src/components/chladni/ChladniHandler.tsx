@@ -5,7 +5,7 @@ export default class ChladniHandler {
   public material: THREE.ShaderMaterial;
   public documentObjects: any[] = [];
 
-  constructor(size: number) {
+  constructor(size: number, color: string) {
     this.geometry = new THREE.PlaneGeometry(size, size);
     this.material = new THREE.ShaderMaterial({
       uniforms: {
@@ -19,8 +19,8 @@ export default class ChladniHandler {
         u_m: { value: 4 },
         u_a: { value: -5 },
         u_b: { value: 20 },
-        colorOne: { value: new THREE.Color(0xffffff) },
-        colorTwo: { value: new THREE.Color(0xffffff) },
+        colorOne: { value: new THREE.Color(color) },
+        colorTwo: { value: new THREE.Color(color) },
         opacityOne: { value: 1.0 },
         opacityTwo: { value: 1.0 }
       },
@@ -125,7 +125,7 @@ export default class ChladniHandler {
     const colorOnePicker = menu.appendChild(document.createElement("input"));
 
     colorOnePicker.type = "color";
-    colorOnePicker.value = "#ffffff";
+    colorOnePicker.value = this.material.uniforms.colorOne.value;
     const colorOneLabel = menu.appendChild(document.createElement("label"));
 
     colorOnePicker.addEventListener("input", () => {
@@ -138,7 +138,7 @@ export default class ChladniHandler {
     const colorTwoPicker = menu.appendChild(document.createElement("input"));
 
     colorTwoPicker.type = "color";
-    colorTwoPicker.value = "#ffffff";
+    colorTwoPicker.value = this.material.uniforms.colorTwo.value;
     const colorTwoLabel = menu.appendChild(document.createElement("label"));
 
     colorTwoPicker.addEventListener("input", () => {

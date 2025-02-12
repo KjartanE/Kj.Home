@@ -28,6 +28,8 @@ const mandelbrotFragmentShader = `
   uniform vec2 screenSize;
   uniform float maxIterations;
   uniform float iterationScale;
+  uniform float isDarkTheme;
+  uniform vec3 backgroundColor;
   
   const float EPSILON = 1e-10;
   const float MAX_VALUE = 1e10;
@@ -100,21 +102,22 @@ const mandelbrotFragmentShader = `
     vec2 z = result.yz;
     
     if (iterations == dynamicIterations) {
-      gl_FragColor = vec4(0.01, 0.0, 0.05, 1.0);
+      gl_FragColor = vec4(backgroundColor, 1.0);
     } else {
       float smoothed = iterations + 1.0 - log(log(dot(z, z)) * 0.5) / log(2.0);
       
-      float baseHue = 0.68;
-      float hue = baseHue + smoothed * 0.0005;
-      float saturation = 0.98;
-      float value = 0.3 + sin(smoothed * 0.05) * 0.1;
+      float baseHue = isDarkTheme > 0.5 ? 0.68 : 0.38;
+      float saturation = isDarkTheme > 0.5 ? 0.98 : 0.85;
+      float value = isDarkTheme > 0.5 ? 
+        (0.3 + sin(smoothed * 0.05) * 0.1) : 
+        (0.5 + sin(smoothed * 0.05) * 0.2);
       
       if (mod(smoothed, 12.0) < 6.0) {
-        value *= 0.85;
+        value *= isDarkTheme > 0.5 ? 0.85 : 0.75;
         saturation *= 0.99;
       }
       
-      vec3 color = hsv2rgb(vec3(hue, saturation, value));
+      vec3 color = hsv2rgb(vec3(baseHue + smoothed * 0.0005, saturation, value));
       gl_FragColor = vec4(color, 1.0);
     }
   }
@@ -152,7 +155,9 @@ export default function MandelbrotBackground() {
         screenSize: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
         maxIterations: { value: 2000.0 },
         iterationScale: { value: 100.0 },
-        pixelSizeThreshold: { value: Number.EPSILON }
+        pixelSizeThreshold: { value: Number.EPSILON },
+        isDarkTheme: { value: theme.resolvedTheme === "dark" ? 1.0 : 0.0 },
+        backgroundColor: { value: new THREE.Color(theme.resolvedTheme === "dark" ? "#09090b" : "#ffffff") }
       },
       vertexShader: mandelbrotVertexShader,
       fragmentShader: mandelbrotFragmentShader

@@ -20,6 +20,7 @@ interface ControlsProps {
     opacityOne: number;
     opacityTwo: number;
   };
+  color: string;
 }
 
 function DraggableCard({
@@ -39,27 +40,29 @@ function DraggableCard({
     id: "controls"
   });
 
-  const style: React.CSSProperties = isMobile ? {
-    position: 'fixed',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 40,
-    opacity: 0.8,
-  } : {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    zIndex: 40,
-    transform: `translate3d(${position.x + (transform?.x || 0)}px, ${position.y + (transform?.y || 0)}px, 0)`
-  };
+  const style: React.CSSProperties = isMobile
+    ? {
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 40,
+        opacity: 0.8
+      }
+    : {
+        position: "fixed",
+        top: 0,
+        left: 0,
+        zIndex: 40,
+        transform: `translate3d(${position.x + (transform?.x || 0)}px, ${position.y + (transform?.y || 0)}px, 0)`
+      };
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`${isMobile ? "w-full rounded-b-none backdrop-blur-sm bg-background/80" : "w-80"}`}>
+      <Card className={`${isMobile ? "w-full rounded-b-none bg-background/80 backdrop-blur-sm" : "w-80"}`}>
         <div
           {...(isMobile ? {} : { ...attributes, ...listeners })}
-          className={`flex h-16 ${!isMobile && "cursor-move"} items-center justify-between px-3 ${isExpanded ? 'border-b' : ''}`}>
+          className={`flex h-16 ${!isMobile && "cursor-move"} items-center justify-between px-3 ${isExpanded ? "border-b" : ""}`}>
           <h3 className="font-semibold">Pattern Controls</h3>
           <Button
             variant="ghost"
@@ -75,7 +78,7 @@ function DraggableCard({
   );
 }
 
-export function Controls({ onValueChange, initialValues }: ControlsProps) {
+export function Controls({ onValueChange, initialValues, color }: ControlsProps) {
   const hasMounted = useHasMounted();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isExpanded, setIsExpanded] = useState(false);
@@ -111,18 +114,13 @@ export function Controls({ onValueChange, initialValues }: ControlsProps) {
     Object.entries(defaultValues).forEach(([key, value]) => {
       onValueChange(key, value);
     });
-    onValueChange("colorOne", "#ffffff");
-    onValueChange("colorTwo", "#ffffff");
+    onValueChange("colorOne", color);
+    onValueChange("colorTwo", color);
   };
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <DraggableCard 
-        position={position} 
-        isExpanded={isExpanded} 
-        setIsExpanded={setIsExpanded}
-        isMobile={isMobile}
-      >
+      <DraggableCard position={position} isExpanded={isExpanded} setIsExpanded={setIsExpanded} isMobile={isMobile}>
         {isExpanded && (
           <CardContent className={`p-4 ${isMobile ? "max-h-[70vh] overflow-y-auto" : ""}`}>
             <div className="space-y-6">
@@ -210,7 +208,7 @@ export function Controls({ onValueChange, initialValues }: ControlsProps) {
                   type="color"
                   className="h-10 w-full cursor-pointer"
                   onChange={(e) => onValueChange("colorOne", e.target.value)}
-                  defaultValue="#ffffff"
+                  defaultValue={color}
                 />
               </div>
               <div className="space-y-2">
@@ -219,7 +217,7 @@ export function Controls({ onValueChange, initialValues }: ControlsProps) {
                   type="color"
                   className="h-10 w-full cursor-pointer"
                   onChange={(e) => onValueChange("colorTwo", e.target.value)}
-                  defaultValue="#ffffff"
+                  defaultValue={color}
                 />
               </div>
               <Button className="w-full" variant="default" onClick={handleReset}>
