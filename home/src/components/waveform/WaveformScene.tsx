@@ -9,14 +9,16 @@ import { AudioAnalyzer } from "@/lib/three/audio";
 // Add these constants at the top of the file, outside the component
 const DARK_MODE = {
   background: "#09090b",
-  line: 0x00ff00,  // Green
-  lineRight: 0x008800  // Darker Green
+  lineLeft: 0x00ff00, // Green
+  lineRight: 0x008800, // Darker Green
+  heatmap: 0xff0000 // Red
 };
 
 const LIGHT_MODE = {
   background: "#ffffff",
-  line: 0x0000ff,  // Blue
-  lineRight: 0x000088  // Darker Blue
+  lineLeft: 0x0000ff, // Blue
+  lineRight: 0x000088, // Darker Blue
+  heatmap: 0xff0000 // Red
 };
 
 export default function WaveformScene() {
@@ -25,15 +27,18 @@ export default function WaveformScene() {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const analyzerRef = useRef<AudioAnalyzer | null>(null);
-  const lineRef = useRef<THREE.Line | null>(null);
-  const lineRightRef = useRef<THREE.Line | null>(null);
   const theme = useTheme();
   const [error, setError] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
-  const materialRef = useRef<THREE.LineBasicMaterial | null>(null);
+  const lineLeftRef = useRef<THREE.Line | null>(null);
+  const lineRightRef = useRef<THREE.Line | null>(null);
+  const materialLeftRef = useRef<THREE.LineBasicMaterial | null>(null);
   const materialRightRef = useRef<THREE.LineBasicMaterial | null>(null);
-  const geometryRef = useRef<THREE.BufferGeometry | null>(null);
+  const geometryLeftRef = useRef<THREE.BufferGeometry | null>(null);
   const geometryRightRef = useRef<THREE.BufferGeometry | null>(null);
+  const heatMapPointsRef = useRef<THREE.Points | null>(null);
+  const heatMapMaterialRef = useRef<THREE.PointsMaterial | null>(null);
+  const heatMapGeometryRef = useRef<THREE.BufferGeometry | null>(null);
 
   const startAudioCapture = async () => {
     try {
@@ -53,10 +58,11 @@ export default function WaveformScene() {
   useEffect(() => {
     // Update material color and scene background when theme changes
     console.log("Theme changed:", theme.resolvedTheme);
-    if (materialRef.current) {
-      const color = theme.resolvedTheme === "dark" ? DARK_MODE.line : LIGHT_MODE.line;
+
+    if (materialLeftRef.current) {
+      const color = theme.resolvedTheme === "dark" ? DARK_MODE.lineLeft : LIGHT_MODE.lineLeft;
       console.log("Setting line color to:", color.toString(16));
-      materialRef.current.color.setHex(color);
+      materialLeftRef.current.color.setHex(color);
     }
     if (materialRightRef.current) {
       const colorRight = theme.resolvedTheme === "dark" ? DARK_MODE.lineRight : LIGHT_MODE.lineRight;
@@ -96,15 +102,26 @@ export default function WaveformScene() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
+    // Create heatmap Material
+    const heatMapMaterial = new THREE.PointsMaterial({
+      color: theme.resolvedTheme === "dark" ? DARK_MODE.heatmap : LIGHT_MODE.heatmap,
+      size: 0.02,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      opacity: 1.0,
+      sizeAttenuation: false
+    });
+    heatMapMaterialRef.current = heatMapMaterial;
+
     // Create materials for both channels
-    const material = new THREE.LineBasicMaterial({
-      color: theme.resolvedTheme === "dark" ? DARK_MODE.line : LIGHT_MODE.line,
+    const materialLeft = new THREE.LineBasicMaterial({
+      color: theme.resolvedTheme === "dark" ? DARK_MODE.lineLeft : LIGHT_MODE.lineLeft,
       linewidth: 2,
       transparent: true,
       opacity: 1.0,
       blending: THREE.NormalBlending
     });
-    materialRef.current = material;
+    materialLeftRef.current = materialLeft;
 
     const materialRight = new THREE.LineBasicMaterial({
       color: theme.resolvedTheme === "dark" ? DARK_MODE.lineRight : LIGHT_MODE.lineRight,
@@ -115,14 +132,25 @@ export default function WaveformScene() {
     });
     materialRightRef.current = materialRight;
 
+    // Create heatmap geometry with initial positions and colors
+    const heatMapGeometry = new THREE.BufferGeometry();
+    const heatMapPositions = new Float32Array(4096 * 3); // Match FFT size
+    for (let i = 0; i < 4096; i++) {
+      heatMapPositions[i * 3] = 1; // X position spread across -1 to 1
+      heatMapPositions[i * 3 + 1] = -0.5; // Initial Y position
+      heatMapPositions[i * 3 + 2] = 0; // Z position
+    }
+    heatMapGeometry.setAttribute("position", new THREE.BufferAttribute(heatMapPositions, 3));
+    heatMapGeometryRef.current = heatMapGeometry;
+
     // Create geometries for both channels
-    const geometry = new THREE.BufferGeometry();
+    const geometryLeft = new THREE.BufferGeometry();
     const geometryRight = new THREE.BufferGeometry();
-    const positions = new Float32Array(4096 * 3);
+    const positionsLeft = new Float32Array(4096 * 3);
     const positionsRight = new Float32Array(4096 * 3);
-    
-    [geometry, geometryRight].forEach((geo, idx) => {
-      const pos = idx === 0 ? positions : positionsRight;
+
+    [geometryLeft, geometryRight].forEach((geo, idx) => {
+      const pos = idx === 0 ? positionsLeft : positionsRight;
       for (let i = 0; i < 4096; i++) {
         pos[i * 3] = 1;
         pos[i * 3 + 1] = 0;
@@ -131,15 +159,20 @@ export default function WaveformScene() {
       geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
     });
 
-    geometryRef.current = geometry;
+    geometryLeftRef.current = geometryLeft;
     geometryRightRef.current = geometryRight;
 
+    // Create heatmap points
+    const heatMapPoints = new THREE.Points(heatMapGeometry, heatMapMaterial);
+    heatMapPointsRef.current = heatMapPoints;
+    scene.add(heatMapPoints);
+
     // Create and add both lines to scene
-    const line = new THREE.Line(geometry, material);
+    const lineLeft = new THREE.Line(geometryLeft, materialLeft);
     const lineRight = new THREE.Line(geometryRight, materialRight);
-    lineRef.current = line;
+    lineLeftRef.current = lineLeft;
     lineRightRef.current = lineRight;
-    scene.add(line);
+    scene.add(lineLeft);
     scene.add(lineRight);
 
     let lastTime = 0;
@@ -150,11 +183,17 @@ export default function WaveformScene() {
       const deltaTime = timestamp - lastTime;
 
       if (deltaTime >= frameInterval) {
-        if (analyzerRef.current && lineRef.current && lineRightRef.current) {
-          analyzerRef.current.updateWaveformGeometry(
-            lineRef.current.geometry,
-            lineRightRef.current.geometry
-          );
+        if (analyzerRef.current) {
+          if (lineLeftRef.current && lineRightRef.current) {
+            analyzerRef.current.updateWaveformGeometry(lineLeftRef.current.geometry, lineRightRef.current.geometry);
+
+            if (heatMapPointsRef.current) {
+              analyzerRef.current.updateFrequencyGeometry(
+                heatMapPointsRef.current.geometry,
+                heatMapPointsRef.current.geometry // Use same geometry for both channels
+              );
+            }
+          }
         }
         renderer.render(scene, camera);
         lastTime = timestamp - (deltaTime % frameInterval);
@@ -196,17 +235,23 @@ export default function WaveformScene() {
         rendererRef.current.dispose();
         container.removeChild(rendererRef.current.domElement);
       }
-      if (materialRef.current) {
-        materialRef.current.dispose();
+      if (materialLeftRef.current) {
+        materialLeftRef.current.dispose();
       }
       if (materialRightRef.current) {
         materialRightRef.current.dispose();
       }
-      if (geometryRef.current) {
-        geometryRef.current.dispose();
+      if (geometryLeftRef.current) {
+        geometryLeftRef.current.dispose();
       }
       if (geometryRightRef.current) {
         geometryRightRef.current.dispose();
+      }
+      if (heatMapGeometryRef.current) {
+        heatMapGeometryRef.current.dispose();
+      }
+      if (heatMapMaterialRef.current) {
+        heatMapMaterialRef.current.dispose();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

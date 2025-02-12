@@ -11,6 +11,8 @@ export class AudioAnalyzer {
   private previousLeftData: Float32Array | null = null;
   private previousRightData: Float32Array | null = null;
   private interpolationFactor = 0.3; // Adjust this value between 0 and 1 for different smoothing levels
+  private frequencyDataLeft: Float32Array | null = null;
+  private frequencyDataRight: Float32Array | null = null;
 
   constructor(fftSize: number = 2048) {
     this.fftSize = fftSize;
@@ -57,7 +59,7 @@ export class AudioAnalyzer {
             noiseSuppression: false,
             autoGainControl: false
           },
-          video: false
+          video: true
         });
       } catch (displayError) {
         console.error("Error getting display media:", displayError);
@@ -70,7 +72,7 @@ export class AudioAnalyzer {
               noiseSuppression: false,
               autoGainControl: false
             },
-            video: false
+            video: true
           });
         } catch (userMediaError) {
           console.error("Error getting user media:", userMediaError);
@@ -142,6 +144,68 @@ export class AudioAnalyzer {
         positions[i * 3 + 2] = 0;
 
         prev[i] = interpolatedValue;
+      }
+    });
+
+    leftGeometry.attributes.position.needsUpdate = true;
+    rightGeometry.attributes.position.needsUpdate = true;
+  }
+
+  public getFrequencyData(): { left: Float32Array; right: Float32Array } {
+    if (!this.leftAnalyser || !this.rightAnalyser) throw new Error("Analyzers not initialized");
+    
+    if (!this.frequencyDataLeft || !this.frequencyDataRight) {
+      this.frequencyDataLeft = new Float32Array(this.leftAnalyser.frequencyBinCount);
+      this.frequencyDataRight = new Float32Array(this.rightAnalyser.frequencyBinCount);
+    }
+    
+    this.leftAnalyser.getFloatFrequencyData(this.frequencyDataLeft);
+    this.rightAnalyser.getFloatFrequencyData(this.frequencyDataRight);
+    
+    return { 
+      left: this.frequencyDataLeft,
+      right: this.frequencyDataRight 
+    };
+  }
+
+  public createFrequencyGeometry(): THREE.BufferGeometry {
+    if (!this.leftAnalyser || !this.rightAnalyser) throw new Error("Analyzers not initialized");
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(this.leftAnalyser.frequencyBinCount * 3);
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    return geometry;
+  }
+
+  public updateFrequencyGeometry(
+    leftGeometry: THREE.BufferGeometry,
+    rightGeometry: THREE.BufferGeometry,
+    colorCallback?: (normalizedValue: number, index: number) => void
+  ): void {
+    if (!this.leftAnalyser || !this.rightAnalyser) return;
+    
+    const leftPositions = leftGeometry.attributes.position.array as Float32Array;
+    const rightPositions = rightGeometry.attributes.position.array as Float32Array;
+    const { left: leftData, right: rightData } = this.getFrequencyData();
+
+    // Update both channels
+    [
+      { data: leftData, positions: leftPositions, xOffset: -0.02, yOffset: -0.5 },
+      { data: rightData, positions: rightPositions, xOffset: 0.02, yOffset: -0.5 }
+    ].forEach(({ data, positions, xOffset, yOffset }) => {
+      for (let i = 0; i < data.length; i++) {
+        // Convert dB to normalized value (typically -100 to 0 range to 0 to 1)
+        const normalizedValue = (data[i] + 100) / 100;
+        const value = Math.max(0, Math.min(1, normalizedValue)) * 0.5; // Scale to reasonable height
+
+        const x = (i / data.length) * 2 - 1;
+        positions[i * 3] = x + xOffset;
+        positions[i * 3 + 1] = value + yOffset;
+        positions[i * 3 + 2] = 0;
+
+        // Update colors if callback is provided
+        if (colorCallback) {
+          colorCallback(normalizedValue, i);
+        }
       }
     });
 
