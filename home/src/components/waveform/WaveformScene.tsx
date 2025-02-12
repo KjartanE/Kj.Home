@@ -6,6 +6,17 @@ import { useTheme } from "next-themes";
 import { ThreeCleanup } from "@/lib/three/cleanup";
 import { AudioAnalyzer } from "@/lib/three/audio";
 
+// Add these constants at the top of the file, outside the component
+const DARK_MODE = {
+  background: "#09090b",
+  line: 0x00ff00 // Green
+};
+
+const LIGHT_MODE = {
+  background: "#ffffff",
+  line: 0x0000ff // Deep Blue
+};
+
 export default function WaveformScene() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -16,6 +27,8 @@ export default function WaveformScene() {
   const theme = useTheme();
   const [error, setError] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const materialRef = useRef<THREE.LineBasicMaterial | null>(null);
+  const geometryRef = useRef<THREE.BufferGeometry | null>(null);
 
   const startAudioCapture = async () => {
     try {
@@ -33,58 +46,93 @@ export default function WaveformScene() {
   };
 
   useEffect(() => {
+    // Update material color and scene background when theme changes
+    console.log("Theme changed:", theme.resolvedTheme);
+    if (materialRef.current) {
+      const color = theme.resolvedTheme === "dark" ? DARK_MODE.line : LIGHT_MODE.line;
+      console.log("Setting line color to:", color.toString(16));
+      materialRef.current.color.setHex(color);
+    }
+    if (sceneRef.current) {
+      sceneRef.current.background = new THREE.Color(
+        theme.resolvedTheme === "dark" ? DARK_MODE.background : LIGHT_MODE.background
+      );
+    }
+  }, [theme.resolvedTheme]);
+
+  useEffect(() => {
     if (!containerRef.current) return;
 
     const container = containerRef.current;
 
     // Initialize Three.js scene
     const scene = new THREE.Scene();
+    // Set initial background color based on current theme
+    scene.background = new THREE.Color(theme.resolvedTheme === "dark" ? DARK_MODE.background : LIGHT_MODE.background);
     sceneRef.current = scene;
-    scene.background = new THREE.Color(theme.resolvedTheme === "dark" ? "#09090b" : "#ffffff");
 
     // Set up camera
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
     camera.position.z = 1;
 
-    // Initialize renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    // Initialize renderer with better settings
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      powerPreference: "high-performance",
+      alpha: false
+    });
     rendererRef.current = renderer;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for better performance
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
-    // Create material and geometry here instead
+    // Create material only once with initial theme color
     const material = new THREE.LineBasicMaterial({
-      color: theme.resolvedTheme === "dark" ? 0x00ff00 : 0x008800,
-      linewidth: 1,
+      color: theme.resolvedTheme === "dark" ? DARK_MODE.line : LIGHT_MODE.line,
+      linewidth: 2,
       transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending
+      opacity: 1.0,
+      blending: THREE.NormalBlending
     });
+    materialRef.current = material;
 
-    // Initialize all points at the right edge
+    // Create geometry only once
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(2048 * 3);
     for (let i = 0; i < 2048; i++) {
-      positions[i * 3] = 1; // Start all X coordinates at 1 (right side)
-      positions[i * 3 + 1] = 0; // Y at center
-      positions[i * 3 + 2] = 0; // Z at 0
+      positions[i * 3] = 1;
+      positions[i * 3 + 1] = 0;
+      positions[i * 3 + 2] = 0;
     }
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometryRef.current = geometry;
 
     const line = new THREE.Line(geometry, material);
     lineRef.current = line;
     scene.add(line);
 
-    const animate = () => {
-      // Update waveform if we're capturing
-      if (analyzerRef.current && lineRef.current) {
-        analyzerRef.current.updateWaveformGeometry(lineRef.current.geometry);
+    let lastTime = 0;
+    const targetFPS = 60;
+    const frameInterval = 1000 / targetFPS;
+
+    const animate = (timestamp: number) => {
+      const deltaTime = timestamp - lastTime;
+
+      if (deltaTime >= frameInterval) {
+        // Update waveform if we're capturing
+        if (analyzerRef.current && lineRef.current) {
+          analyzerRef.current.updateWaveformGeometry(lineRef.current.geometry);
+        }
+
+        // Render the scene
+        renderer.render(scene, camera);
+        lastTime = timestamp - (deltaTime % frameInterval);
       }
 
-      // Always render the scene
-      renderer.render(scene, camera);
       animationFrameRef.current = requestAnimationFrame(animate);
     };
+
+    animate(0);
 
     const handleResize = () => {
       const width = window.innerWidth;
@@ -101,7 +149,6 @@ export default function WaveformScene() {
 
     window.addEventListener("resize", handleResize);
     handleResize();
-    animate();
 
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -118,8 +165,15 @@ export default function WaveformScene() {
         rendererRef.current.dispose();
         container.removeChild(rendererRef.current.domElement);
       }
+      if (materialRef.current) {
+        materialRef.current.dispose();
+      }
+      if (geometryRef.current) {
+        geometryRef.current.dispose();
+      }
     };
-  }, [theme.resolvedTheme]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="relative h-screen w-screen">
