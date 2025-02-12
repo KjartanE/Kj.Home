@@ -9,12 +9,14 @@ import { AudioAnalyzer } from "@/lib/three/audio";
 // Add these constants at the top of the file, outside the component
 const DARK_MODE = {
   background: "#09090b",
-  line: 0x00ff00 // Green
+  line: 0x00ff00,  // Green
+  lineRight: 0x008800  // Darker Green
 };
 
 const LIGHT_MODE = {
   background: "#ffffff",
-  line: 0x0000ff // Deep Blue
+  line: 0x0000ff,  // Blue
+  lineRight: 0x000088  // Darker Blue
 };
 
 export default function WaveformScene() {
@@ -24,15 +26,18 @@ export default function WaveformScene() {
   const animationFrameRef = useRef<number | null>(null);
   const analyzerRef = useRef<AudioAnalyzer | null>(null);
   const lineRef = useRef<THREE.Line | null>(null);
+  const lineRightRef = useRef<THREE.Line | null>(null);
   const theme = useTheme();
   const [error, setError] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const materialRef = useRef<THREE.LineBasicMaterial | null>(null);
+  const materialRightRef = useRef<THREE.LineBasicMaterial | null>(null);
   const geometryRef = useRef<THREE.BufferGeometry | null>(null);
+  const geometryRightRef = useRef<THREE.BufferGeometry | null>(null);
 
   const startAudioCapture = async () => {
     try {
-      const analyzer = new AudioAnalyzer(2048);
+      const analyzer = new AudioAnalyzer(4096);
       analyzerRef.current = analyzer;
       await analyzer.initializeSystemAudio();
       setIsCapturing(true);
@@ -52,6 +57,11 @@ export default function WaveformScene() {
       const color = theme.resolvedTheme === "dark" ? DARK_MODE.line : LIGHT_MODE.line;
       console.log("Setting line color to:", color.toString(16));
       materialRef.current.color.setHex(color);
+    }
+    if (materialRightRef.current) {
+      const colorRight = theme.resolvedTheme === "dark" ? DARK_MODE.lineRight : LIGHT_MODE.lineRight;
+      console.log("Setting right line color to:", colorRight.toString(16));
+      materialRightRef.current.color.setHex(colorRight);
     }
     if (sceneRef.current) {
       sceneRef.current.background = new THREE.Color(
@@ -86,7 +96,7 @@ export default function WaveformScene() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
-    // Create material only once with initial theme color
+    // Create materials for both channels
     const material = new THREE.LineBasicMaterial({
       color: theme.resolvedTheme === "dark" ? DARK_MODE.line : LIGHT_MODE.line,
       linewidth: 2,
@@ -96,20 +106,41 @@ export default function WaveformScene() {
     });
     materialRef.current = material;
 
-    // Create geometry only once
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(2048 * 3);
-    for (let i = 0; i < 2048; i++) {
-      positions[i * 3] = 1;
-      positions[i * 3 + 1] = 0;
-      positions[i * 3 + 2] = 0;
-    }
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geometryRef.current = geometry;
+    const materialRight = new THREE.LineBasicMaterial({
+      color: theme.resolvedTheme === "dark" ? DARK_MODE.lineRight : LIGHT_MODE.lineRight,
+      linewidth: 2,
+      transparent: true,
+      opacity: 1.0,
+      blending: THREE.NormalBlending
+    });
+    materialRightRef.current = materialRight;
 
+    // Create geometries for both channels
+    const geometry = new THREE.BufferGeometry();
+    const geometryRight = new THREE.BufferGeometry();
+    const positions = new Float32Array(4096 * 3);
+    const positionsRight = new Float32Array(4096 * 3);
+    
+    [geometry, geometryRight].forEach((geo, idx) => {
+      const pos = idx === 0 ? positions : positionsRight;
+      for (let i = 0; i < 4096; i++) {
+        pos[i * 3] = 1;
+        pos[i * 3 + 1] = 0;
+        pos[i * 3 + 2] = 0;
+      }
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    });
+
+    geometryRef.current = geometry;
+    geometryRightRef.current = geometryRight;
+
+    // Create and add both lines to scene
     const line = new THREE.Line(geometry, material);
+    const lineRight = new THREE.Line(geometryRight, materialRight);
     lineRef.current = line;
+    lineRightRef.current = lineRight;
     scene.add(line);
+    scene.add(lineRight);
 
     let lastTime = 0;
     const targetFPS = 60;
@@ -119,12 +150,12 @@ export default function WaveformScene() {
       const deltaTime = timestamp - lastTime;
 
       if (deltaTime >= frameInterval) {
-        // Update waveform if we're capturing
-        if (analyzerRef.current && lineRef.current) {
-          analyzerRef.current.updateWaveformGeometry(lineRef.current.geometry);
+        if (analyzerRef.current && lineRef.current && lineRightRef.current) {
+          analyzerRef.current.updateWaveformGeometry(
+            lineRef.current.geometry,
+            lineRightRef.current.geometry
+          );
         }
-
-        // Render the scene
         renderer.render(scene, camera);
         lastTime = timestamp - (deltaTime % frameInterval);
       }
@@ -168,8 +199,14 @@ export default function WaveformScene() {
       if (materialRef.current) {
         materialRef.current.dispose();
       }
+      if (materialRightRef.current) {
+        materialRightRef.current.dispose();
+      }
       if (geometryRef.current) {
         geometryRef.current.dispose();
+      }
+      if (geometryRightRef.current) {
+        geometryRightRef.current.dispose();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

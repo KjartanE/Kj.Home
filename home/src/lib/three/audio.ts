@@ -2,11 +2,14 @@ import * as THREE from "three";
 
 export class AudioAnalyzer {
   public audioContext: AudioContext | null = null;
-  private analyser: AnalyserNode | null = null;
+  private leftAnalyser: AnalyserNode | null = null;
+  private rightAnalyser: AnalyserNode | null = null;
+  private splitter: ChannelSplitterNode | null = null;
   private source: MediaElementAudioSourceNode | MediaStreamAudioSourceNode | null = null;
   private stream: MediaStream | null = null;
   private fftSize: number;
-  private previousWaveformData: Float32Array | null = null;
+  private previousLeftData: Float32Array | null = null;
+  private previousRightData: Float32Array | null = null;
   private interpolationFactor = 0.3; // Adjust this value between 0 and 1 for different smoothing levels
 
   constructor(fftSize: number = 2048) {
@@ -16,114 +19,142 @@ export class AudioAnalyzer {
   private initialize() {
     if (!this.audioContext) {
       this.audioContext = new AudioContext();
-      this.analyser = this.audioContext.createAnalyser();
-      this.analyser.fftSize = this.fftSize;
-      this.analyser.smoothingTimeConstant = 0.65; // Increased for smoother transitions
-      this.analyser.minDecibels = -90; // Adjusted for better dynamic range
-      this.analyser.maxDecibels = -10;
-      this.previousWaveformData = new Float32Array(this.analyser.frequencyBinCount);
+      
+      // Create stereo channel splitter
+      this.splitter = this.audioContext.createChannelSplitter(2);
+      
+      // Create analyzers for both channels
+      this.leftAnalyser = this.audioContext.createAnalyser();
+      this.rightAnalyser = this.audioContext.createAnalyser();
+      
+      // Configure both analyzers
+      [this.leftAnalyser, this.rightAnalyser].forEach(analyser => {
+        if (analyser) {
+          analyser.fftSize = this.fftSize;
+          analyser.smoothingTimeConstant = 0.65;
+          analyser.minDecibels = -90;
+          analyser.maxDecibels = -10;
+        }
+      });
+
+      // Connect splitter to analyzers
+      this.splitter.connect(this.leftAnalyser, 0);  // Left channel
+      this.splitter.connect(this.rightAnalyser, 1); // Right channel
     }
   }
 
   public async initializeSystemAudio(): Promise<void> {
     try {
       this.initialize();
-      if (!this.audioContext || !this.analyser) throw new Error("Audio context not initialized");
+      if (!this.audioContext || !this.splitter) throw new Error("Audio context not initialized");
 
-      // Try different methods to capture system audio
       try {
-        // Method 1: Try getDisplayMedia first (Chrome/Edge)
+        // Method 1: Try getDisplayMedia with explicit stereo
         this.stream = await navigator.mediaDevices.getDisplayMedia({
-          audio: true,
-          video: true
+          audio: {
+            channelCount: 2,
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          },
+          video: false
         });
       } catch (displayError) {
         console.error("Error getting display media:", displayError);
         try {
-          // Method 2: Try getUserMedia with system audio (Some browsers)
+          // Method 2: Fallback to getUserMedia with stereo settings
           this.stream = await navigator.mediaDevices.getUserMedia({
             audio: {
-              mandatory: {
-                chromeMediaSource: "desktop"
-              }
-            } as MediaTrackConstraints
+              channelCount: 2,
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false
+            },
+            video: false
           });
         } catch (userMediaError) {
           console.error("Error getting user media:", userMediaError);
-          // Method 3: Fallback to basic audio input
-          this.stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-            video: false
-          });
         }
       }
 
       // Stop any video tracks if they exist
-      this.stream.getVideoTracks().forEach((track) => track.stop());
+      this.stream?.getVideoTracks().forEach((track) => track.stop());
 
-      if (!this.stream.getAudioTracks().length) {
+      if (!this.stream?.getAudioTracks().length) {
         throw new Error("No audio track available. Please make sure audio is enabled.");
       }
 
       this.source = this.audioContext.createMediaStreamSource(this.stream);
-      this.source.connect(this.analyser);
+      this.source.connect(this.splitter);
     } catch (error) {
       console.error("Error accessing system audio:", error);
       throw error;
     }
   }
 
-  public getWaveformData(): Float32Array {
-    if (!this.analyser) throw new Error("Analyzer not initialized");
-    const dataArray = new Float32Array(this.analyser.frequencyBinCount);
-    this.analyser.getFloatTimeDomainData(dataArray);
-    return dataArray;
+  public getWaveformData(): { left: Float32Array; right: Float32Array } {
+    if (!this.leftAnalyser || !this.rightAnalyser) throw new Error("Analyzers not initialized");
+    
+    const leftData = new Float32Array(this.leftAnalyser.frequencyBinCount);
+    const rightData = new Float32Array(this.rightAnalyser.frequencyBinCount);
+    
+    this.leftAnalyser.getFloatTimeDomainData(leftData);
+    this.rightAnalyser.getFloatTimeDomainData(rightData);
+    
+    return { left: leftData, right: rightData };
   }
 
   public createWaveformGeometry(): THREE.BufferGeometry {
-    if (!this.analyser) throw new Error("Analyzer not initialized");
+    if (!this.leftAnalyser || !this.rightAnalyser) throw new Error("Analyzers not initialized");
     const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(this.analyser.frequencyBinCount * 3);
+    const positions = new Float32Array(this.leftAnalyser.frequencyBinCount * 3);
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     return geometry;
   }
 
-  public updateWaveformGeometry(geometry: THREE.BufferGeometry): void {
-    if (!this.analyser) return;
-    const positions = geometry.attributes.position.array as Float32Array;
-    const currentWaveformData = this.getWaveformData();
+  public updateWaveformGeometry(leftGeometry: THREE.BufferGeometry, rightGeometry: THREE.BufferGeometry): void {
+    if (!this.leftAnalyser || !this.rightAnalyser) return;
+    
+    const leftPositions = leftGeometry.attributes.position.array as Float32Array;
+    const rightPositions = rightGeometry.attributes.position.array as Float32Array;
+    const { left: leftData, right: rightData } = this.getWaveformData();
 
     // Initialize previous data if needed
-    if (!this.previousWaveformData) {
-      this.previousWaveformData = new Float32Array(currentWaveformData);
+    if (!this.previousLeftData) {
+      this.previousLeftData = new Float32Array(leftData);
+      this.previousRightData = new Float32Array(rightData);
     }
 
-    for (let i = 0; i < currentWaveformData.length; i++) {
-      // Interpolate between previous and current values
-      const currentValue = currentWaveformData[i];
-      const previousValue = this.previousWaveformData[i];
-      const interpolatedValue = previousValue + (currentValue - previousValue) * this.interpolationFactor;
+    // Update both channels
+    [
+      { data: leftData, prev: this.previousLeftData!, positions: leftPositions, xOffset: -0.02, yOffset: 0 },
+      { data: rightData, prev: this.previousRightData!, positions: rightPositions, xOffset: 0.02, yOffset: 0.1 } // More noticeable offset
+    ].forEach(({ data, prev, positions, xOffset, yOffset }) => {
+      for (let i = 0; i < data.length; i++) {
+        const currentValue = data[i];
+        const previousValue = prev[i] || 0;
+        const interpolatedValue = previousValue + (currentValue - previousValue) * this.interpolationFactor;
+        const smoothedValue = interpolatedValue * 0.8;
 
-      // Apply additional smoothing for high-frequency changes
-      const smoothedValue = interpolatedValue * 0.8;
+        const x = (i / data.length) * 2 - 1;
+        positions[i * 3] = x + xOffset;  // Add X offset
+        positions[i * 3 + 1] = smoothedValue + yOffset;  // Add Y offset
+        positions[i * 3 + 2] = 0;
 
-      // Update positions
-      const x = (i / currentWaveformData.length) * 2 - 1;
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = smoothedValue;
-      positions[i * 3 + 2] = 0;
+        prev[i] = interpolatedValue;
+      }
+    });
 
-      // Store the interpolated value for next frame
-      this.previousWaveformData[i] = interpolatedValue;
-    }
-
-    geometry.attributes.position.needsUpdate = true;
+    leftGeometry.attributes.position.needsUpdate = true;
+    rightGeometry.attributes.position.needsUpdate = true;
   }
 
   public dispose(): void {
     this.stream?.getTracks().forEach((track) => track.stop());
     this.source?.disconnect();
-    this.analyser?.disconnect();
+    this.leftAnalyser?.disconnect();
+    this.rightAnalyser?.disconnect();
+    this.splitter?.disconnect();
     this.audioContext?.close();
   }
 }
