@@ -4,6 +4,7 @@ import { ThemeProvider } from "../components/providers/theme-provider";
 import { Header } from "@/components/layout/header";
 import BackgroundLayout from "@/components/layout/BackgroundLayout";
 import { Toaster } from "@/components/ui/toaster";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "kj.home",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </ThemeProvider>
         <Toaster />
       </body>
+      <Analytics />
     </html>
   );
 }
