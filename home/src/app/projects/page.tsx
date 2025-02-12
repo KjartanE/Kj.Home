@@ -51,16 +51,20 @@ const projects = [
     image: "/projects/mandelbrot-preview.png",
     link: "/projects/mandelbrot",
     tech: ["Three.js", "WebGL", "TypeScript"]
+  },
+  {
+    title: "Waveform",
+    description: "Interactive waveform visualization",
+    image: "/projects/waveform-preview.png",
+    link: "/projects/waveform"
   }
 ];
 
 export default function ProjectsPage() {
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 mt-14">
+    <div className="container mx-auto mt-14 max-w-7xl px-4 py-8">
       <h1 className="mb-2 text-3xl font-bold">Projects</h1>
-      <p className="mb-8 text-muted-foreground">
-        Here are some of the projects I&apos;ve worked on.
-      </p>
+      <p className="mb-8 text-muted-foreground">Here are some of the projects I&apos;ve worked on.</p>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
           <Link href={project.link} key={project.title}>

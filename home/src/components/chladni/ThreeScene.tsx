@@ -29,7 +29,6 @@ const ThreeScene: React.FC = () => {
     colorTwo: new THREE.Color(color)
   });
 
-
   const updateBackgroundColor = useCallback(() => {
     if (sceneRef.current) {
       const isDark = theme === "dark" || (theme === "system" && systemTheme === "dark");
@@ -51,9 +50,10 @@ const ThreeScene: React.FC = () => {
     const chladni = new ChladniHandler(4, color);
     const plane = new THREE.Mesh(chladni.geometry, chladni.material);
 
+    // Update all uniforms including colors
     Object.entries(uniforms).forEach(([key, value]) => {
       if (plane.material.uniforms[key]) {
-        plane.material.uniforms[key].value = value;
+        plane.material.uniforms[key].value = value instanceof THREE.Color ? value : value;
       }
     });
 
@@ -64,10 +64,10 @@ const ThreeScene: React.FC = () => {
 
     updateBackgroundColor();
 
-    //check if color needs to be updated
+    // Update the color check and setting
     if (color !== uniforms.colorOne.getHexString()) {
-      chladni.material.uniforms.colorOne.value = new THREE.Color(color);
-      chladni.material.uniforms.colorTwo.value = new THREE.Color(color);
+      plane.material.uniforms.colorOne.value = uniforms.colorOne;
+      plane.material.uniforms.colorTwo.value = uniforms.colorTwo;
     }
     let time = 0;
 
@@ -105,16 +105,34 @@ const ThreeScene: React.FC = () => {
 
       sceneRef.current = null;
     };
-  }, [uniforms, updateBackgroundColor, color, theme, systemTheme]);
+  }, [uniforms, updateBackgroundColor, color]);
+
+  useEffect(() => {
+    const isDark = theme === "dark" || (theme === "system" && systemTheme === "dark");
+    const newColor = isDark ? "#ffffff" : "#000000";
+
+    // Update both colors when theme changes
+    handleValueChange("colorOne", newColor);
+    handleValueChange("colorTwo", newColor);
+    setColor(newColor);
+  }, [theme, systemTheme]);
 
   const handleValueChange = (key: string, value: number | string) => {
     setUniforms((prev) => ({
       ...prev,
-      [key === "a" ? "u_a" : key === "b" ? "u_b" : key === "n" ? "u_n" : key === "m" ? "u_m" : key]: key.includes(
-        "color"
-      )
-        ? new THREE.Color(value as string)
-        : value
+      [key === "a"
+        ? "u_a"
+        : key === "b"
+          ? "u_b"
+          : key === "n"
+            ? "u_n"
+            : key === "m"
+              ? "u_m"
+              : key === "colorOne"
+                ? "colorOne"
+                : key === "colorTwo"
+                  ? "colorTwo"
+                  : key]: key.includes("color") ? new THREE.Color(value as string) : value
     }));
   };
 

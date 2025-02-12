@@ -16,10 +16,15 @@ export default function Home() {
             I like to code. Welcome to my collection of projects and experiments.
           </p>
 
-          <div className="mt-8 flex gap-4">
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="/projects">
               <Button size="lg" className="rounded-full">
                 Current Projects
+              </Button>
+            </Link>
+            <Link href="/about">
+              <Button size="lg" variant="secondary" className="rounded-full">
+                About Me
               </Button>
             </Link>
             <Link href="/contact">

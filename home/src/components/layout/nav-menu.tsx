@@ -14,7 +14,6 @@ import {
   navigationMenuTriggerStyle
 } from "@/components/ui/navigation-menu";
 import HomeLogo from "@/assets/icons/HomeLogo";
-import { useTheme } from "next-themes";
 
 interface NavMenuProps {
   mobile?: boolean;
@@ -22,8 +21,6 @@ interface NavMenuProps {
 }
 
 export function NavMenu({ mobile, onSelect }: NavMenuProps) {
-  const { resolvedTheme } = useTheme();
-  const fillColor = resolvedTheme && resolvedTheme === "dark" ? "#ffffff" : "#000000";
   const mobileClasses = mobile ? "flex flex-col space-y-3" : "";
   const linkClasses = mobile
     ? "flex w-full p-3 hover:bg-accent rounded-md transition-colors text-foreground"
@@ -59,9 +56,9 @@ export function NavMenu({ mobile, onSelect }: NavMenuProps) {
               <li className="row-span-3">
                 <NavigationMenuLink asChild>
                   <Link
-                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/40 to-muted p-6 no-underline outline-none focus:shadow-md"
                     href="/projects">
-                    <HomeLogo fillColor={fillColor} />
+                    <HomeLogo />
                     <div className="mb-2 mt-4 text-lg font-medium">Projects</div>
                     <p className="text-sm leading-tight text-muted-foreground">
                       Check out some interesting projects I&apos;ve worked on.
@@ -93,17 +90,17 @@ export function NavMenu({ mobile, onSelect }: NavMenuProps) {
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
-        <NavigationMenuItem>
+        <NavigationMenuItem className="bg-transparent">
           <Link href="/about" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>About</NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
-        <NavigationMenuItem>
+        <NavigationMenuItem className="bg-transparent">
           <Link href="/blog" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>Blog</NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
-        <NavigationMenuItem>
+        <NavigationMenuItem className="bg-transparent">
           <Link href="/contact" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>Contact</NavigationMenuLink>
           </Link>
