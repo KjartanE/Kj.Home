@@ -213,6 +213,31 @@ export class AudioAnalyzer {
     rightGeometry.attributes.position.needsUpdate = true;
   }
 
+  public getButterchurnData(): { timeByteArray: Uint8Array; timeByteArrayR: Uint8Array; freqByteArray: Uint8Array; freqByteArrayR: Uint8Array } {
+    if (!this.leftAnalyser || !this.rightAnalyser) {
+      throw new Error("Analyzers not initialized");
+    }
+
+    const bufferLength = this.leftAnalyser.frequencyBinCount;
+    
+    const timeByteArray = new Uint8Array(bufferLength);
+    const timeByteArrayR = new Uint8Array(bufferLength);
+    const freqByteArray = new Uint8Array(bufferLength);
+    const freqByteArrayR = new Uint8Array(bufferLength);
+
+    this.leftAnalyser.getByteTimeDomainData(timeByteArray);
+    this.rightAnalyser.getByteTimeDomainData(timeByteArrayR);
+    this.leftAnalyser.getByteFrequencyData(freqByteArray);
+    this.rightAnalyser.getByteFrequencyData(freqByteArrayR);
+
+    return {
+      timeByteArray,
+      timeByteArrayR,
+      freqByteArray,
+      freqByteArrayR
+    };
+  }
+
   public dispose(): void {
     this.stream?.getTracks().forEach((track) => track.stop());
     this.source?.disconnect();

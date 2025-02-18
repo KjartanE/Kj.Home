@@ -57,6 +57,12 @@ const projects = [
     description: "Interactive waveform visualization",
     image: "/projects/waveform-preview.png",
     link: "/projects/waveform"
+  },
+  {
+    title: "Butterchurn",
+    description: "Interactive butterchurn visualization",
+    image: "/projects/butterchurn-preview.png",
+    link: "/projects/butterchurn"
   }
 ];
 
