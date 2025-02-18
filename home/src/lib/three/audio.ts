@@ -2,11 +2,12 @@ import * as THREE from "three";
 
 export class AudioAnalyzer {
   public audioContext: AudioContext | null = null;
+  public audioNode: AudioNode | null = null;
+  public stream: MediaStream | null = null;
   private leftAnalyser: AnalyserNode | null = null;
   private rightAnalyser: AnalyserNode | null = null;
   private splitter: ChannelSplitterNode | null = null;
   private source: MediaElementAudioSourceNode | MediaStreamAudioSourceNode | null = null;
-  private stream: MediaStream | null = null;
   private fftSize: number;
   private previousLeftData: Float32Array | null = null;
   private previousRightData: Float32Array | null = null;
@@ -33,9 +34,9 @@ export class AudioAnalyzer {
       [this.leftAnalyser, this.rightAnalyser].forEach(analyser => {
         if (analyser) {
           analyser.fftSize = this.fftSize;
-          analyser.smoothingTimeConstant = 0.65;
-          analyser.minDecibels = -90;
-          analyser.maxDecibels = -10;
+          analyser.smoothingTimeConstant = 0.4;    // Reduced from 0.65 for faster response
+          analyser.minDecibels = -70;              // Increased from -90 for better sensitivity
+          analyser.maxDecibels = -30;              // Adjusted from -10 for better dynamic range
         }
       });
 
@@ -211,31 +212,6 @@ export class AudioAnalyzer {
 
     leftGeometry.attributes.position.needsUpdate = true;
     rightGeometry.attributes.position.needsUpdate = true;
-  }
-
-  public getButterchurnData(): { timeByteArray: Uint8Array; timeByteArrayR: Uint8Array; freqByteArray: Uint8Array; freqByteArrayR: Uint8Array } {
-    if (!this.leftAnalyser || !this.rightAnalyser) {
-      throw new Error("Analyzers not initialized");
-    }
-
-    const bufferLength = this.leftAnalyser.frequencyBinCount;
-    
-    const timeByteArray = new Uint8Array(bufferLength);
-    const timeByteArrayR = new Uint8Array(bufferLength);
-    const freqByteArray = new Uint8Array(bufferLength);
-    const freqByteArrayR = new Uint8Array(bufferLength);
-
-    this.leftAnalyser.getByteTimeDomainData(timeByteArray);
-    this.rightAnalyser.getByteTimeDomainData(timeByteArrayR);
-    this.leftAnalyser.getByteFrequencyData(freqByteArray);
-    this.rightAnalyser.getByteFrequencyData(freqByteArrayR);
-
-    return {
-      timeByteArray,
-      timeByteArrayR,
-      freqByteArray,
-      freqByteArrayR
-    };
   }
 
   public dispose(): void {

@@ -6,13 +6,13 @@ import isButterchurnSupported from "butterchurn/lib/isSupported.min";
 import { useRef, useState, useEffect, useCallback } from "react";
 import butterchurnPresets from "butterchurn-presets";
 import { ButterchurnControls } from "./ButterchurnControls";
-
+import { Visualizer } from "@/types/butterchurn";
 export default function ButterchurnScene() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const analyzerRef = useRef<AudioAnalyzer | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const visualizerRef = useRef<any>(null);
+  const visualizerRef = useRef<Visualizer>(null);
   const animationFrameRef = useRef<number | null>(null);
   const [currentPresetIndex, setCurrentPresetIndex] = useState(22);
   const presetsRef = useRef<Record<string, any>>({});
@@ -68,7 +68,7 @@ export default function ButterchurnScene() {
 
     // Use 21:9 aspect ratio (ultrawide)
     const aspectRatio = 21 / 9;
-    
+
     // Target a more reasonable base size
     const baseWidth = Math.min(2100, availableWidth); // Increased for wider aspect ratio
     const baseHeight = Math.min(900, availableHeight);
@@ -98,7 +98,8 @@ export default function ButterchurnScene() {
 
   const startAudioCapture = async () => {
     try {
-      const analyzer = new AudioAnalyzer(4096);
+      // Increase FFT size for better frequency resolution
+      const analyzer = new AudioAnalyzer(4096); // Increased from 4096
       analyzerRef.current = analyzer;
       await analyzer.initializeSystemAudio();
 
@@ -106,14 +107,14 @@ export default function ButterchurnScene() {
         throw new Error("Canvas or AudioContext not initialized");
       }
 
-      // Create Butterchurn visualizer with initial size
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-
       visualizerRef.current = butterchurn.createVisualizer(analyzer.audioContext, canvasRef.current, {
-        width: windowWidth,
-        height: windowHeight,
-        pixelRatio: window.devicePixelRatio || 1
+        width: window.innerWidth,
+        height: window.innerHeight,
+        pixelRatio: window.devicePixelRatio || 1,
+        // Add these settings to make it more responsive
+        meshWidth: 96, // Increased mesh resolution
+        meshHeight: 54,
+        textureRatio: 2 // Increased texture quality,
       });
 
       // Update size after creation
@@ -123,21 +124,22 @@ export default function ButterchurnScene() {
       presetsRef.current = butterchurnPresets.getPresets();
       const presetKeys = Object.keys(presetsRef.current);
 
+      console.log("visualizerRef.current", visualizerRef.current);
       // Load initial preset
       const initialPreset = presetsRef.current[presetKeys[currentPresetIndex]];
-      visualizerRef.current.loadPreset(initialPreset, 0.0);
+      if (visualizerRef.current) {
+        visualizerRef.current.loadPreset(initialPreset, 0.0);
+      }
+
+      if (analyzer.stream) {
+        visualizerRef.current?.connectAudio(analyzer.audioContext.createMediaStreamSource(analyzer.stream));
+      }
 
       // Start rendering
       const render = () => {
-        if (!visualizerRef.current || !analyzer.audioContext) return;
+        if (!visualizerRef.current || !analyzerRef.current) return;
 
-        // Get audio data from your analyzer
-        const audioLevels = analyzerRef.current?.getButterchurnData();
-
-        if (audioLevels) {
-          // Update Butterchurn
-          visualizerRef.current.render(audioLevels);
-        }
+        visualizerRef.current.render();
 
         animationFrameRef.current = requestAnimationFrame(render);
       };
