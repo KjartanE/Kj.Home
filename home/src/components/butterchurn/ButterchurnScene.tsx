@@ -14,7 +14,7 @@ export default function ButterchurnScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const visualizerRef = useRef<any>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const [currentPresetIndex, setCurrentPresetIndex] = useState(0);
+  const [currentPresetIndex, setCurrentPresetIndex] = useState(22);
   const presetsRef = useRef<Record<string, any>>({});
 
   useEffect(() => {
@@ -49,6 +49,42 @@ export default function ButterchurnScene() {
     setCurrentPresetIndex(previousIndex);
   }, [currentPresetIndex]);
 
+  const updateVisualizerSize = useCallback(() => {
+    if (!visualizerRef.current || !canvasRef.current) return;
+
+    const availableWidth = window.innerWidth;
+    const availableHeight = window.innerHeight; // Account for header
+
+    // Use 21:9 aspect ratio (ultrawide)
+    const aspectRatio = 21 / 9;
+    
+    // Target a more reasonable base size
+    const baseWidth = Math.min(2100, availableWidth); // Increased for wider aspect ratio
+    const baseHeight = Math.min(900, availableHeight);
+
+    let width = baseWidth;
+    let height = baseWidth / aspectRatio;
+
+    // If height is too big, scale based on height
+    if (height > availableHeight) {
+      height = baseHeight;
+      width = height * aspectRatio;
+    }
+
+    // Update canvas dimensions
+    canvasRef.current.width = width;
+    canvasRef.current.height = height;
+
+    // Update visualizer size
+    visualizerRef.current.setRendererSize(width, height);
+  }, []);
+
+  // Add resize listener
+  useEffect(() => {
+    window.addEventListener("resize", updateVisualizerSize);
+    return () => window.removeEventListener("resize", updateVisualizerSize);
+  }, [updateVisualizerSize]);
+
   const startAudioCapture = async () => {
     try {
       const analyzer = new AudioAnalyzer(4096);
@@ -59,15 +95,18 @@ export default function ButterchurnScene() {
         throw new Error("Canvas or AudioContext not initialized");
       }
 
-      // Create Butterchurn visualizer
+      // Create Butterchurn visualizer with initial size
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
       visualizerRef.current = butterchurn.createVisualizer(analyzer.audioContext, canvasRef.current, {
-        width: 1280,
-        height: 720,
+        width: windowWidth,
+        height: windowHeight,
         pixelRatio: window.devicePixelRatio || 1
       });
 
-      // Scale down the visualization
-      visualizerRef.current.renderer.textureRatio = 0.5; // Values between 0.5 and 1.0 work well
+      // Update size after creation
+      updateVisualizerSize();
 
       // Store all presets in ref for later use
       presetsRef.current = butterchurnPresets.getPresets();
@@ -108,8 +147,10 @@ export default function ButterchurnScene() {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center">
-      <canvas ref={canvasRef}  />
+    <div className="fixed inset-0 mt-14 flex items-center justify-center overflow-hidden">
+      <div className="relative flex items-center justify-center">
+        <canvas ref={canvasRef} className="max-h-full max-w-full" />
+      </div>
 
       <ButterchurnControls
         isCapturing={isCapturing}
