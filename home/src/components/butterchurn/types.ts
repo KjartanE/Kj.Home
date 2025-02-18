@@ -17,6 +17,13 @@ export interface Visualizer {
   warpBufferToDataURL: () => string;
 }
 
+interface AudioProcessor {
+  audioContext: AudioContext;
+  stream: MediaStream;
+  analyser: AnalyserNode;
+  source: MediaStreamAudioSourceNode;
+}
+
 interface AudioLevels {
   audio: AudioProcessor;
   starts: number[];
@@ -88,7 +95,7 @@ interface Border {
 
 interface ImageTextures {
   gl: WebGL2RenderingContext;
-  anisoExt: EXTTextureFilterAnisotropic;
+  anisoExt: EXT_texture_filter_anisotropic;
   samplers: Record<string, unknown>;
   clouds2Image: HTMLImageElement;
   emptyImage: HTMLImageElement;
@@ -96,7 +103,7 @@ interface ImageTextures {
 
 interface Noise {
   gl: WebGL2RenderingContext;
-  anisoExt: EXTTextureFilterAnisotropic;
+  anisoExt: EXT_texture_filter_anisotropic;
   noiseTexLQ: WebGLTexture;
   noiseTexLQLite: WebGLTexture;
   noiseTexMQ: WebGLTexture;
@@ -137,7 +144,7 @@ interface PresetObject {
 interface Renderer {
   // WebGL Context and Extensions
   gl: WebGL2RenderingContext;
-  anisoExt: EXTTextureFilterAnisotropic;
+  anisoExt: EXT_texture_filter_anisotropic;
 
   // Dimensions and Ratios
   width: number;
@@ -227,6 +234,39 @@ interface Renderer {
   // UI Elements
   supertext: { startTime: number };
   titleText: TitleText;
+}
+
+interface MotionVectors {
+  gl: WebGL2RenderingContext;
+  positions: Float32Array;
+  aspectx: number;
+  aspecty: number;
+  invAspectx: number;
+}
+
+interface OutputShader {
+  gl: WebGL2RenderingContext;
+  aspectx: number;
+  aspecty: number;
+  invAspectx: number;
+}
+
+interface ResampleShader {
+  gl: WebGL2RenderingContext;
+  aspectx: number;
+  aspecty: number;
+  invAspectx: number;
+}
+
+interface WarpShader {
+  gl: WebGL2RenderingContext;
+  aspectx: number;
+  aspecty: number;
+  invAspectx: number;
+}
+
+interface TitleText {
+  startTime: number;
 }
 
 interface BaseValsDefaults {

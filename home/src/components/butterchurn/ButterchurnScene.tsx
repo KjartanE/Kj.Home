@@ -2,15 +2,21 @@
 
 import { AudioAnalyzer } from "@/lib/three/audio";
 import butterchurn from "butterchurn";
-// import isButterchurnSupported from "butterchurn/lib/isSupported.min";
+import isButterchurnSupported from "butterchurn/lib/isSupported.min";
 import { useRef, useState, useEffect, useCallback } from "react";
 import butterchurnPresets from "butterchurn-presets";
 import { ButterchurnControls } from "./ButterchurnControls";
-import { Visualizer } from "@/types/butterchurn";
-
-const isBrowser = typeof window !== "undefined";
+import { Visualizer } from "@/components/butterchurn/types";
 
 export default function ButterchurnScene() {
+  // Move the browser check to a state to avoid hydration issues
+  const [isBrowserSupported, setIsBrowserSupported] = useState(false);
+  
+  // Check browser support on mount
+  useEffect(() => {
+    setIsBrowserSupported(isButterchurnSupported());
+  }, []);
+
   const [isCapturing, setIsCapturing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const analyzerRef = useRef<AudioAnalyzer | null>(null);
@@ -64,7 +70,7 @@ export default function ButterchurnScene() {
   }, []);
 
   const updateVisualizerSize = useCallback(() => {
-    if (!visualizerRef.current || !canvasRef.current || !isBrowser) return;
+    if (!visualizerRef.current || !canvasRef.current || !window) return;
 
     const availableWidth = window.innerWidth;
     const availableHeight = window.innerHeight; // Account for header
@@ -93,16 +99,8 @@ export default function ButterchurnScene() {
     visualizerRef.current.setRendererSize(width, height);
   }, []);
 
-  // Add resize listener
-  useEffect(() => {
-    if (!isBrowser) return;
-
-    window.addEventListener("resize", updateVisualizerSize);
-    return () => window.removeEventListener("resize", updateVisualizerSize);
-  }, [updateVisualizerSize]);
-
   const startAudioCapture = async () => {
-    if (!isBrowser) return;
+    if (!window) return;
 
     try {
       // Increase FFT size for better frequency resolution
@@ -115,9 +113,9 @@ export default function ButterchurnScene() {
       }
 
       visualizerRef.current = butterchurn.createVisualizer(analyzer.audioContext, canvasRef.current, {
-        width: isBrowser ? window.innerWidth : 1920,
-        height: isBrowser ? window.innerHeight : 1080,
-        pixelRatio: isBrowser ? window.devicePixelRatio || 1 : 1,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        pixelRatio: window.devicePixelRatio || 1,
         // Add these settings to make it more responsive
         meshWidth: 96, // Increased mesh resolution
         meshHeight: 54,
@@ -161,9 +159,18 @@ export default function ButterchurnScene() {
     }
   };
 
-  // if (!isButterchurnSupported()) {
-  //   return <div>Butterchurn is not supported in this browser</div>;
-  // }
+  // Add resize listener
+  useEffect(() => {
+    if (!window) return;
+
+    window.addEventListener("resize", updateVisualizerSize);
+    return () => window.removeEventListener("resize", updateVisualizerSize);
+  }, [updateVisualizerSize]);
+
+  // Early return if not supported
+  if (!isBrowserSupported) {
+    return <div>Butterchurn is not supported in this browser</div>;
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center overflow-hidden">

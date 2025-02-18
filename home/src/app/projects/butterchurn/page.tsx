@@ -1,9 +1,5 @@
-import ButterchurnScene from "@/components/butterchurn/ButterchurnScene";
+import ButterchurnWrapper from "@/components/butterchurn/ButterchurnWrapper";
 
 export default function Page() {
-  return (
-    <div className="fixed inset-0">
-      <ButterchurnScene />
-    </div>
-  );
+  return <ButterchurnWrapper />;
 }
