@@ -49,6 +49,17 @@ export default function ButterchurnScene() {
     setCurrentPresetIndex(previousIndex);
   }, [currentPresetIndex]);
 
+  const loadRandomPreset = useCallback(() => {
+    if (!visualizerRef.current) return;
+
+    const presetKeys = Object.keys(presetsRef.current);
+    const randomIndex = Math.floor(Math.random() * presetKeys.length);
+    const randomPreset = presetsRef.current[presetKeys[randomIndex]];
+
+    visualizerRef.current.loadPreset(randomPreset, 0.0);
+    setCurrentPresetIndex(randomIndex);
+  }, []);
+
   const updateVisualizerSize = useCallback(() => {
     if (!visualizerRef.current || !canvasRef.current) return;
 
@@ -156,6 +167,7 @@ export default function ButterchurnScene() {
         isCapturing={isCapturing}
         onNextPreset={loadNextPreset}
         onPreviousPreset={loadPreviousPreset}
+        onRandomPreset={loadRandomPreset}
       />
 
       {error && (

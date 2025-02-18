@@ -4,15 +4,19 @@ interface ButterchurnControlsProps {
   isCapturing: boolean;
   onNextPreset: () => void;
   onPreviousPreset: () => void;
+  onRandomPreset: () => void;
 }
 
-export function ButterchurnControls({ isCapturing, onNextPreset, onPreviousPreset }: ButterchurnControlsProps) {
+export function ButterchurnControls({ isCapturing, onNextPreset, onPreviousPreset, onRandomPreset }: ButterchurnControlsProps) {
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (!isCapturing) return;
 
       switch (event.code) {
         case "Space":
+          event.preventDefault();
+          onRandomPreset();
+          break;
         case "ArrowRight":
           event.preventDefault();
           onNextPreset();
@@ -26,7 +30,7 @@ export function ButterchurnControls({ isCapturing, onNextPreset, onPreviousPrese
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isCapturing, onNextPreset, onPreviousPreset]);
+  }, [isCapturing, onNextPreset, onPreviousPreset, onRandomPreset]);
 
   if (!isCapturing) return null;
 
@@ -36,7 +40,8 @@ export function ButterchurnControls({ isCapturing, onNextPreset, onPreviousPrese
         <div className="text-sm font-medium">Controls</div>
         <div className="text-xs text-gray-300">
           <span className="mx-1">←: Previous Preset</span>
-          <span className="mx-1">→ or Space: Next Preset</span>
+          <span className="mx-1">→: Next Preset</span>
+          <span className="mx-1">Space: Random Preset</span>
         </div>
       </div>
     </div>
