@@ -29,9 +29,9 @@ export function ButterchurnControls({
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
       // Toggle header visibility
-      const header = document.querySelector('header');
+      const header = document.querySelector("header");
       if (header) {
-        header.style.display = document.fullscreenElement ? 'none' : 'block';
+        header.style.display = document.fullscreenElement ? "none" : "block";
       }
     };
 
@@ -70,9 +70,10 @@ export function ButterchurnControls({
   if (!isCapturing) return null;
 
   return (
-    <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 transform space-y-2 text-center transition-opacity duration-300 ${
-      isFullscreen ? 'opacity-0 hover:opacity-100' : 'opacity-100'
-    }`}>
+    <div
+      className={`absolute bottom-4 left-1/2 -translate-x-1/2 transform space-y-2 text-center transition-opacity duration-300 ${
+        isFullscreen ? "opacity-0 hover:opacity-100" : "opacity-100"
+      }`}>
       <div className="rounded bg-black/50 px-4 py-2 text-white">
         <div className="text-sm font-medium">Controls</div>
         <div className="text-xs text-gray-300">

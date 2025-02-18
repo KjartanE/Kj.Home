@@ -34,10 +34,7 @@ const PenrosePlayground: React.FC = () => {
     return controller;
   }, []);
 
-  const penroseManager = useMemo(
-    () => new PenroseManager(theme.resolvedTheme || "dark"),
-    [theme.resolvedTheme]
-  );
+  const penroseManager = useMemo(() => new PenroseManager(theme.resolvedTheme || "dark"), [theme.resolvedTheme]);
 
   const location = useRef<IPosition | null>({
     position: new THREE.Vector3(0, 0, 0),
@@ -70,7 +67,7 @@ const PenrosePlayground: React.FC = () => {
   const handleRender = () => {
     playgroundController.reset();
     playgroundController.simulate();
-    
+
     if (playgroundController.instantFlag) {
       penroseManager.steps = playgroundController.penroseLSystem.production.length;
       penroseManager.generateLines(location, playgroundController.penroseLSystem);
@@ -98,9 +95,7 @@ const PenrosePlayground: React.FC = () => {
     camera.lookAt(0, 0, 0);
     controls.update();
 
-    scene.background = new THREE.Color(
-      0xff0000
-    );
+    scene.background = new THREE.Color(0xff0000);
 
     function animate() {
       const stepSize = Math.max(1, Math.floor(playgroundController.speed / 20));
@@ -110,7 +105,7 @@ const PenrosePlayground: React.FC = () => {
         scene.clear();
         penroseManager.reset();
         penroseManager.steps = 0;
-        
+
         // Immediately render full pattern if in instant mode
         if (playgroundController.instantFlag) {
           penroseManager.steps = playgroundController.penroseLSystem.production.length;
@@ -120,7 +115,10 @@ const PenrosePlayground: React.FC = () => {
         }
       }
 
-      if (!playgroundController.instantFlag && penroseManager.steps < playgroundController.penroseLSystem.production.length) {
+      if (
+        !playgroundController.instantFlag &&
+        penroseManager.steps < playgroundController.penroseLSystem.production.length
+      ) {
         penroseManager.steps += stepSize;
         scene.clear();
         penroseManager.generateLines(location, playgroundController.penroseLSystem);
@@ -155,8 +153,8 @@ const PenrosePlayground: React.FC = () => {
   }, [theme.resolvedTheme, penroseManager, playgroundController]);
 
   return (
-    <div className="relative w-full h-full">
-      <div ref={containerRef} className="w-full h-full" />
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
       <Controls
         onGenerationsChange={handleGenerationsChange}
         onSpeedChange={handleSpeedChange}
@@ -169,5 +167,3 @@ const PenrosePlayground: React.FC = () => {
 };
 
 export default PenrosePlayground;
-
-

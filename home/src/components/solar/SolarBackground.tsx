@@ -210,10 +210,42 @@ export default function SolarBackground() {
         speed: 0.000028,
         color: "#DEB887",
         moons: [
-          { name: "Io", radius: 0.285, distance: 3.5, speed: 0.004, color: "#FFD700", tracerPositions: [], parent: "Jupiter" },
-          { name: "Europa", radius: 0.246, distance: 4.5, speed: 0.003, color: "#F5F5DC", tracerPositions: [], parent: "Jupiter" },
-          { name: "Ganymede", radius: 0.413, distance: 5.5, speed: 0.002, color: "#D2B48C", tracerPositions: [], parent: "Jupiter" },
-          { name: "Callisto", radius: 0.378, distance: 6.5, speed: 0.001, color: "#A0522D", tracerPositions: [], parent: "Jupiter" }
+          {
+            name: "Io",
+            radius: 0.285,
+            distance: 3.5,
+            speed: 0.004,
+            color: "#FFD700",
+            tracerPositions: [],
+            parent: "Jupiter"
+          },
+          {
+            name: "Europa",
+            radius: 0.246,
+            distance: 4.5,
+            speed: 0.003,
+            color: "#F5F5DC",
+            tracerPositions: [],
+            parent: "Jupiter"
+          },
+          {
+            name: "Ganymede",
+            radius: 0.413,
+            distance: 5.5,
+            speed: 0.002,
+            color: "#D2B48C",
+            tracerPositions: [],
+            parent: "Jupiter"
+          },
+          {
+            name: "Callisto",
+            radius: 0.378,
+            distance: 6.5,
+            speed: 0.001,
+            color: "#A0522D",
+            tracerPositions: [],
+            parent: "Jupiter"
+          }
         ]
       },
       {
@@ -223,8 +255,24 @@ export default function SolarBackground() {
         speed: 0.000011,
         color: "#F4A460",
         moons: [
-          { name: "Titan", radius: 0.404, distance: 4.0, speed: 0.003, color: "#DAA520", tracerPositions: [], parent: "Saturn" },
-          { name: "Rhea", radius: 0.12, distance: 3.0, speed: 0.004, color: "#C0C0C0", tracerPositions: [], parent: "Saturn" }
+          {
+            name: "Titan",
+            radius: 0.404,
+            distance: 4.0,
+            speed: 0.003,
+            color: "#DAA520",
+            tracerPositions: [],
+            parent: "Saturn"
+          },
+          {
+            name: "Rhea",
+            radius: 0.12,
+            distance: 3.0,
+            speed: 0.004,
+            color: "#C0C0C0",
+            tracerPositions: [],
+            parent: "Saturn"
+          }
         ]
       },
       {
@@ -234,8 +282,24 @@ export default function SolarBackground() {
         speed: 0.0000039,
         color: "#87CEEB",
         moons: [
-          { name: "Titania", radius: 0.124, distance: 2.5, speed: 0.003, color: "#D3D3D3", tracerPositions: [], parent: "Uranus" },
-          { name: "Oberon", radius: 0.119, distance: 3.0, speed: 0.002, color: "#A9A9A9", tracerPositions: [], parent: "Uranus" }
+          {
+            name: "Titania",
+            radius: 0.124,
+            distance: 2.5,
+            speed: 0.003,
+            color: "#D3D3D3",
+            tracerPositions: [],
+            parent: "Uranus"
+          },
+          {
+            name: "Oberon",
+            radius: 0.119,
+            distance: 3.0,
+            speed: 0.002,
+            color: "#A9A9A9",
+            tracerPositions: [],
+            parent: "Uranus"
+          }
         ]
       },
       {
@@ -245,7 +309,15 @@ export default function SolarBackground() {
         speed: 0.000002,
         color: "#4682B4",
         moons: [
-          { name: "Triton", radius: 0.212, distance: 2.8, speed: 0.003, color: "#B8860B", tracerPositions: [], parent: "Neptune" }
+          {
+            name: "Triton",
+            radius: 0.212,
+            distance: 2.8,
+            speed: 0.003,
+            color: "#B8860B",
+            tracerPositions: [],
+            parent: "Neptune"
+          }
         ]
       }
     ],
@@ -257,7 +329,7 @@ export default function SolarBackground() {
     sceneRef.current = new THREE.Scene();
     cameraRef.current = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     rendererRef.current = new THREE.WebGLRenderer({ antialias: true });
-    
+
     if (rendererRef.current && cameraRef.current) {
       controlsRef.current = new OrbitControls(cameraRef.current, rendererRef.current.domElement);
     }

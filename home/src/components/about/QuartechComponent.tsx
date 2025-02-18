@@ -73,12 +73,12 @@ const QuartechComponent = () => {
 
           <div className="space-y-6">
             <Tabs defaultValue={contracts[0].id}>
-              <TabsList className="flex w-full flex-wrap items-center justify-start gap-1 border-b border-gray-700 bg-muted/50 rounded-t-lg p-2">
+              <TabsList className="flex w-full flex-wrap items-center justify-start gap-1 rounded-t-lg border-b border-gray-700 bg-muted/50 p-2">
                 {contracts.map((contract) => (
                   <TabsTrigger
                     key={contract.id}
                     value={contract.id}
-                    className="min-h-[2.5rem] px-4 text-foreground transition-colors duration-300 hover:text-muted-foreground text-sm sm:text-base data-[state=active]:border-b-2 data-[state=active]:border-primary">
+                    className="min-h-[2.5rem] px-4 text-sm text-foreground transition-colors duration-300 hover:text-muted-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary sm:text-base">
                     {contract.label}
                   </TabsTrigger>
                 ))}

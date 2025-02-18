@@ -34,7 +34,7 @@ export default async function BlogPage({ params }: { params: Params }) {
   const { frontmatter, content } = post;
 
   return (
-    <div className="container mx-auto mt-14 max-w-7xl py-8 px-4">
+    <div className="container mx-auto mt-14 max-w-7xl px-4 py-8">
       <div className="mx-auto max-w-3xl space-y-6">
         <div className="mb-8">
           <p className="text-muted-foreground">

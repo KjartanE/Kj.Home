@@ -2,11 +2,14 @@
 
 import { AudioAnalyzer } from "@/lib/three/audio";
 import butterchurn from "butterchurn";
-import isButterchurnSupported from "butterchurn/lib/isSupported.min";
+// import isButterchurnSupported from "butterchurn/lib/isSupported.min";
 import { useRef, useState, useEffect, useCallback } from "react";
 import butterchurnPresets from "butterchurn-presets";
 import { ButterchurnControls } from "./ButterchurnControls";
 import { Visualizer } from "@/types/butterchurn";
+
+const isBrowser = typeof window !== "undefined";
+
 export default function ButterchurnScene() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +64,7 @@ export default function ButterchurnScene() {
   }, []);
 
   const updateVisualizerSize = useCallback(() => {
-    if (!visualizerRef.current || !canvasRef.current) return;
+    if (!visualizerRef.current || !canvasRef.current || !isBrowser) return;
 
     const availableWidth = window.innerWidth;
     const availableHeight = window.innerHeight; // Account for header
@@ -92,11 +95,15 @@ export default function ButterchurnScene() {
 
   // Add resize listener
   useEffect(() => {
+    if (!isBrowser) return;
+
     window.addEventListener("resize", updateVisualizerSize);
     return () => window.removeEventListener("resize", updateVisualizerSize);
   }, [updateVisualizerSize]);
 
   const startAudioCapture = async () => {
+    if (!isBrowser) return;
+
     try {
       // Increase FFT size for better frequency resolution
       const analyzer = new AudioAnalyzer(4096); // Increased from 4096
@@ -108,9 +115,9 @@ export default function ButterchurnScene() {
       }
 
       visualizerRef.current = butterchurn.createVisualizer(analyzer.audioContext, canvasRef.current, {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        pixelRatio: window.devicePixelRatio || 1,
+        width: isBrowser ? window.innerWidth : 1920,
+        height: isBrowser ? window.innerHeight : 1080,
+        pixelRatio: isBrowser ? window.devicePixelRatio || 1 : 1,
         // Add these settings to make it more responsive
         meshWidth: 96, // Increased mesh resolution
         meshHeight: 54,
@@ -154,9 +161,9 @@ export default function ButterchurnScene() {
     }
   };
 
-  if (!isButterchurnSupported()) {
-    return <div>Butterchurn is not supported in this browser</div>;
-  }
+  // if (!isButterchurnSupported()) {
+  //   return <div>Butterchurn is not supported in this browser</div>;
+  // }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center overflow-hidden">

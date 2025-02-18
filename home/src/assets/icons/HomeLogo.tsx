@@ -9,9 +9,8 @@ export default function HomeLogo() {
       preserveAspectRatio="xMidYMid meet"
       className="text-foreground"
       style={{
-        fill: 'currentColor'
-      }}
-    >
+        fill: "currentColor"
+      }}>
       <g transform="translate(0.000000,161.000000) scale(0.100000,-0.100000)" stroke="none">
         <path
           d="M1525 1409 c-55 -55 -112 -109 -127 -120 l-27 -20 -56 51 c-30 27

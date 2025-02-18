@@ -67,27 +67,24 @@ export default function ContactPage() {
       }
 
       if (!response.ok) {
-        throw new Error(
-          data.error || 
-          "Unable to send message. Please check your input and try again."
-        );
+        throw new Error(data.error || "Unable to send message. Please check your input and try again.");
       }
 
       toast({
         title: "Message Sent",
         description: "Thanks for reaching out! I'll get back to you soon.",
-        variant: "default",
+        variant: "default"
       });
       form.reset();
     } catch (error: any) {
       // Log the full error for debugging
       console.error("Contact form error:", error);
-      
+
       // Show a user-friendly error message
       toast({
         title: "Unable to Send",
         description: error.message || "Failed to send message. Please try again later.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);

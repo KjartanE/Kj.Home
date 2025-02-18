@@ -11,4 +11,4 @@ function PenroseBackground() {
   );
 }
 
-export default memo(PenroseBackground); 
+export default memo(PenroseBackground);

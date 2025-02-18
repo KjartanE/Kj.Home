@@ -22,26 +22,26 @@ export class AudioAnalyzer {
   private initialize() {
     if (!this.audioContext) {
       this.audioContext = new AudioContext();
-      
+
       // Create stereo channel splitter
       this.splitter = this.audioContext.createChannelSplitter(2);
-      
+
       // Create analyzers for both channels
       this.leftAnalyser = this.audioContext.createAnalyser();
       this.rightAnalyser = this.audioContext.createAnalyser();
-      
+
       // Configure both analyzers
-      [this.leftAnalyser, this.rightAnalyser].forEach(analyser => {
+      [this.leftAnalyser, this.rightAnalyser].forEach((analyser) => {
         if (analyser) {
           analyser.fftSize = this.fftSize;
-          analyser.smoothingTimeConstant = 0.4;    // Reduced from 0.65 for faster response
-          analyser.minDecibels = -70;              // Increased from -90 for better sensitivity
-          analyser.maxDecibels = -30;              // Adjusted from -10 for better dynamic range
+          analyser.smoothingTimeConstant = 0.4; // Reduced from 0.65 for faster response
+          analyser.minDecibels = -70; // Increased from -90 for better sensitivity
+          analyser.maxDecibels = -30; // Adjusted from -10 for better dynamic range
         }
       });
 
       // Connect splitter to analyzers
-      this.splitter.connect(this.leftAnalyser, 0);  // Left channel
+      this.splitter.connect(this.leftAnalyser, 0); // Left channel
       this.splitter.connect(this.rightAnalyser, 1); // Right channel
     }
   }
@@ -97,13 +97,13 @@ export class AudioAnalyzer {
 
   public getWaveformData(): { left: Float32Array; right: Float32Array } {
     if (!this.leftAnalyser || !this.rightAnalyser) throw new Error("Analyzers not initialized");
-    
+
     const leftData = new Float32Array(this.leftAnalyser.frequencyBinCount);
     const rightData = new Float32Array(this.rightAnalyser.frequencyBinCount);
-    
+
     this.leftAnalyser.getFloatTimeDomainData(leftData);
     this.rightAnalyser.getFloatTimeDomainData(rightData);
-    
+
     return { left: leftData, right: rightData };
   }
 
@@ -117,7 +117,7 @@ export class AudioAnalyzer {
 
   public updateWaveformGeometry(leftGeometry: THREE.BufferGeometry, rightGeometry: THREE.BufferGeometry): void {
     if (!this.leftAnalyser || !this.rightAnalyser) return;
-    
+
     const leftPositions = leftGeometry.attributes.position.array as Float32Array;
     const rightPositions = rightGeometry.attributes.position.array as Float32Array;
     const { left: leftData, right: rightData } = this.getWaveformData();
@@ -140,8 +140,8 @@ export class AudioAnalyzer {
         const smoothedValue = interpolatedValue * 0.8;
 
         const x = (i / data.length) * 2 - 1;
-        positions[i * 3] = x + xOffset;  // Add X offset
-        positions[i * 3 + 1] = smoothedValue + yOffset;  // Add Y offset
+        positions[i * 3] = x + xOffset; // Add X offset
+        positions[i * 3 + 1] = smoothedValue + yOffset; // Add Y offset
         positions[i * 3 + 2] = 0;
 
         prev[i] = interpolatedValue;
@@ -154,18 +154,18 @@ export class AudioAnalyzer {
 
   public getFrequencyData(): { left: Float32Array; right: Float32Array } {
     if (!this.leftAnalyser || !this.rightAnalyser) throw new Error("Analyzers not initialized");
-    
+
     if (!this.frequencyDataLeft || !this.frequencyDataRight) {
       this.frequencyDataLeft = new Float32Array(this.leftAnalyser.frequencyBinCount);
       this.frequencyDataRight = new Float32Array(this.rightAnalyser.frequencyBinCount);
     }
-    
+
     this.leftAnalyser.getFloatFrequencyData(this.frequencyDataLeft);
     this.rightAnalyser.getFloatFrequencyData(this.frequencyDataRight);
-    
-    return { 
+
+    return {
       left: this.frequencyDataLeft,
-      right: this.frequencyDataRight 
+      right: this.frequencyDataRight
     };
   }
 
@@ -183,7 +183,7 @@ export class AudioAnalyzer {
     colorCallback?: (normalizedValue: number, index: number) => void
   ): void {
     if (!this.leftAnalyser || !this.rightAnalyser) return;
-    
+
     const leftPositions = leftGeometry.attributes.position.array as Float32Array;
     const rightPositions = rightGeometry.attributes.position.array as Float32Array;
     const { left: leftData, right: rightData } = this.getFrequencyData();

@@ -8,7 +8,7 @@ const IntroductionComponent: React.FC = () => {
   return (
     <Card>
       <CardHeader className="space-y-0 pb-4">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-8">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-8">
           <div className="shrink-0">
             <Image
               src="/images/clancy.png"

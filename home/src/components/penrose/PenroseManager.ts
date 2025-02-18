@@ -40,15 +40,15 @@ export default class PenroseManager {
       if (this.lineGeometry) {
         this.lineGeometry.dispose();
       }
-      
+
       this.lineGeometry = new THREE.BufferGeometry();
-      
+
       const positionsArray = new Float32Array(this.positions);
       const widthsArray = new Float32Array(this.widths);
-      
+
       this.lineGeometry.setAttribute("position", new THREE.BufferAttribute(positionsArray, 3));
       this.lineGeometry.setAttribute("width", new THREE.BufferAttribute(widthsArray, 1));
-      
+
       return new THREE.LineSegments(this.lineGeometry, this.lineMaterial);
     };
 
@@ -128,7 +128,7 @@ export default class PenroseManager {
     this.widths = [];
     this.steps = 0;
     this.stack = [];
-    
+
     if (this.lineGeometry) {
       this.lineGeometry.dispose();
     }

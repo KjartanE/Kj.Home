@@ -9,7 +9,7 @@ export class ThreeCleanup {
 
   static disposeMaterial(material: THREE.Material | THREE.Material[] | null) {
     if (Array.isArray(material)) {
-      material.forEach(m => m.dispose());
+      material.forEach((m) => m.dispose());
     } else if (material) {
       material.dispose();
     }
@@ -36,8 +36,8 @@ export class ThreeCleanup {
   }
 
   static disposeScene(scene: THREE.Scene) {
-    scene.traverse(object => {
+    scene.traverse((object) => {
       ThreeCleanup.disposeObject(object);
     });
   }
-} 
+}

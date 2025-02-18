@@ -12,7 +12,7 @@ export default class CubeScene {
   constructor(containerWidth: number, containerHeight: number) {
     this.width = containerWidth;
     this.height = containerHeight;
-    
+
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 10000);
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
