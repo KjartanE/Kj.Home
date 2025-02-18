@@ -67,11 +67,11 @@ export default function ButterchurnScene() {
     const availableHeight = window.innerHeight; // Account for header
 
     // Use 21:9 aspect ratio (ultrawide)
-    const aspectRatio = 21 / 9;
+    const aspectRatio = 16 / 9;
 
     // Target a more reasonable base size
-    const baseWidth = Math.min(2100, availableWidth); // Increased for wider aspect ratio
-    const baseHeight = Math.min(900, availableHeight);
+    const baseWidth = Math.min(1920, availableWidth); // Increased for wider aspect ratio
+    const baseHeight = Math.min(1080, availableHeight);
 
     let width = baseWidth;
     let height = baseWidth / aspectRatio;
@@ -124,15 +124,14 @@ export default function ButterchurnScene() {
       presetsRef.current = butterchurnPresets.getPresets();
       const presetKeys = Object.keys(presetsRef.current);
 
-      console.log("visualizerRef.current", visualizerRef.current);
       // Load initial preset
       const initialPreset = presetsRef.current[presetKeys[currentPresetIndex]];
-      if (visualizerRef.current) {
-        visualizerRef.current.loadPreset(initialPreset, 0.0);
-      }
-
       if (analyzer.stream) {
         visualizerRef.current?.connectAudio(analyzer.audioContext.createMediaStreamSource(analyzer.stream));
+      }
+
+      if (visualizerRef.current) {
+        visualizerRef.current.loadPreset(initialPreset, 0.0);
       }
 
       // Start rendering
@@ -160,7 +159,7 @@ export default function ButterchurnScene() {
   }
 
   return (
-    <div className="fixed inset-0 mt-14 flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
       <div className="relative flex items-center justify-center">
         <canvas ref={canvasRef} className="max-h-full max-w-full" />
       </div>
@@ -173,7 +172,7 @@ export default function ButterchurnScene() {
       />
 
       {error && (
-        <div className="absolute left-1/2 top-4 z-10 -translate-x-1/2 transform rounded bg-red-500 px-4 py-2 text-white">
+        <div className="absolute left-1/2 top-4 z-[60] -translate-x-1/2 transform rounded bg-red-500 px-4 py-2 text-white">
           {error}
         </div>
       )}
