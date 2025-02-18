@@ -3,8 +3,9 @@
 import { AudioAnalyzer } from "@/lib/three/audio";
 import butterchurn from "butterchurn";
 import isButterchurnSupported from "butterchurn/lib/isSupported.min";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import butterchurnPresets from "butterchurn-presets";
+import { ButterchurnControls } from "./ButterchurnControls";
 
 export default function ButterchurnScene() {
   const [isCapturing, setIsCapturing] = useState(false);
@@ -13,6 +14,8 @@ export default function ButterchurnScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const visualizerRef = useRef<any>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const [currentPresetIndex, setCurrentPresetIndex] = useState(0);
+  const presetsRef = useRef<Record<string, any>>({});
 
   useEffect(() => {
     // Clean up on unmount
@@ -23,6 +26,28 @@ export default function ButterchurnScene() {
       analyzerRef.current?.dispose();
     };
   }, []);
+
+  const loadNextPreset = useCallback(() => {
+    if (!visualizerRef.current) return;
+
+    const presetKeys = Object.keys(presetsRef.current);
+    const nextIndex = (currentPresetIndex + 1) % presetKeys.length;
+    const nextPreset = presetsRef.current[presetKeys[nextIndex]];
+
+    visualizerRef.current.loadPreset(nextPreset, 0.0);
+    setCurrentPresetIndex(nextIndex);
+  }, [currentPresetIndex]);
+
+  const loadPreviousPreset = useCallback(() => {
+    if (!visualizerRef.current) return;
+
+    const presetKeys = Object.keys(presetsRef.current);
+    const previousIndex = (currentPresetIndex - 1 + presetKeys.length) % presetKeys.length;
+    const previousPreset = presetsRef.current[presetKeys[previousIndex]];
+
+    visualizerRef.current.loadPreset(previousPreset, 0.0);
+    setCurrentPresetIndex(previousIndex);
+  }, [currentPresetIndex]);
 
   const startAudioCapture = async () => {
     try {
@@ -35,28 +60,30 @@ export default function ButterchurnScene() {
       }
 
       // Create Butterchurn visualizer
-      visualizerRef.current = butterchurn.createVisualizer(
-        analyzer.audioContext,
-        canvasRef.current,
-        {
-          width: window.innerWidth,
-          height: window.innerHeight,
-          pixelRatio: window.devicePixelRatio || 1,
-        }
-      );
+      visualizerRef.current = butterchurn.createVisualizer(analyzer.audioContext, canvasRef.current, {
+        width: 1280,
+        height: 720,
+        pixelRatio: window.devicePixelRatio || 1
+      });
 
-      // Get a random preset from the built-in presets
-      const presets = butterchurnPresets.getPresets();
-      const preset = presets[Object.keys(presets)[1]];
-      visualizerRef.current.loadPreset(preset, 0.0);
+      // Scale down the visualization
+      visualizerRef.current.renderer.textureRatio = 0.5; // Values between 0.5 and 1.0 work well
+
+      // Store all presets in ref for later use
+      presetsRef.current = butterchurnPresets.getPresets();
+      const presetKeys = Object.keys(presetsRef.current);
+
+      // Load initial preset
+      const initialPreset = presetsRef.current[presetKeys[currentPresetIndex]];
+      visualizerRef.current.loadPreset(initialPreset, 0.0);
 
       // Start rendering
       const render = () => {
         if (!visualizerRef.current || !analyzer.audioContext) return;
-        
+
         // Get audio data from your analyzer
         const audioLevels = analyzerRef.current?.getButterchurnData();
-        
+
         if (audioLevels) {
           // Update Butterchurn
           visualizerRef.current.render(audioLevels);
@@ -81,16 +108,21 @@ export default function ButterchurnScene() {
   }
 
   return (
-    <div className="relative h-screen w-screen">
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 h-full w-full"
+    <div className="flex h-screen w-screen flex-col items-center justify-center">
+      <canvas ref={canvasRef}  />
+
+      <ButterchurnControls
+        isCapturing={isCapturing}
+        onNextPreset={loadNextPreset}
+        onPreviousPreset={loadPreviousPreset}
       />
+
       {error && (
         <div className="absolute left-1/2 top-4 z-10 -translate-x-1/2 transform rounded bg-red-500 px-4 py-2 text-white">
           {error}
         </div>
       )}
+
       <div
         className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 transition-opacity duration-300 ${
           isCapturing ? "pointer-events-none opacity-0" : "opacity-100"
