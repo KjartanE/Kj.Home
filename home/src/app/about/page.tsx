@@ -13,7 +13,7 @@ export default function AboutPage() {
       {/*
         Show for desktop and tablet
       */}
-      <div className="hidden md:grid gap-6 md:grid-cols-[300px_1fr]">
+      <div className="hidden gap-6 md:grid md:grid-cols-[300px_1fr]">
         <div className="relative md:block">
           <div className="backface-visibility-hidden sticky top-20 transform-gpu will-change-transform">
             <PersonalStickyComponent personal={resume.personal} />

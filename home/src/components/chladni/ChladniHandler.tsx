@@ -125,7 +125,7 @@ export default class ChladniHandler {
     const colorOnePicker = menu.appendChild(document.createElement("input"));
 
     colorOnePicker.type = "color";
-    colorOnePicker.value = '#' + this.material.uniforms.colorOne.value.getHexString();
+    colorOnePicker.value = "#" + this.material.uniforms.colorOne.value.getHexString();
     const colorOneLabel = menu.appendChild(document.createElement("label"));
 
     colorOnePicker.addEventListener("input", () => {
@@ -138,7 +138,7 @@ export default class ChladniHandler {
     const colorTwoPicker = menu.appendChild(document.createElement("input"));
 
     colorTwoPicker.type = "color";
-    colorTwoPicker.value = '#' + this.material.uniforms.colorTwo.value.getHexString();
+    colorTwoPicker.value = "#" + this.material.uniforms.colorTwo.value.getHexString();
     const colorTwoLabel = menu.appendChild(document.createElement("label"));
 
     colorTwoPicker.addEventListener("input", () => {

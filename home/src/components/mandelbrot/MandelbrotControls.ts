@@ -43,9 +43,9 @@ export class MandelbrotControls {
       this.currentZoom += zoomDiff * zoomFactor;
       this.material.uniforms.zoom.value = this.currentZoom;
       this.onZoomChange?.(this.currentZoom);
-      
+
       this.material.uniforms.center.value.add(centerDiff.multiplyScalar(centerFactor));
-      
+
       this.animationFrameId = requestAnimationFrame(this.animate);
     } else {
       this.isAnimating = false;
@@ -59,7 +59,7 @@ export class MandelbrotControls {
 
   cleanup() {
     this.container.removeEventListener("wheel", this.handleWheel);
-    
+
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
     }
@@ -67,31 +67,30 @@ export class MandelbrotControls {
 
   private handleWheel(event: WheelEvent) {
     event.preventDefault();
-    
+
     const rect = this.container.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-    
+
     const mandelbrotX = (x * 2.0) / this.currentZoom + this.material.uniforms.center.value.x;
-    const mandelbrotY = (y * 2.0 / this.aspect) / this.currentZoom + this.material.uniforms.center.value.y;
-    
+    const mandelbrotY = (y * 2.0) / this.aspect / this.currentZoom + this.material.uniforms.center.value.y;
+
     // Replace the baseZoomFactor calculation with a constant value
     const baseZoomFactor = 0.15; // Constant zoom factor
 
-    const zoomFactor = event.deltaY > 0 
-      ? 1.0 / (1.0 + baseZoomFactor)
-      : 1.0 + baseZoomFactor;
-    
+    const zoomFactor = event.deltaY > 0 ? 1.0 / (1.0 + baseZoomFactor) : 1.0 + baseZoomFactor;
+
     const newZoom = this.currentZoom * zoomFactor;
-    
+
     // Increased zoom range
-    if (newZoom >= Number.EPSILON && newZoom <= 1e308) {  // Using JavaScript's maximum safe number
+    if (newZoom >= Number.EPSILON && newZoom <= 1e308) {
+      // Using JavaScript's maximum safe number
       const newCenterX = mandelbrotX - (x * 2.0) / newZoom;
-      const newCenterY = mandelbrotY - (y * 2.0 / this.aspect) / newZoom;
-      
+      const newCenterY = mandelbrotY - (y * 2.0) / this.aspect / newZoom;
+
       this.targetZoom = newZoom;
       this.targetCenter.set(newCenterX, newCenterY);
-      
+
       if (!this.isAnimating) {
         this.isAnimating = true;
         this.animationFrameId = requestAnimationFrame(this.animate);
@@ -111,25 +110,25 @@ export class MandelbrotControls {
     this.startAnimation();
   }
 
-  public move(direction: 'up' | 'down' | 'left' | 'right') {
+  public move(direction: "up" | "down" | "left" | "right") {
     const moveAmount = 0.5 / this.currentZoom;
     const currentCenter = this.material.uniforms.center.value;
-    
+
     switch (direction) {
-      case 'up':
+      case "up":
         this.targetCenter.set(currentCenter.x, currentCenter.y + moveAmount);
         break;
-      case 'down':
+      case "down":
         this.targetCenter.set(currentCenter.x, currentCenter.y - moveAmount);
         break;
-      case 'left':
+      case "left":
         this.targetCenter.set(currentCenter.x - moveAmount, currentCenter.y);
         break;
-      case 'right':
+      case "right":
         this.targetCenter.set(currentCenter.x + moveAmount, currentCenter.y);
         break;
     }
-    
+
     this.startAnimation();
   }
 
@@ -139,4 +138,4 @@ export class MandelbrotControls {
       this.animationFrameId = requestAnimationFrame(this.animate);
     }
   }
-} 
+}

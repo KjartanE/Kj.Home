@@ -57,6 +57,12 @@ const projects = [
     description: "Interactive waveform visualization",
     image: "/projects/waveform-preview.png",
     link: "/projects/waveform"
+  },
+  {
+    title: "Butterchurn",
+    description: "Interactive butterchurn visualization",
+    image: "/projects/butterchurn-preview.png",
+    link: "/projects/butterchurn"
   }
 ];
 
@@ -75,7 +81,7 @@ export default function ProjectsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="relative aspect-video overflow-hidden rounded-lg">
-                  <Image src={project.image} alt={project.title} fill className="object-cover" priority />
+                  <Image src={project.image} alt={project.title} sizes="large" fill className="object-cover" priority />
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {project.tech?.map((tech) => (

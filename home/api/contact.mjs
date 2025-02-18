@@ -7,10 +7,7 @@ const formatMessage = (message) => {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(
-      /(https?:\/\/[^\s]+)/g,
-      '<a href="$1" style="color: #007bff; text-decoration: underline;">$1</a>'
-    )
+    .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" style="color: #007bff; text-decoration: underline;">$1</a>')
     .split("\n")
     .join("<br>");
 };
@@ -20,10 +17,7 @@ export default async function handler(req, res) {
 
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET,OPTIONS,PATCH,DELETE,POST,PUT"
-  );
+  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
@@ -63,7 +57,7 @@ export default async function handler(req, res) {
           </div>
         </div>
       `,
-      replyTo: email,
+      replyTo: email
     });
 
     return res.status(200).json({ success: true, data });
@@ -71,7 +65,7 @@ export default async function handler(req, res) {
     console.error("Email error:", error);
     return res.status(500).json({
       error: "Error sending email",
-      details: process.env.NODE_ENV === "development" ? error : undefined,
+      details: process.env.NODE_ENV === "development" ? error : undefined
     });
   }
 }

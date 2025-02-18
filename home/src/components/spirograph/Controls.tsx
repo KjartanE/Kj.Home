@@ -47,27 +47,29 @@ function DraggableCard({
     id: "spirograph-controls"
   });
 
-  const style: React.CSSProperties = isMobile ? {
-    position: 'fixed',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 40,
-    opacity: 0.8,
-  } : {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    zIndex: 40,
-    transform: `translate3d(${position.x + (transform?.x || 0)}px, ${position.y + (transform?.y || 0)}px, 0)`
-  };
+  const style: React.CSSProperties = isMobile
+    ? {
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 40,
+        opacity: 0.8
+      }
+    : {
+        position: "fixed",
+        top: 0,
+        left: 0,
+        zIndex: 40,
+        transform: `translate3d(${position.x + (transform?.x || 0)}px, ${position.y + (transform?.y || 0)}px, 0)`
+      };
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`${isMobile ? "w-full rounded-b-none backdrop-blur-sm bg-background/80" : "w-80"}`}>
+      <Card className={`${isMobile ? "w-full rounded-b-none bg-background/80 backdrop-blur-sm" : "w-80"}`}>
         <div
           {...(isMobile ? {} : { ...attributes, ...listeners })}
-          className={`flex h-16 ${!isMobile && "cursor-move"} items-center justify-between px-3 ${isExpanded ? 'border-b' : ''}`}>
+          className={`flex h-16 ${!isMobile && "cursor-move"} items-center justify-between px-3 ${isExpanded ? "border-b" : ""}`}>
           <h3 className="font-semibold">Spirograph Controls</h3>
           <Button
             variant="ghost"
@@ -92,7 +94,7 @@ export function Controls({
   onThirdCircleToggle,
   onThirdRadiusChange,
   onRender,
-  initialValues,
+  initialValues
 }: ControlsProps) {
   const hasMounted = useHasMounted();
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -114,12 +116,7 @@ export function Controls({
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <DraggableCard 
-        position={position} 
-        isExpanded={isExpanded} 
-        setIsExpanded={setIsExpanded}
-        isMobile={isMobile}
-      >
+      <DraggableCard position={position} isExpanded={isExpanded} setIsExpanded={setIsExpanded} isMobile={isMobile}>
         {isExpanded && (
           <CardContent className={`p-4 ${isMobile ? "max-h-[70vh] overflow-y-auto" : ""}`}>
             <div className="space-y-6">
@@ -200,12 +197,12 @@ export function Controls({
                   />
                 </div>
                 {values.thirdCircle && (
-                  <div className="space-y-2 mt-2">
+                  <div className="mt-2 space-y-2">
                     <Label>Third Circle Radius: {values.thirdRadius}</Label>
                     <Slider
                       value={[values.thirdRadius]}
                       min={0}
-                      max={values.r / values.R * 2}
+                      max={(values.r / values.R) * 2}
                       step={0.2}
                       onValueChange={([value]) => {
                         setValues((prev) => ({ ...prev, thirdRadius: value }));
@@ -215,10 +212,7 @@ export function Controls({
                   </div>
                 )}
               </div>
-              <Button 
-                className="w-full" 
-                onClick={onRender}
-              >
+              <Button className="w-full" onClick={onRender}>
                 Render New Spirograph
               </Button>
             </div>
@@ -227,4 +221,4 @@ export function Controls({
       </DraggableCard>
     </DndContext>
   );
-} 
+}

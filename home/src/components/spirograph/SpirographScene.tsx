@@ -63,7 +63,7 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
     }
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ 
+    const renderer = new THREE.WebGLRenderer({
       antialias: !isMobile,
       powerPreference: "high-performance"
     });
@@ -83,8 +83,8 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
     const gridHelper = new THREE.GridHelper(20, 20);
     const gridMaterial = gridHelper.material as THREE.Material;
     if (Array.isArray(gridMaterial)) {
-      gridMaterial.forEach(mat => mat.opacity = 0.1);
-      gridMaterial.forEach(mat => mat.transparent = true);
+      gridMaterial.forEach((mat) => (mat.opacity = 0.1));
+      gridMaterial.forEach((mat) => (mat.transparent = true));
     } else {
       gridMaterial.opacity = 0.1;
       gridMaterial.transparent = true;
@@ -95,13 +95,13 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
     const maxPoints = 10000;
     const positions = new Float32Array(maxPoints * 3);
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geometry.setDrawRange(0, 0);
 
-    const material = new THREE.LineBasicMaterial({ 
-      color: theme.resolvedTheme === "dark" ? 0x00ff00 : 0x00aa00,
+    const material = new THREE.LineBasicMaterial({
+      color: theme.resolvedTheme === "dark" ? 0x00ff00 : 0x00aa00
     });
-    
+
     const line = new THREE.Line(geometry, material);
     scene.add(line);
 
@@ -112,7 +112,7 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
     const totalPoints = revolutions * pointsPerRevolution;
     let currentPoint = 0;
     const basePointsPerFrame = 2;
-    
+
     const animate = () => {
       if (!isPageVisible) {
         animationFrameRef.current = requestAnimationFrame(animate);
@@ -121,28 +121,28 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
 
       const positions = line.geometry.attributes.position.array;
       const pointsThisFrame = Math.ceil(basePointsPerFrame * params.speed);
-      
+
       for (let i = 0; i < pointsThisFrame && currentPoint < totalPoints; i++) {
         const t = (currentPoint / totalPoints) * Math.PI * 2 * revolutions;
-        
+
         const k = params.r / params.R;
         const l = params.d / params.r;
-        
+
         let x, y;
         if (params.thirdCircle) {
           const innerT = t * 2;
           const innerRadius = params.r * params.thirdRadius;
-          
-          const secondX = params.R * ((1 - k) * Math.cos(t) + l * k * Math.cos((1 - k) * t / k));
-          const secondY = params.R * ((1 - k) * Math.sin(t) - l * k * Math.sin((1 - k) * t / k));
-          
+
+          const secondX = params.R * ((1 - k) * Math.cos(t) + l * k * Math.cos(((1 - k) * t) / k));
+          const secondY = params.R * ((1 - k) * Math.sin(t) - l * k * Math.sin(((1 - k) * t) / k));
+
           x = secondX + innerRadius * Math.cos(innerT);
           y = secondY + innerRadius * Math.sin(innerT);
         } else {
-          x = params.R * ((1 - k) * Math.cos(t) + l * k * Math.cos((1 - k) * t / k));
-          y = params.R * ((1 - k) * Math.sin(t) - l * k * Math.sin((1 - k) * t / k));
+          x = params.R * ((1 - k) * Math.cos(t) + l * k * Math.cos(((1 - k) * t) / k));
+          y = params.R * ((1 - k) * Math.sin(t) - l * k * Math.sin(((1 - k) * t) / k));
         }
-        
+
         const z = Math.sin(t) * params.b;
 
         const idx = currentPoint * 3;
@@ -179,17 +179,17 @@ export default function SpirographScene({ params }: SpirographSceneProps) {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("resize", handleResize);
-      
+
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
 
       controls.dispose();
-      
+
       if (sceneRef.current) {
         ThreeCleanup.disposeScene(sceneRef.current);
       }
-      
+
       if (rendererRef.current) {
         rendererRef.current.dispose();
         if (container.contains(rendererRef.current.domElement)) {

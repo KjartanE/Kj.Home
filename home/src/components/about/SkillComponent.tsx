@@ -10,15 +10,15 @@ const SkillComponent: React.FC = () => {
   const categories = {
     skills: {
       title: "Skills",
-      items: resume.skills,
+      items: resume.skills
     },
     technologies: {
       title: "Technologies",
-      items: resume.technologies,
+      items: resume.technologies
     },
     languages: {
       title: "Languages",
-      items: resume.languages,
+      items: resume.languages
     }
   };
 
@@ -32,11 +32,7 @@ const SkillComponent: React.FC = () => {
           <CardContent>
             <div className="flex flex-wrap gap-3">
               {category.items.map((item) => (
-                <Badge 
-                  key={item} 
-                  variant="secondary"
-                  className="flex items-center gap-2 px-3 py-1.5"
-                >
+                <Badge key={item} variant="secondary" className="flex items-center gap-2 px-3 py-1.5">
                   <Layers className="h-4 w-4" />
                   <span>{item}</span>
                 </Badge>
