@@ -63,6 +63,12 @@ const projects = [
     description: "Interactive butterchurn visualization",
     image: "/projects/butterchurn-preview.png",
     link: "/projects/butterchurn"
+  },
+  {
+    title: "Game of Life",
+    description: "Interactive Game of Life simulation",
+    image: "/projects/life-preview.png",
+    link: "/projects/life"
   }
 ];
 
