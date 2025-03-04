@@ -7,9 +7,7 @@ import {
   GRID_SIZE_X,
   GRID_SIZE_Y,
   CELL_SIZE, 
-  createGridGeometry, 
-  createCellsMaterial, 
-  updateCellPositions
+  createGridGeometry
 } from "./main";
 
 export default function ThreeScene() {
@@ -52,23 +50,58 @@ export default function ThreeScene() {
     const gridLines = new THREE.LineSegments(gridGeometry, gridMaterial);
     scene.add(gridLines);
 
-    // Create points for cells
-    const cellsGeometry = new THREE.BufferGeometry();
-    const cellsMaterial = createCellsMaterial();
-    const cellsPoints = new THREE.Points(cellsGeometry, cellsMaterial);
-    scene.add(cellsPoints);
+    // Create instanced mesh for cells
+    const cellGeometry = new THREE.PlaneGeometry(CELL_SIZE * 0.9, CELL_SIZE * 0.9);
+    const cellMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xFFFFFF,
+      side: THREE.DoubleSide
+    });
+    
+    // Keep track of cell instances
+    const cellInstances: THREE.InstancedMesh = new THREE.InstancedMesh(
+      cellGeometry, 
+      cellMaterial, 
+      GRID_SIZE_X * GRID_SIZE_Y
+    );
+    cellInstances.count = 0; // Start with no cells
+    scene.add(cellInstances);
 
     // Initialize Game of Life
     const game = new GameOfLife();
     gameRef.current = game;
 
+    // Update cell instances based on game state
+    const updateCells = () => {
+      // Reset instance count
+      cellInstances.count = 0;
+      
+      // Matrix for positioning
+      const matrix = new THREE.Matrix4();
+      
+      // Add instances for each live cell
+      for (let x = 0; x < GRID_SIZE_X; x++) {
+        for (let y = 0; y < GRID_SIZE_Y; y++) {
+          if (game.grid[x][y]) {
+            matrix.setPosition(
+              x * CELL_SIZE + CELL_SIZE / 2,
+              y * CELL_SIZE + CELL_SIZE / 2,
+              0
+            );
+            cellInstances.setMatrixAt(cellInstances.count, matrix);
+            cellInstances.count++;
+          }
+        }
+      }
+      
+      // Update the instance matrix buffer
+      cellInstances.instanceMatrix.needsUpdate = true;
+    };
+
     // Set up update callback
-    game.setUpdateCallback(() => {
-      updateCellPositions(game, cellsPoints);
-    });
+    game.setUpdateCallback(updateCells);
 
     // Initial update
-    updateCellPositions(game, cellsPoints);
+    updateCells();
 
     // Resize handler - ensure grid fills width
     const handleResize = () => {
@@ -147,11 +180,11 @@ export default function ThreeScene() {
         game.pause();
       }
       scene.remove(gridLines);
-      scene.remove(cellsPoints);
+      scene.remove(cellInstances);
       gridGeometry.dispose();
       gridMaterial.dispose();
-      cellsGeometry.dispose();
-      cellsMaterial.dispose();
+      cellGeometry.dispose();
+      cellMaterial.dispose();
       renderer.dispose();
     };
   }, []);

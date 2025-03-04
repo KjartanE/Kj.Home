@@ -135,7 +135,7 @@ export function createGridGeometry(): THREE.BufferGeometry {
 
 export function createCellsMaterial(): THREE.PointsMaterial {
   return new THREE.PointsMaterial({
-    color: 0x00ff00,
+    color: 0xFFFFFF,
     size: CELL_SIZE * 0.9,
     sizeAttenuation: true,
   });
