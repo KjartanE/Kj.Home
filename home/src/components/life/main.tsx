@@ -4,7 +4,7 @@ import * as THREE from "three";
 export const GRID_SIZE_Y = 100; // Vertical grid size
 export const GRID_SIZE_X = 200; // Horizontal grid size (wider)
 export const CELL_SIZE = 1;
-export const UPDATE_INTERVAL = 200; // ms between updates
+export const UPDATE_INTERVAL = 60; // ms between updates
 
 // Class to handle the game logic
 export class GameOfLife {

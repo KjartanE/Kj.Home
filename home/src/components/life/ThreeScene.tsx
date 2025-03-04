@@ -2,13 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { 
-  GameOfLife, 
-  GRID_SIZE_X,
-  GRID_SIZE_Y,
-  CELL_SIZE, 
-  createGridGeometry
-} from "./main";
+import { GameOfLife, GRID_SIZE_X, GRID_SIZE_Y, CELL_SIZE, createGridGeometry } from "./main";
 
 export default function ThreeScene() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -17,7 +11,7 @@ export default function ThreeScene() {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    
+
     // Store ref to container element for cleanup
     const container = containerRef.current;
 
@@ -39,9 +33,7 @@ export default function ThreeScene() {
     const gridHeight = GRID_SIZE_Y * CELL_SIZE;
 
     // Create camera (will be adjusted in resize handler)
-    const camera = new THREE.OrthographicCamera(
-      -1, 1, 1, -1, 0.1, 1000
-    );
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
     camera.position.z = 10;
 
     // Create grid geometry and material
@@ -52,15 +44,15 @@ export default function ThreeScene() {
 
     // Create instanced mesh for cells
     const cellGeometry = new THREE.PlaneGeometry(CELL_SIZE * 0.9, CELL_SIZE * 0.9);
-    const cellMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0xFFFFFF,
+    const cellMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
       side: THREE.DoubleSide
     });
-    
+
     // Keep track of cell instances
     const cellInstances: THREE.InstancedMesh = new THREE.InstancedMesh(
-      cellGeometry, 
-      cellMaterial, 
+      cellGeometry,
+      cellMaterial,
       GRID_SIZE_X * GRID_SIZE_Y
     );
     cellInstances.count = 0; // Start with no cells
@@ -74,25 +66,21 @@ export default function ThreeScene() {
     const updateCells = () => {
       // Reset instance count
       cellInstances.count = 0;
-      
+
       // Matrix for positioning
       const matrix = new THREE.Matrix4();
-      
+
       // Add instances for each live cell
       for (let x = 0; x < GRID_SIZE_X; x++) {
         for (let y = 0; y < GRID_SIZE_Y; y++) {
           if (game.grid[x][y]) {
-            matrix.setPosition(
-              x * CELL_SIZE + CELL_SIZE / 2,
-              y * CELL_SIZE + CELL_SIZE / 2,
-              0
-            );
+            matrix.setPosition(x * CELL_SIZE + CELL_SIZE / 2, y * CELL_SIZE + CELL_SIZE / 2, 0);
             cellInstances.setMatrixAt(cellInstances.count, matrix);
             cellInstances.count++;
           }
         }
       }
-      
+
       // Update the instance matrix buffer
       cellInstances.instanceMatrix.needsUpdate = true;
     };
@@ -106,16 +94,16 @@ export default function ThreeScene() {
     // Resize handler - ensure grid fills width
     const handleResize = () => {
       if (!container) return;
-      
+
       const newWidth = container.clientWidth;
       const newHeight = container.clientHeight;
-      
+
       // Calculate aspect ratios
       const containerAspect = newWidth / newHeight;
       const gridAspect = gridWidth / gridHeight;
-      
+
       let width, height;
-      
+
       if (containerAspect > gridAspect) {
         // Container is wider than grid - fill width
         width = gridWidth;
@@ -125,40 +113,51 @@ export default function ThreeScene() {
         height = gridHeight;
         width = height * containerAspect;
       }
-      
+
       // Set camera frustum
-      camera.left = 0;
       camera.right = gridWidth;
       camera.top = gridHeight;
-      camera.bottom = 0;
-      
+
       // Update camera
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, newHeight);
     };
-    
+
     // Add event listener and trigger initial resize
     window.addEventListener("resize", handleResize);
     handleResize();
 
-    // Handle mouse click
+    // Create a raycaster for accurate mouse position detection
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    // Handle mouse click with proper raycasting
     const handleMouseClick = (event: MouseEvent) => {
       if (!container) return;
-      
+
       const rect = container.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      
+
+      // Calculate normalized device coordinates (-1 to +1)
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      // Set the raycaster from the camera and mouse position
+      raycaster.setFromCamera(mouse, camera);
+
+      // Calculate the intersection with the plane at z=0
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1));
+      const intersectionPoint = new THREE.Vector3();
+      raycaster.ray.intersectPlane(plane, intersectionPoint);
+
       // Convert to grid coordinates
-      const gridX = Math.floor((x / rect.width) * GRID_SIZE_X);
-      const gridY = Math.floor((y / rect.height) * GRID_SIZE_Y);
-      
-      if (game && gridX >= 0 && gridX < GRID_SIZE_X && 
-          gridY >= 0 && gridY < GRID_SIZE_Y) {
+      const gridX = Math.floor(intersectionPoint.x);
+      const gridY = Math.floor(intersectionPoint.y);
+
+      if (game && gridX >= 0 && gridX < GRID_SIZE_X && gridY >= 0 && gridY < GRID_SIZE_Y) {
         game.toggleCell(gridX, gridY);
       }
     };
-    
+
     container.addEventListener("click", handleMouseClick);
 
     // Animation loop
@@ -166,7 +165,7 @@ export default function ThreeScene() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
     };
-    
+
     animate();
 
     // Cleanup
@@ -192,13 +191,13 @@ export default function ThreeScene() {
   // Game controls
   const toggleSimulation = () => {
     if (!gameRef.current) return;
-    
+
     if (isRunning) {
       gameRef.current.pause();
     } else {
       gameRef.current.start();
     }
-    
+
     setIsRunning(!isRunning);
   };
 
