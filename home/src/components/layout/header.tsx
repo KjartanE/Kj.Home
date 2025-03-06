@@ -17,7 +17,7 @@ export const Header = () => {
       <div className="flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-4 sm:gap-6">
           <Link href="/" className="flex items-center gap-2">
-            <HomeLogo />
+            <HomeLogo width={50} height={50} />
             <span className="font-mono text-lg font-bold sm:inline-flex">kj.home</span>
           </Link>
           <div className="hidden md:block">
