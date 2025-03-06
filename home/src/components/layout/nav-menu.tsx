@@ -58,7 +58,7 @@ export function NavMenu({ mobile, onSelect }: NavMenuProps) {
                   <Link
                     className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/40 to-muted p-6 no-underline outline-none focus:shadow-md"
                     href="/projects">
-                    <HomeLogo />
+                    <HomeLogo width={150} height={150} />
                     <div className="mb-2 mt-4 text-lg font-medium">Projects</div>
                     <p className="text-sm leading-tight text-muted-foreground">
                       Check out some interesting projects I&apos;ve worked on.
