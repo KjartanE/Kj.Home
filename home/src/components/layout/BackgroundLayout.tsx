@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import PenroseBackground from "@/components/penrose/PenroseBackground";
+import PenroseBackground from "@/components/penrose/background/PenroseBackground";
 import { memo } from "react";
 
 const excludedPaths = [

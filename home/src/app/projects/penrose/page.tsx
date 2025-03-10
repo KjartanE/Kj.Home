@@ -1,5 +1,5 @@
 import React from "react";
-import PenrosePlayground from "@/components/penrose/PenrosePlayground";
+import PenrosePlayground from "@/components/penrose/playground/PenrosePlayground";
 
 export default function Page() {
   return (

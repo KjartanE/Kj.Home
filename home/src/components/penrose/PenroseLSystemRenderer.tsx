@@ -12,7 +12,7 @@ import { ThreeCleanup } from "@/lib/three/cleanup";
 const PenroseLSystemRenderer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const isInitializedRef = useRef(false);
+  const isInitializedRef = useRef<boolean>(false);
   const frameCountRef = useRef(0);
   const sceneRef = useRef<{
     scene: THREE.Scene;
@@ -20,12 +20,14 @@ const PenroseLSystemRenderer: React.FC = () => {
     renderer: THREE.WebGLRenderer;
     resize: (camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer) => void;
   } | null>(null);
+  const penroseManagerRef = useRef<PenroseManager | null>(null);
 
   const theme = useTheme();
 
   const { penroseLSystem, penroseManager } = useMemo(() => {
     const system = new PenroseLSystem();
     const manager = new PenroseManager(theme.resolvedTheme || "dark");
+    penroseManagerRef.current = manager;
     system.simulate(5);
     return { penroseLSystem: system, penroseManager: manager };
   }, [theme.resolvedTheme]);
@@ -47,6 +49,12 @@ const PenroseLSystemRenderer: React.FC = () => {
     container.appendChild(renderer.domElement);
     scene.background = new THREE.Color(theme.resolvedTheme === "dark" ? 0x000000 : 0xffffff);
 
+    const viewSize = Math.max(window.innerWidth, window.innerHeight);
+    const distanceScale = 1.0 / viewSize;
+    if (penroseManagerRef.current) {
+      penroseManagerRef.current.setDistanceScale(distanceScale);
+    }
+
     const renderInterval = 1000 / 30;
     let accumulatedTime = 0;
 
@@ -64,12 +72,14 @@ const PenroseLSystemRenderer: React.FC = () => {
       let shouldRender = false;
       while (accumulatedTime >= renderInterval) {
         if (penroseManager.steps < penroseLSystem.production.length) {
-          penroseManager.steps += Math.min(24, penroseLSystem.production.length - penroseManager.steps);
-          scene.clear();
-          penroseManager.generateLines(location, penroseLSystem);
-          const line = penroseManager.renderLines();
-          scene.add(line);
-          shouldRender = true;
+          penroseManager.steps += Math.min(12, penroseLSystem.production.length - penroseManager.steps);
+          
+          const newLines = penroseManager.generateIncrementalLines(location, penroseLSystem);
+          
+          if (newLines) {
+            scene.add(newLines);
+            shouldRender = true;
+          }
         }
 
         accumulatedTime -= renderInterval;
@@ -92,16 +102,22 @@ const PenroseLSystemRenderer: React.FC = () => {
     };
 
     const handleResize = () => {
-      if (sceneRef.current) {
-        resize(camera, renderer);
+      if (!sceneRef.current || !containerRef.current) return;
+      const { camera, renderer, resize } = sceneRef.current;
+      resize(camera, renderer);
+      
+      const newViewSize = Math.max(window.innerWidth, window.innerHeight);
+      const newDistanceScale = 1.0 / newViewSize;
+      if (penroseManagerRef.current) {
+        penroseManagerRef.current.setDistanceScale(newDistanceScale);
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("resize", handleResize);
 
-    // Force initial render
-    penroseManager.generateLines(location, penroseLSystem);
+    penroseManager.reset();
+    scene.clear();
     const initialLine = penroseManager.renderLines();
     scene.add(initialLine);
     renderer.render(scene, camera);

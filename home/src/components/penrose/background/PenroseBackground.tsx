@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import PenroseLSystemRenderer from "./PenroseLSystemRenderer";
+import PenroseLSystemRenderer from "../PenroseLSystemRenderer";
 
 function PenroseBackground() {
   return (
