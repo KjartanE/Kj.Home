@@ -23,7 +23,7 @@ export const fadeFragmentShader = `
       
       // Adjust width based on distance from center
       // The further from center, the wider the line
-      float adjustedWidth = baseWidth * (5.0 + distanceFromCenter * distanceScale * 2.0);
+      float adjustedWidth = baseWidth * (25.0 + distanceFromCenter * distanceScale * 2.0);
       
       float color = mix(0.0, 1.0, themeColor);
       gl_FragColor = vec4(adjustedWidth * color, adjustedWidth * color, adjustedWidth * color, 1.0);
