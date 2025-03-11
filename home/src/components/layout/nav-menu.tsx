@@ -52,42 +52,79 @@ export function NavMenu({ mobile, onSelect }: NavMenuProps) {
         <NavigationMenuItem>
           <NavigationMenuTrigger className="bg-transparent">Projects</NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid w-[300px] gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-              <li className="row-span-3">
+            <div className="flex flex-col p-4 w-[300px] md:w-[500px] lg:w-[800px]">
+              {/* Projects Header */}
+              <div className="mb-4">
                 <NavigationMenuLink asChild>
                   <Link
-                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/40 to-muted p-6 no-underline outline-none focus:shadow-md"
+                    className="flex w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/40 to-muted p-4 no-underline outline-none focus:shadow-md"
                     href="/projects">
-                    <HomeLogo width={150} height={150} />
-                    <div className="mb-2 mt-4 text-lg font-medium">Projects</div>
-                    <p className="text-sm leading-tight text-muted-foreground">
-                      Check out some interesting projects I&apos;ve worked on.
-                    </p>
+                    <div className="flex items-center">
+                      <HomeLogo width={80} height={80} />
+                      <div className="ml-4">
+                        <div className="mb-1 text-lg font-medium">Projects</div>
+                        <p className="text-sm leading-tight text-muted-foreground">
+                          Check out some interesting projects I&apos;ve worked on.
+                        </p>
+                      </div>
+                    </div>
                   </Link>
                 </NavigationMenuLink>
-              </li>
-              <ListItem href="/projects/cube" title="Cube">
-                Cube Rendering
-              </ListItem>
-              <ListItem href="/projects/penrose" title="Penrose">
-                Penrose Rendering
-              </ListItem>
-              <ListItem href="/projects/chladni" title="Chladni">
-                Chladni Patterns
-              </ListItem>
-              <ListItem href="/projects/pendulum" title="Pendulum">
-                Double Pendulum Physics.
-              </ListItem>
-              <ListItem href="/projects/solar" title="Solar">
-                Solar System.
-              </ListItem>
-              <ListItem href="/projects/spirograph" title="Spirograph">
-                Spirograph.
-              </ListItem>
-              <ListItem href="/projects/mandelbrot" title="Mandelbrot">
-                Mandelbrot Set.
-              </ListItem>
-            </ul>
+              </div>
+
+              {/* Categories */}
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {/* Mathematics & Simulations */}
+                <div>
+                  <div className="font-medium mb-2 text-sm text-muted-foreground">Mathematics & Simulations</div>
+                  <ul className="space-y-1">
+                    <ListItem href="/projects/penrose" title="Penrose">
+                      Penrose Tiling pattern generator
+                    </ListItem>
+                    <ListItem href="/projects/chladni" title="Chladni">
+                      Chladni plate vibration patterns
+                    </ListItem>
+                    <ListItem href="/projects/pendulum" title="Double Pendulum">
+                      Interactive physics simulation
+                    </ListItem>
+                    <ListItem href="/projects/spirograph" title="Spirograph">
+                      Interactive spirograph simulation
+                    </ListItem>
+                    <ListItem href="/projects/mandelbrot" title="Mandelbrot">
+                      Mandelbrot Set visualization
+                    </ListItem>
+                  </ul>
+                </div>
+                
+                {/* 3D Visualizations */}
+                <div>
+                  <div className="font-medium mb-2 text-sm text-muted-foreground">3D Visualizations</div>
+                  <ul className="space-y-1">
+                    <ListItem href="/projects/cube" title="Cube">
+                      3D Cube Rendering
+                    </ListItem>
+                    <ListItem href="/projects/solar" title="Solar System">
+                      Solar System visualization
+                    </ListItem>
+                    {/* Add more 3D projects as needed */}
+                  </ul>
+                </div>
+                
+                {/* Music & Audio */}
+                <div>
+                  <div className="font-medium mb-2 text-sm text-muted-foreground">Music & Audio</div>
+                  <ul className="space-y-1">
+                    {/* Music projects will go here when added */}
+                    <ListItem href="/projects/waveform" title="Waveform">
+                      Waveform visualization
+                    </ListItem>
+                    <ListItem href="/projects/butterchurn" title="Butterchurn">
+                      Butterchurn visualization
+                    </ListItem>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem className="bg-transparent">
@@ -118,12 +155,12 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWit
           <a
             ref={ref}
             className={cn(
-              "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+              "block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
               className
             )}
             {...props}>
             <div className="text-sm font-medium leading-none">{title}</div>
-            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">{children}</p>
+            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">{children}</p>
           </a>
         </NavigationMenuLink>
       </li>

@@ -1,4 +1,4 @@
-import PenroseLSystem from "./lib/PenroseLSystem";
+import PenroseLSystem from "../lib/PenroseLSystem";
 
 export default class PlaygroundController {
   public color: string;

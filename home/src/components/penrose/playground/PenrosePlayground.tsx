@@ -3,8 +3,8 @@
 import * as THREE from "three";
 import { useEffect, useRef, useMemo } from "react";
 import { useTheme } from "next-themes";
-import PenroseScene, { IPosition } from "./PenroseScene";
-import PenroseManager from "./PenroseManager";
+import PenroseScene, { IPosition } from "../PenroseScene";
+import PenroseManager from "../PenroseManager";
 import PlaygroundController from "./PlaygroundController";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Controls } from "./Controls";
@@ -55,7 +55,7 @@ const PenrosePlayground: React.FC = () => {
     if (value) {
       // Immediately render the full pattern when instant mode is enabled
       penroseManager.steps = playgroundController.penroseLSystem.production.length;
-      penroseManager.generateLines(location, playgroundController.penroseLSystem);
+      penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
       if (sceneRef.current) {
         sceneRef.current.scene.clear();
         sceneRef.current.scene.add(penroseManager.renderLines());
@@ -70,7 +70,7 @@ const PenrosePlayground: React.FC = () => {
 
     if (playgroundController.instantFlag) {
       penroseManager.steps = playgroundController.penroseLSystem.production.length;
-      penroseManager.generateLines(location, playgroundController.penroseLSystem);
+      penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
       if (sceneRef.current) {
         sceneRef.current.scene.clear();
         sceneRef.current.scene.add(penroseManager.renderLines());
@@ -109,7 +109,7 @@ const PenrosePlayground: React.FC = () => {
         // Immediately render full pattern if in instant mode
         if (playgroundController.instantFlag) {
           penroseManager.steps = playgroundController.penroseLSystem.production.length;
-          penroseManager.generateLines(location, playgroundController.penroseLSystem);
+          penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
           const line = penroseManager.renderLines();
           scene.add(line);
         }
@@ -121,7 +121,7 @@ const PenrosePlayground: React.FC = () => {
       ) {
         penroseManager.steps += stepSize;
         scene.clear();
-        penroseManager.generateLines(location, playgroundController.penroseLSystem);
+        penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
         const line = penroseManager.renderLines();
         scene.add(line);
       }
@@ -132,7 +132,7 @@ const PenrosePlayground: React.FC = () => {
     }
 
     // Initial render
-    penroseManager.generateLines(location, playgroundController.penroseLSystem);
+    penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
     const initialLine = penroseManager.renderLines();
     scene.add(initialLine);
     renderer.render(scene, camera);
