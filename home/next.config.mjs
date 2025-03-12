@@ -15,7 +15,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true
   },
-  output: "standalone",
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"]
 };
 
