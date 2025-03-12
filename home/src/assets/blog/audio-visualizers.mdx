@@ -1,12 +1,12 @@
 ---
 title: "Audio Visualizers"
-publishedAt: "2025-02-05"
+publishedAt: "2025-03-12"
 summary: "Creating reactive audio visualizations with Web Audio API"
 ---
 
 # Exploring Milkdrop 2.0 Integration for Live Music Visualization
 
-As a DJ and developer, I've always been fascinated by the intersection of audio and visual experiences. Recently, I've been exploring ways to integrate Milkdrop 2.0, the legendary Winamp visualizer, into modern web applications for live music visualization.
+As a self proclaimed producer and developer, I've always been fascinated by the intersection of audio and visual experiences. Recently, I've been exploring ways to integrate Milkdrop 2.0, the legendary Winamp visualizer, into modern web applications for live music visualization.
 
 ## What is Milkdrop?
 
@@ -42,7 +42,7 @@ To ensure smooth 60fps performance, I implemented several techniques:
 
 ### Butterchurn Integration
 
-[Butterchurn](https://github.com/jberg/butterchurn), a WebGL implementation of Milkdrop 2.0, has been invaluable in this project. It provides a modern, web-friendly way to render Milkdrop presets.
+<a href="https://github.com/jberg/butterchurn" target="_blank">Butterchurn</a>, a WebGL implementation of Milkdrop 2.0, has been invaluable in this project. It provides a modern, web-friendly way to render Milkdrop presets.
 
 ## Current Status
 
@@ -64,8 +64,30 @@ Future development will focus on:
 
 Stay tuned for updates as this project develops further!
 
+
+# Web Page Audio Interfacing
+
+Integrating an audio output stream into a web page from a user computer presents some interesting challenges.
+
+```
+audiooutputs cannot be accessed for privacy, only audioinputs (and only after confirming with the user). On Windows you can enable "stereo mix" that routes all outputs to a virtual input, and you can use that, but it requires all users to have stereo mix enabled...
+
+The visualizers you see are using the buffer or source that they created so of course they have access to it.
+``` 
+
+<a href="https://stackoverflow.com/questions/58016209/can-i-access-the-local-audio-output-stream-from-chrome-using-the-webaudio-api" target="_blank">https://stackoverflow.com/questions/58016209/can-i-access-the-local-audio-output-stream-from-chrome-using-the-webaudio-api</a>
+
+This comment lead me to understanding how Chrome routes your audio. But this also means I can make any audio visualizer. (on chrome)
+
+<a href="https://www.forritun.dev/projects/waveform" target="_blank">https://www.forritun.dev/projects/waveform</a>
+
+Then integrating butterchurn:
+
+<a href="https://www.forritun.dev/projects/butterchurn" target="_blank">https://www.forritun.dev/projects/butterchurn</a>
+
+
 ## Resources
 
-- [Butterchurn GitHub Repository](https://github.com/jberg/butterchurn)
-- [Web Audio API Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
-- [WebGL Fundamentals](https://webglfundamentals.org/)
+- <a href="https://github.com/jberg/butterchurn" target="_blank">Butterchurn GitHub Repository</a>
+- <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" target="_blank">Web Audio API Documentation</a>
+- <a href="https://webglfundamentals.org/" target="_blank">WebGL Fundamentals</a>

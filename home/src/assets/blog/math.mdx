@@ -1,0 +1,85 @@
+---
+title: "Math - Notes"
+publishedAt: "2025-03-12"
+summary: "I like math."
+---
+
+## Penrose Tiling
+
+Implementing Penrose tilings - aperiodic patterns that never repeat regardless of how far they're extended. My implementation features:
+
+- L-System based pattern generation for fractal-like growth
+- Interactive click-and-drag controls for pattern manipulation
+- Custom shader-based rendering for optimal visual output
+- Smooth animation system to visualize pattern growth
+
+The core algorithm uses L-System substitution rules to generate these complex geometric patterns. Each iteration creates increasingly detailed self-similar structures while maintaining the fundamental aperiodic property.
+
+Reference implementation: <a href="https://www.forritun.dev/projects/penrose" target="_blank">https://www.forritun.dev/projects/penrose</a>
+
+## Chladni Patterns
+
+Digital recreation of Chladni figures - the geometric patterns that emerge when vibrating a plate at specific resonant frequencies. The implementation includes:
+
+- Real-time pattern generation via GLSL fragment shaders for performance
+- Parameter sliders to adjust n and m modal values for different pattern types
+- Customizable color mapping and opacity controls
+- Time-based evolution with animated transitions between states
+
+The technical approach involves solving the wave equation for a vibrating plate and visualizing the nodal lines (where amplitude = 0) using shader-based rendering. The standing wave patterns are computed based on eigenfunction solutions.
+
+Reference implementation: <a href="https://www.forritun.dev/projects/chladni" target="_blank">https://www.forritun.dev/projects/chladni</a>
+
+## Double Pendulum
+
+A double pendulum simulation that demonstrates chaotic dynamics in a simple mechanical system. Features include:
+
+- Accurate physics simulation based on Lagrangian mechanics
+- Interactive mouse control for initial conditions
+- Motion trail visualization with temporal fading
+- Color-coded component rendering for tracking movement
+- Responsive design that adapts to viewport dimensions
+
+The implementation solves the coupled differential equations using fourth-order Runge-Kutta numerical integration. This provides accuracy while maintaining real-time performance across devices.
+
+Reference implementation: <a href="https://www.forritun.dev/projects/pendulum" target="_blank">https://www.forritun.dev/projects/pendulum</a>
+
+## Spirograph
+
+Digital implementation of the classical spirograph drawing toy, generating hypotrochoid and epitrochoid curves. The tool offers:
+
+- Adjustable parameters for gear ratios, hole positions, and rotation rates
+- Real-time rendering of parametric curves
+- Custom color selection for stroke and background elements
+- One-click pattern saving functionality
+- Multi-touch support for tablet interactions
+
+The mathematical model uses parametric equations to trace the path of a point on a circle rolling around the inside or outside of another circle. These equations generate continuous curves with fascinating symmetry properties.
+
+Reference implementation: <a href="https://www.forritun.dev/projects/spirograph" target="_blank">https://www.forritun.dev/projects/spirograph</a>
+
+## Mandelbrot Set
+
+Interactive explorer for the Mandelbrot set fractal with advanced rendering capabilities. Key features:
+
+- GPU-accelerated zooming and panning for smooth navigation
+- Configurable color mapping with customizable gradient palettes
+- Optimized escape-time algorithm with early bailout conditions
+- Variable iteration depth control for exploring deeper structures
+
+The rendering engine uses complex number arithmetic to iterate the function z = z² + c, tracking how quickly each point escapes a boundary radius (or if it remains bounded). The iteration count determines color mapping for visualizing the fractal boundary.
+
+Reference implementation: <a href="https://www.forritun.dev/projects/mandelbrot" target="_blank">https://www.forritun.dev/projects/mandelbrot</a>
+
+## Conway's Game of Life
+
+Implementation of Conway's cellular automaton with an expanded feature set. The simulation includes:
+
+- Custom pattern drawing and preset template library
+- Cell age visualization using color gradients
+- Toroidal grid implementation with edge wrapping
+- Comprehensive playback controls (pause, step, reset)
+
+The core logic follows Conway's four rules: underpopulation, survival, overpopulation, and reproduction. Despite this simple ruleset, the simulation exhibits emergent complexity capable of universal computation.
+
+Reference implementation: <a href="https://www.forritun.dev/projects/life" target="_blank">https://www.forritun.dev/projects/life</a>

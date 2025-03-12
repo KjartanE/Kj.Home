@@ -1,6 +1,6 @@
 ---
 title: "3D Rendering Projects"
-publishedAt: "2025-02-05"
+publishedAt: "2025-03-12"
 summary: "Exploring 3D rendering techniques with Three.js and WebGL"
 ---
 
@@ -9,73 +9,22 @@ summary: "Exploring 3D rendering techniques with Three.js and WebGL"
 A collection of interactive 3D visualizations built with Three.js, exploring different rendering techniques and physics simulations.
 
 ## Cube Visualization
+ 
+This was my first ever creation within the Processing, p5.js. 
+I actually got inspiration to recreate this idea from a Sky-Block Minecraft video where there was a random block placed every 16 blocks (1 chunk) apart.   
 
-A 3D point cloud visualization arranged in a cube formation. The project features:
+This version is a THREE.js recreation of my original, this one mainly focusing on simplicity. 
+Where as the last one I had a lot of fun with rotating colors and sync with music. <a href="https://www.youtube.com/watch?v=soJ7ezz3Rl4" target="_blank">Watch on YouTube</a>
 
-- Dynamic point matrix generation with adjustable density
-- Orbital camera controls for 360° viewing
-- Responsive window resizing
-- Wireframe rendering with custom shaders
-
-The implementation uses a dot matrix system to generate points in 3D space, creating an ethereal grid-like structure that responds to user interaction.
-
-Reference implementation:
-
-## Chladni Patterns
-
-An interactive visualization of Chladni plate vibration patterns. These patterns emerge from standing waves on a vibrating plate, creating beautiful nodal patterns. Features include:
-
-- Real-time pattern generation using custom GLSL shaders
-- Interactive controls for wave parameters (n, m values)
-- Color and opacity controls
-- Smooth animations with time-based evolution
-
-The patterns are generated using mathematical formulas translated into fragment shaders, creating mesmerizing wave interference patterns.
-
-Reference implementation:
-
-## Double Pendulum
-
-A physics-based simulation of a double pendulum system, demonstrating chaotic motion. Features:
-
-- Accurate physics simulation with gravity and damping
-- Interactive mouse control
-- Motion trails with fade effects
-- Color-coded pendulum arms and joints
-- Responsive window sizing
-
-The simulation uses numerical integration to calculate the complex motion of the coupled pendulum system, creating unpredictable and fascinating patterns.
-
-Reference implementation:
-
-## Penrose Tiling
-
-An implementation of Penrose tiling, generating infinite non-repeating patterns. Features:
-
-- L-System based pattern generation
-- Interactive generation controls
-- Custom shader-based rendering
-- Smooth animations during pattern growth
-- Dark/light theme support
-
-The project uses a sophisticated L-System algorithm to generate the complex geometric patterns characteristic of Penrose tilings.
-
-Reference implementation:
+Reference implementation: <a href="https://www.forritun.dev/projects/cube" target="_blank">Cube Visualization</a>
 
 ## Solar System
 
-An interactive 3D visualization of our solar system. Features:
+The current version of the solar system call it v1, works and in a simple way achieves the job. 
+But i just don't think its that good, I'm not happy with it. I think this idea can go the into so much detail and fun design.
 
-- Accurate orbital mechanics
-- Realistic planet scaling and texturing
-- Interactive camera controls
-- Planet trails with fade effects
-- Custom sun shader for realistic solar glow
+I just find shaders and lighting really awkward when I am trying to portray the sun against all the planets.
 
-The visualization uses custom shaders for the sun's corona effect and implements accurate orbital mathematics for planet movements.
+I will eventually get back to doing something fun with this.
 
-Reference implementation:
-
-Each project showcases different aspects of 3D graphics programming, from physics simulations to procedural pattern generation. The implementations use modern Three.js features and custom WebGL shaders to create engaging, interactive experiences.
-
-All projects are built with performance in mind, implementing proper cleanup and disposal of Three.js resources to prevent memory leaks. The code structure follows best practices for React integration with Three.js, using hooks for lifecycle management and clean separation of concerns.
+Reference implementation: <a href="https://www.forritun.dev/projects/solar" target="_blank">Solar System</a>
