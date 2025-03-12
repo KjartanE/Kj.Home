@@ -1,4 +1,4 @@
-import { MutableRefObject } from "react";
+import { RefObject } from "react";
 import * as THREE from "three";
 import { IPosition } from "./PenroseScene";
 import PenroseLSystem from "./lib/PenroseLSystem";
@@ -22,20 +22,22 @@ export default class PenroseManager {
   public steps: number;
   public drawLine: (start: THREE.Vector3, end: THREE.Vector3, width: number) => void;
   public renderLines: () => THREE.LineSegments;
-  public generateLines: (location: MutableRefObject<IPosition | null>, penroseLSystem: PenroseLSystem) => void;
-  public generateIncrementalLines: (location: MutableRefObject<IPosition | null>, penroseLSystem: PenroseLSystem) => THREE.LineSegments | null;
+  public generateLines: (location: RefObject<IPosition | null>, penroseLSystem: PenroseLSystem) => void;
+  public generateIncrementalLines: (location: RefObject<IPosition | null>, penroseLSystem: PenroseLSystem) => THREE.LineSegments | null;
 
   constructor(theme: string) {
     this.theme = theme;
     this.themeColor = this.theme === "dark" ? 1.0 : 0.0;
-    this.distanceScale = 0.2; // Controls how much distance affects width
-    // Use a constant base width that doesn't vary during drawing
-    this.baseWidth = this.theme === "dark" ? 0.01 : 0.05;
+    this.distanceScale = 0.15;
+    this.baseWidth = this.theme === "dark" ? 0.015 : 0.06;
     
     this.lineGeometry = new THREE.BufferGeometry();
     this.lineMaterial = shadeLineMaterial(this.themeColor);
+    
     this.lineMaterial.uniforms.distanceScale.value = this.distanceScale;
     this.lineMaterial.uniforms.baseWidth.value = this.baseWidth;
+    
+    this.lineMaterial.needsUpdate = true;
 
     this.steps = 0;
     this.lastGeneratedStep = 0;
@@ -65,7 +67,7 @@ export default class PenroseManager {
       return new THREE.LineSegments(this.lineGeometry, this.lineMaterial);
     };
 
-    this.generateIncrementalLines = (location: MutableRefObject<IPosition | null>, penroseLSystem: PenroseLSystem) => {
+    this.generateIncrementalLines = (location: RefObject<IPosition | null>, penroseLSystem: PenroseLSystem) => {
       // If no new steps to generate, return null
       if (this.lastGeneratedStep >= this.steps) {
         return null;
@@ -196,19 +198,21 @@ export default class PenroseManager {
     this.lineGeometry = new THREE.BufferGeometry();
   }
   
-  // Update distanceScale method
+  // Update distanceScale method with improved value verification
   public setDistanceScale(scale: number) {
-    this.distanceScale = scale;
+    this.distanceScale = Math.max(0.01, Math.min(scale, 1.0));
     if (this.lineMaterial && this.lineMaterial.uniforms) {
-      this.lineMaterial.uniforms.distanceScale.value = scale;
+      this.lineMaterial.uniforms.distanceScale.value = this.distanceScale;
+      this.lineMaterial.needsUpdate = true;
     }
   }
   
-  // Set base width method
+  // Set base width method with improved value verification
   public setBaseWidth(width: number) {
-    this.baseWidth = width;
+    this.baseWidth = Math.max(0.005, Math.min(width, 0.1));
     if (this.lineMaterial && this.lineMaterial.uniforms) {
-      this.lineMaterial.uniforms.baseWidth.value = width;
+      this.lineMaterial.uniforms.baseWidth.value = this.baseWidth;
+      this.lineMaterial.needsUpdate = true;
     }
   }
 }

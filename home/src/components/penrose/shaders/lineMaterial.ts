@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 export const fadeVertexShader = `
+    precision highp float;
     attribute float width;
     varying float vWidth;
     varying vec3 vPosition;
@@ -12,21 +13,26 @@ export const fadeVertexShader = `
   `;
 
 export const fadeFragmentShader = `
+    precision highp float;
     varying float vWidth;
     varying vec3 vPosition;
     uniform float themeColor;
     uniform float baseWidth;
     uniform float distanceScale;
     void main() {
-      // Calculate distance from center (0,0,0)
-      float distanceFromCenter = length(vPosition.xy);
+      // Calculate distance from center (0,0,0) more precisely
+      float distanceFromCenter = sqrt(vPosition.x * vPosition.x + vPosition.y * vPosition.y);
       
-      // Adjust width based on distance from center
+      // Adjust width based on distance from center with clamping to avoid extreme values
       // The further from center, the wider the line
-      float adjustedWidth = baseWidth * (25.0 + distanceFromCenter * distanceScale * 2.0);
+      float scaleFactor = clamp(distanceScale * 2.0, 0.01, 5.0);
+      float adjustedWidth = baseWidth * (14.0 + distanceFromCenter * scaleFactor);
       
+      // Make sure the color value is properly calculated
       float color = mix(0.0, 1.0, themeColor);
-      gl_FragColor = vec4(adjustedWidth * color, adjustedWidth * color, adjustedWidth * color, 1.0);
+      // Apply the width with more consistent calculation
+      float intensity = clamp(adjustedWidth, 0.0, 1.0);
+      gl_FragColor = vec4(intensity * color, intensity * color, intensity * color, 1.0);
     }
   `;
 

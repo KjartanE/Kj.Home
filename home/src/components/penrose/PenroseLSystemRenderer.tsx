@@ -14,12 +14,14 @@ const PenroseLSystemRenderer: React.FC = () => {
   const animationFrameRef = useRef<number | null>(null);
   const isInitializedRef = useRef<boolean>(false);
   const frameCountRef = useRef(0);
+
   const sceneRef = useRef<{
     scene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
     resize: (camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer) => void;
   } | null>(null);
+
   const penroseManagerRef = useRef<PenroseManager | null>(null);
 
   const theme = useTheme();
@@ -73,9 +75,9 @@ const PenroseLSystemRenderer: React.FC = () => {
       while (accumulatedTime >= renderInterval) {
         if (penroseManager.steps < penroseLSystem.production.length) {
           penroseManager.steps += Math.min(12, penroseLSystem.production.length - penroseManager.steps);
-          
+
           const newLines = penroseManager.generateIncrementalLines(location, penroseLSystem);
-          
+
           if (newLines) {
             scene.add(newLines);
             shouldRender = true;
@@ -105,7 +107,7 @@ const PenroseLSystemRenderer: React.FC = () => {
       if (!sceneRef.current || !containerRef.current) return;
       const { camera, renderer, resize } = sceneRef.current;
       resize(camera, renderer);
-      
+
       const newViewSize = Math.max(window.innerWidth, window.innerHeight);
       const newDistanceScale = 1.0 / newViewSize;
       if (penroseManagerRef.current) {

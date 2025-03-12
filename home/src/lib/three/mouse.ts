@@ -1,4 +1,4 @@
-import { MutableRefObject } from "react";
+import { RefObject } from "react";
 import * as THREE from "three";
 
 export class mouseController {
@@ -12,16 +12,16 @@ export class mouseController {
   private selectedObjectMaterial: THREE.Material | null;
   private selectedObjectOriginalColor: number | null;
   private selectedObjectOriginalOpacity: number | null;
-  private mouseDownPosition: MutableRefObject<{ x: number; y: number }>;
-  private isDragging: MutableRefObject<boolean>;
+  private mouseDownPosition: RefObject<{ x: number; y: number }>;
+  private isDragging: RefObject<boolean>;
 
   constructor(
     camera: THREE.Camera,
     scene: THREE.Scene,
     vertices: THREE.Vector3[],
     meshes: THREE.Mesh[],
-    mouseDownPosition: MutableRefObject<{ x: number; y: number }>,
-    isDragging: MutableRefObject<boolean>
+    mouseDownPosition: RefObject<{ x: number; y: number }>,
+    isDragging: RefObject<boolean>
   ) {
     this.scene = scene;
     this.camera = camera;
