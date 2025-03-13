@@ -43,6 +43,7 @@ const ThreeScene: React.FC = () => {
     const size = 20;
     const divisions = 20;
     const gridHelper = new THREE.GridHelper(size, divisions);
+    gridHelper.position.set(0, -0.1, 0);
     scene.add(gridHelper);
 
     // Initialize SceneSteps

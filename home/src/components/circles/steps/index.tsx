@@ -163,15 +163,15 @@ export const GeometrySteps: StepConfig[] = [
     setupGeometry: (geometry: Geometry) => {
       // The Germ of Life with half-moon arcs
       const radius = 5;
-      
+
       // Central circle
       geometry.createCircle({ x: 0, y: 0, z: 0 }, radius, { strokeColor: 0xff4400, animationDuration: 3 });
-      
+
       // Calculate the intersection angle (where the circles intersect)
       // When two circles of the same radius are placed one radius apart,
       // they intersect at 60 degrees from the center line
-      const intersectionAngle = - Math.PI / 6; // 60 degrees in radians
-      
+      const intersectionAngle = -Math.PI / 6; // 60 degrees in radians
+
       // Create top arc (circle centered at 0,0,radius)
       geometry.createArc(
         { x: 0, y: 0, z: radius }, // center of the arc
@@ -180,7 +180,7 @@ export const GeometrySteps: StepConfig[] = [
         2 * Math.PI + intersectionAngle, // end angle
         { strokeColor: 0xff4400, animationDuration: 3, segments: 64 }
       );
-      
+
       // Create bottom arc (circle centered at 0,0,-radius)
       geometry.createArc(
         { x: 0, y: 0, z: -radius }, // center of the arc
@@ -190,25 +190,111 @@ export const GeometrySteps: StepConfig[] = [
         { strokeColor: 0xff4400, animationDuration: 3, segments: 64 }
       );
 
+      // Create Bottom Right Arc
+      geometry.createArc(
+        { x: radius - 0.7, y: 0, z: radius / 2 }, // center of the arc
+        radius, // radius
+        Math.PI - intersectionAngle * 3, // start angle
+        Math.PI + intersectionAngle, // end angle
+        { strokeColor: 0xff4400, animationDuration: 3, segments: 64 }
+      );
+
       // Create Bottom Left Arc
       geometry.createArc(
-        { x: -radius, y: 0, z: radius }, // center of the arc
+        { x: -radius + 0.7, y: 0, z: radius / 2 }, // center of the arc
         radius, // radius
-        Math.PI + intersectionAngle, // start angle
-        Math.PI -intersectionAngle, // end angle
+        -Math.PI - intersectionAngle * 3, // start angle
+        -Math.PI - intersectionAngle * 7, // end angle
+        { strokeColor: 0xff4400, animationDuration: 3, segments: 64 }
+      );
+
+      // Create Top Right Arc
+      geometry.createArc(
+        { x: radius - 0.7, y: 0, z: -radius / 2 }, // center of the arc
+        radius, // radius
+        Math.PI - intersectionAngle, // start angle
+        Math.PI + intersectionAngle * 3, // end angle
+        { strokeColor: 0xff4400, animationDuration: 3, segments: 64 }
+      );
+
+      // Create Top Left Arc
+      geometry.createArc(
+        { x: -radius + 0.7, y: 0, z: -radius / 2 }, // center of the arc
+        radius, // radius
+        Math.PI + intersectionAngle * 3, // start angle
+        -Math.PI - intersectionAngle * 5, // end angle
+        { strokeColor: 0xff4400, animationDuration: 3, segments: 64 }
       );
     }
   },
   {
     name: "Tree of Life",
     setupGeometry: (geometry: Geometry) => {
-      geometry.createLine({ x: -5, y: 0, z: 0 }, { x: 5, y: 0, z: 0 }, { color: 0x0088ff, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 8 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: -8 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: 3, y: 0, z: 2 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: -3, y: 0, z: 2 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: 3, y: 0, z: -2 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: -3, y: 0, z: -2 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: 3, y: 0, z: -6 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: -3, y: 0, z: -6 }, { color: 0xff4400, animationDuration: 2 });
+
+      geometry.createLine({ x: 0, y: 0, z: 8 }, { x: 3, y: 0, z: 2 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: 8 }, { x: -3, y: 0, z: 2 }, { color: 0xff4400, animationDuration: 2 });
+
+      geometry.createLine({ x: 0, y: 0, z: -8 }, { x: 3, y: 0, z: -6 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: -8 }, { x: -3, y: 0, z: -6 }, { color: 0xff4400, animationDuration: 2 });
+
+      geometry.createLine({ x: 3, y: 0, z: -6 }, { x: 3, y: 0, z: -2 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: -3, y: 0, z: -6 }, { x: -3, y: 0, z: -2 }, { color: 0xff4400, animationDuration: 2 });
+
+      geometry.createLine({ x: 3, y: 0, z: 2 }, { x: 3, y: 0, z: -2 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: -3, y: 0, z: 2 }, { x: -3, y: 0, z: -2 }, { color: 0xff4400, animationDuration: 2 });
+
+      geometry.createLine({ x: 0, y: 0, z: -6 }, { x: 3, y: 0, z: -6 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: -6 }, { x: -3, y: 0, z: -6 }, { color: 0xff4400, animationDuration: 2 });
+
+      geometry.createLine({ x: 0, y: 0, z: -2 }, { x: 3, y: 0, z: -2 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: -2 }, { x: -3, y: 0, z: -2 }, { color: 0xff4400, animationDuration: 2 });
+
+      geometry.createLine({ x: 0, y: 0, z: 4 }, { x: 3, y: 0, z: 2 }, { color: 0xff4400, animationDuration: 2 });
+      geometry.createLine({ x: 0, y: 0, z: 4 }, { x: -3, y: 0, z: 2 }, { color: 0xff4400, animationDuration: 2 });
     }
   },
   {
     name: "Merkaba",
     setupGeometry: (geometry: Geometry) => {
-      geometry.createLine({ x: -5, y: 0, z: 0 }, { x: 5, y: 0, z: 0 }, { color: 0x0088ff, animationDuration: 2 });
+      const a = 6.9282;
+      // Create Star Tetrahedron (Merkaba)
+      // Upward pointing tetrahedron
+      geometry.createLine({ x: 0, y: 0, z: 8 }, { x: a, y: 0, z: -4 }, { color: 0xff4400, animationDuration: 3 });
+      geometry.createLine({ x: -a, y: 0, z: -4 }, { x: 0, y: 0, z: 8 }, { color: 0xff4400, animationDuration: 3 });
+      geometry.createLine({ x: a, y: 0, z: -4 }, { x: -a, y: 0, z: -4 }, { color: 0xff4400, animationDuration: 3 });
+
+      // Downward pointing tetrahedron
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: -8 }, { color: 0xff4400, animationDuration: 3 });
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: a, y: 0, z: 4 }, { color: 0xff4400, animationDuration: 3 });
+      geometry.createLine({ x: 0, y: 0, z: 0 }, { x: -a, y: 0, z: 4 }, { color: 0xff4400, animationDuration: 3 });
+
+      const b = a / 2;
+
+      // Connecting lines
+      geometry.createLine({ x: b, y: 0, z: 2 }, { x: 0, y: 0, z: -4 }, { color: 0xff4400, animationDuration: 3 });
+      geometry.createLine({ x: 0, y: 0, z: -4 }, { x: -b, y: 0, z: 2 }, { color: 0xff4400, animationDuration: 3 });
+      geometry.createLine({ x: -b, y: 0, z: 2 }, { x: b, y: 0, z: 2 }, { color: 0xff4400, animationDuration: 3 });
+
+      // Tips of the tetrahedrons
+      const c = a / 3;
+      const d = c * 2;
+
+      geometry.createLine({ x: 0, y: 0, z: -8 }, { x: c, y: 0, z: -4 }, { color: 0xff4400, animationDuration: 3 });
+      geometry.createLine({ x: 0, y: 0, z: -8 }, { x: -c, y: 0, z: -4 }, { color: 0xff4400, animationDuration: 3 });
+
+      geometry.createLine({ x: a, y: 0, z: 4 }, { x: d, y: 0, z: 0 }, { color: 0xff4400, animationDuration: 3 });
+      geometry.createLine({ x: a, y: 0, z: 4 }, { x: c, y: 0, z: 4 }, { color: 0xff4400, animationDuration: 3 });
+
+      geometry.createLine({ x: -a, y: 0, z: 4 }, { x: -d, y: 0, z: 0 }, { color: 0xff4400, animationDuration: 3 });
+      geometry.createLine({ x: -a, y: 0, z: 4 }, { x: -c, y: 0, z: 4 }, { color: 0xff4400, animationDuration: 3 });
     }
   },
   {
