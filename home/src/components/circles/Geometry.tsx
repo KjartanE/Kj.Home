@@ -244,6 +244,72 @@ export class Geometry {
   }
 
   /**
+   * Creates an animated arc (partial circle)
+   */
+  createArc(center: Point, radius: number, startAngle: number, endAngle: number, options: GeometryOptions = {}): THREE.Line {
+    const opts = { ...DEFAULT_OPTIONS, ...options };
+    const segments = opts.segments || 64;
+    
+    // Determine how many segments to use for the arc based on the angle range
+    const angleRange = Math.abs(endAngle - startAngle);
+    const arcSegments = Math.max(3, Math.floor((segments * angleRange) / (Math.PI * 2)));
+    
+    // Create initial points (all at center for animation)
+    const points: THREE.Vector3[] = [];
+    for (let i = 0; i <= arcSegments; i++) {
+      points.push(new THREE.Vector3(
+        center.x,
+        center.y,
+        center.z || 0
+      ));
+    }
+    
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+      color: opts.strokeColor || opts.color,
+      linewidth: opts.lineWidth,
+      opacity: opts.opacity,
+      transparent: opts.opacity !== undefined && opts.opacity < 1,
+    });
+    
+    const arc = new THREE.Line(geometry, material);
+    this.parent.add(arc);
+    this.geometries.push(arc);
+    
+    // Set up animation
+    const startTime = this.clock.getElapsedTime();
+    
+    this.animationStates.set(arc, {
+      startTime,
+      duration: opts.animationDuration || 1,
+      completed: false,
+      update: (progress: number) => {
+        if (progress >= 1) return;
+        
+        // Update the arc by recreating points with current radius
+        const currentRadius = radius * progress;
+        const positions = (geometry.attributes.position as THREE.BufferAttribute).array;
+        
+        for (let i = 0; i <= arcSegments; i++) {
+          const theta = startAngle + (i / arcSegments) * (endAngle - startAngle);
+          
+          // Calculate position on X-Z plane (not X-Y)
+          const x = center.x + Math.cos(theta) * currentRadius;
+          const z = (center.z || 0) + Math.sin(theta) * currentRadius;
+          
+          positions[i * 3] = x;
+          positions[i * 3 + 1] = center.y; // Keep Y constant
+          positions[i * 3 + 2] = z;
+        }
+        
+        geometry.attributes.position.needsUpdate = true;
+      }
+    });
+    
+    return arc;
+  }
+
+  /**
    * Update all animations
    */
   update(): void {
