@@ -11,6 +11,15 @@ export class PolarGrid {
   private numDirections: number;
   private isNestedGrid: boolean;
   private nestedGridScale: number;
+  
+  // Shared materials
+  private static circlesMaterial: THREE.LineBasicMaterial;
+  private static directionsMaterial: THREE.LineBasicMaterial;
+  private static mainTriangleMaterial: THREE.LineBasicMaterial;
+  private static nestedTriangleMaterial: THREE.LineBasicMaterial;
+  
+  // Reusable vector for calculations
+  private static tempVector = new THREE.Vector3();
 
   /**
    * Create a polar grid with cardinal directions
@@ -40,8 +49,48 @@ export class PolarGrid {
     this.grid = new THREE.Group();
     this.grid.position.copy(position);
 
+    // Initialize shared materials if not already created
+    this.initMaterials();
+
     this.createGrid();
     scene.add(this.grid);
+  }
+
+  /**
+   * Initialize shared materials if they don't exist yet
+   */
+  private initMaterials(): void {
+    // Only create materials once across all instances
+    if (!PolarGrid.circlesMaterial) {
+      PolarGrid.circlesMaterial = new THREE.LineBasicMaterial({
+        color: 0x444444,
+        transparent: true,
+        opacity: 0.5
+      });
+    }
+
+    if (!PolarGrid.directionsMaterial) {
+      PolarGrid.directionsMaterial = new THREE.LineBasicMaterial({
+        color: 0x666666,
+        opacity: 1
+      });
+    }
+
+    if (!PolarGrid.mainTriangleMaterial) {
+      PolarGrid.mainTriangleMaterial = new THREE.LineBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.8
+      });
+    }
+
+    if (!PolarGrid.nestedTriangleMaterial) {
+      PolarGrid.nestedTriangleMaterial = new THREE.LineBasicMaterial({
+        color: 0x333333,
+        transparent: true,
+        opacity: 0.3
+      });
+    }
   }
 
   /**
@@ -67,6 +116,9 @@ export class PolarGrid {
    * Create nested polar grids at each intersection point
    */
   private createNestedGrids(): void {
+    // Reusable position vector
+    const position = new THREE.Vector3();
+    
     // For each concentric circle
     for (let i = 1; i <= this.numCircles; i++) {
       const radius = (i / this.numCircles) * this.maxRadius;
@@ -74,20 +126,21 @@ export class PolarGrid {
       // Calculate intersection points on this circle for each cardinal direction
       for (let j = 0; j < this.numDirections; j++) {
         const theta = (j / this.numDirections) * Math.PI * 2 + Math.PI / 6;
-        const x = radius * Math.cos(theta);
-        const z = radius * Math.sin(theta);
         
-        // Create a position vector for the nested grid
-        const position = new THREE.Vector3(x, 0, z);
+        // Reuse position vector
+        position.set(
+          radius * Math.cos(theta),
+          0,
+          radius * Math.sin(theta)
+        );
         
         // Create a smaller nested grid at this position
-        // We don't want the nested grids to create more nested grids, so we set isNestedGrid to true
         new PolarGrid(
           this.scene,
           this.maxRadius * this.nestedGridScale,
           this.numCircles,
           this.numDirections,
-          position,
+          position.clone(), // Need to clone since position is reused
           true, // This is a nested grid
           this.nestedGridScale
         );
@@ -103,26 +156,37 @@ export class PolarGrid {
       return;
     }
 
-    const material = new THREE.LineBasicMaterial({
-      color: 0x444444,
-      transparent: true,
-      opacity:  0.5
-    });
-
+    // Use the shared material
+    const material = PolarGrid.circlesMaterial;
+    
+    // Set number of segments for each circle
+    const segments = 64;
+    
+    // Create a buffer for circle points
+    const circleGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array((segments + 1) * 3);
+    circleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
     for (let i = 1; i <= this.numCircles; i++) {
       const radius = (i / this.numCircles) * this.maxRadius;
-      const geometry = new THREE.BufferGeometry();
-
-      // Create a circle
-      const points: THREE.Vector3[] = [];
-      const segments = 64;
+      
+      // Generate the circle points directly into the buffer
       for (let j = 0; j <= segments; j++) {
         const theta = (j / segments) * Math.PI * 2;
-        points.push(new THREE.Vector3(radius * Math.cos(theta), 0, radius * Math.sin(theta)));
+        const x = radius * Math.cos(theta);
+        const z = radius * Math.sin(theta);
+        
+        const index = j * 3;
+        positions[index] = x;
+        positions[index + 1] = 0;
+        positions[index + 2] = z;
       }
-
-      geometry.setFromPoints(points);
-      const circle = new THREE.Line(geometry, material);
+      
+      // Update the buffer
+      circleGeometry.attributes.position.needsUpdate = true;
+      
+      // Create a circle with the updated geometry
+      const circle = new THREE.Line(circleGeometry.clone(), material);
       this.grid.add(circle);
     }
   }
@@ -135,23 +199,32 @@ export class PolarGrid {
       return;
     }
 
-    const material = new THREE.LineBasicMaterial({
-      color: 0x666666,
-      opacity: 1
-    });
+    // Use the shared material
+    const material = PolarGrid.directionsMaterial;
+    
+    // Create a reusable line geometry
+    const lineGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(6); // 2 points × 3 coordinates
+    lineGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+    // Set the start point at origin (doesn't change)
+    positions[0] = 0;
+    positions[1] = 0.1;
+    positions[2] = 0;
 
     for (let i = 0; i < this.numDirections; i++) {
       const theta = (i / this.numDirections) * Math.PI * 2 + Math.PI / 6;
-      const geometry = new THREE.BufferGeometry();
-
-      // Create a line from center to edge
-      const points = [
-        new THREE.Vector3(0, 0.1, 0),
-        new THREE.Vector3(this.maxRadius * Math.cos(theta), 0.1, this.maxRadius * Math.sin(theta))
-      ];
-
-      geometry.setFromPoints(points);
-      const line = new THREE.Line(geometry, material);
+      
+      // Set end point coordinates directly into the buffer
+      positions[3] = this.maxRadius * Math.cos(theta);
+      positions[4] = 0.1;
+      positions[5] = this.maxRadius * Math.sin(theta);
+      
+      // Update the buffer
+      lineGeometry.attributes.position.needsUpdate = true;
+      
+      // Create a line with the updated geometry
+      const line = new THREE.Line(lineGeometry.clone(), material);
       this.grid.add(line);
     }
   }
@@ -160,45 +233,62 @@ export class PolarGrid {
    * Create triangular intersection patterns at each concentric circle
    */
   private createTriangularPatterns(): void {
-    const material = new THREE.LineBasicMaterial({
-      color: this.isNestedGrid ? 0x333333 : 0xffffff,
-      transparent: true,
-      opacity: this.isNestedGrid ? 0.3 : 0.8
-    });
+    // Use the appropriate shared material based on grid type
+    const material = this.isNestedGrid ? 
+      PolarGrid.nestedTriangleMaterial : 
+      PolarGrid.mainTriangleMaterial;
 
+    const y = this.isNestedGrid ? 0 : 0.1;
+    
+    // Pre-calculate and store all intersection points
+    const allIntersectionPoints: THREE.Vector3[][] = [];
+    
     // For each concentric circle
     for (let i = 1; i <= this.numCircles; i++) {
       const radius = (i / this.numCircles) * this.maxRadius;
-
-      let y = 0.1;
-      if (this.isNestedGrid) {
-        y = 0;
-      }
-
+      
       // Calculate intersection points on this circle for each cardinal direction
-      const intersectionPoints: THREE.Vector3[] = [];
+      const circlePoints: THREE.Vector3[] = [];
+      allIntersectionPoints.push(circlePoints);
 
       for (let j = 0; j < this.numDirections; j++) {
         const theta = (j / this.numDirections) * Math.PI * 2 + Math.PI / 6;
         const x = radius * Math.cos(theta);
         const z = radius * Math.sin(theta);
-        intersectionPoints.push(new THREE.Vector3(x, y, z));
+        circlePoints.push(new THREE.Vector3(x, y, z));
       }
+    }
 
-      // Create triangular patterns by connecting alternate points
+    // Create a single reusable geometry and reuse it for all lines
+    const lineGeometry = new THREE.BufferGeometry();
+    const linePositions = new Float32Array(2 * 3); // 2 points × 3 coordinates
+    lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+    
+    // Reuse the same array buffer to update geometry
+    for (let i = 0; i < allIntersectionPoints.length; i++) {
+      const circlePoints = allIntersectionPoints[i];
+      
       for (let j = 0; j < this.numDirections; j++) {
-        const startPoint = intersectionPoints[j];
-
-        // Connect to alternating points to create triangular pattern
-        // For 6 directions, connect to points that are 2 steps away
+        const startPoint = circlePoints[j];
         const nextIndex = (j + 1) % this.numDirections;
-        const nextPoint = intersectionPoints[nextIndex];
-
-        const geometry = new THREE.BufferGeometry();
-        geometry.setFromPoints([startPoint, nextPoint]);
-
-        const line = new THREE.Line(geometry, material);
-        this.grid.add(line);
+        const nextPoint = circlePoints[nextIndex];
+        
+        // Update the buffer directly
+        // Start point
+        linePositions[0] = startPoint.x;
+        linePositions[1] = startPoint.y;
+        linePositions[2] = startPoint.z;
+        // End point
+        linePositions[3] = nextPoint.x;
+        linePositions[4] = nextPoint.y;
+        linePositions[5] = nextPoint.z;
+        
+        // Notify that attributes have changed
+        lineGeometry.attributes.position.needsUpdate = true;
+        
+        // Clone the geometry for this line
+        const lineInstance = new THREE.Line(lineGeometry.clone(), material);
+        this.grid.add(lineInstance);
       }
     }
   }
