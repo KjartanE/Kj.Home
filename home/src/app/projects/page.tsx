@@ -98,13 +98,6 @@ const projectsData: Record<ProjectCategory, Project[]> = {
       image: "/projects/life-preview.png",
       link: "/projects/life",
       category: "Math"
-    },
-    {
-      title: "Circles",
-      description: "Interactive circles visualization",
-      image: "/projects/circles-preview.png",
-      link: "/projects/circles",
-      category: "Math"
     }
   ],
   "3D": [

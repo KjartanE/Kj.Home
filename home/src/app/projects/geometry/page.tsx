@@ -1,4 +1,4 @@
-import ThreeScene from "@/components/circles/ThreeScene";
+import ThreeScene from "@/components/geometry/ThreeScene";
 
 export default function Page() {
   return (

@@ -3,6 +3,42 @@ import { StepConfig } from "../SceneSteps";
 
 export const GeometrySteps: StepConfig[] = [
   {
+    name: "Vesica Piscis",
+    setupGeometry: (geometry: Geometry) => {
+      geometry.createCircle({ x: 4, y: 0, z: 0 }, 6, { strokeColor: 0xff4400, animationDuration: 3 });
+      geometry.createCircle({ x: -4, y: 0, z: 0 }, 6, { strokeColor: 0xff4400, animationDuration: 3 });
+    }
+  },
+  {
+    name: "Tripod of Life",
+    setupGeometry: (geometry: Geometry) => {
+      geometry.createCircle({ x: 4, y: 0, z: -3 }, 6, { strokeColor: 0xff4400, animationDuration: 3 });
+      geometry.createCircle({ x: -4, y: 0, z: -3 }, 6, { strokeColor: 0xff4400, animationDuration: 3 });
+      geometry.createCircle({ x: 0, y: 0, z: 3 }, 6, { strokeColor: 0xff4400, animationDuration: 3 });
+    }
+  },
+  {
+    name: "Seed of Life",
+    setupGeometry: (geometry: Geometry) => {
+      geometry.createCircle({ x: 0, y: 0, z: 0 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
+      geometry.createCircle({ x: 0, y: 0, z: 5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
+      geometry.createCircle({ x: 0, y: 0, z: -5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
+      geometry.createCircle({ x: 4.3, y: 0, z: -2.5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
+      geometry.createCircle({ x: 4.3, y: 0, z: 2.5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
+      geometry.createCircle({ x: -4.3, y: 0, z: -2.5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
+      geometry.createCircle({ x: -4.3, y: 0, z: 2.5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
+    }
+  },
+  // {
+  //   name: "Vesica Piscis~ EYE",
+  //   setupGeometry: (geometry: Geometry) => {
+  //     geometry.createCircle({ x: 0, y: 0, z: 0 }, 2, { strokeColor: 0xff4400, animationDuration: 3 });
+  //     geometry.createCircle({ x: 0, y: 0, z: 0 }, 10, { strokeColor: 0xff4400, animationDuration: 3 });
+  //     geometry.createCircle({ x: 0, y: 0, z: 4 }, 6, { strokeColor: 0xff4400, animationDuration: 3 });
+  //     geometry.createCircle({ x: 0, y: 0, z: -4 }, 6, { strokeColor: 0xff4400, animationDuration: 3 });
+  //   }
+  // },
+  {
     name: "Egg of Life",
     setupGeometry: (geometry: Geometry) => {
       geometry.createCircle({ x: 0, y: 0, z: 0 }, 1, { strokeColor: 0xff4400, animationDuration: 3 });
@@ -137,27 +173,7 @@ export const GeometrySteps: StepConfig[] = [
       geometry.createLine({ x: -3.5, y: 0, z: -2 }, { x: 0, y: 0, z: 2 }, { color: 0xff4400, animationDuration: 3 });
     }
   },
-  {
-    name: "Vesica Piscis",
-    setupGeometry: (geometry: Geometry) => {
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, 2, { strokeColor: 0xff4400, animationDuration: 3 });
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, 10, { strokeColor: 0xff4400, animationDuration: 3 });
-      geometry.createCircle({ x: 0, y: 0, z: 4 }, 6, { strokeColor: 0xff4400, animationDuration: 3 });
-      geometry.createCircle({ x: 0, y: 0, z: -4 }, 6, { strokeColor: 0xff4400, animationDuration: 3 });
-    }
-  },
-  {
-    name: "Seed of Life",
-    setupGeometry: (geometry: Geometry) => {
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
-      geometry.createCircle({ x: 0, y: 0, z: 5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
-      geometry.createCircle({ x: 0, y: 0, z: -5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
-      geometry.createCircle({ x: 4.3, y: 0, z: -2.5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
-      geometry.createCircle({ x: 4.3, y: 0, z: 2.5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
-      geometry.createCircle({ x: -4.3, y: 0, z: -2.5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
-      geometry.createCircle({ x: -4.3, y: 0, z: 2.5 }, 5, { strokeColor: 0xff4400, animationDuration: 3 });
-    }
-  },
+
   {
     name: "Germ of Life",
     setupGeometry: (geometry: Geometry) => {
