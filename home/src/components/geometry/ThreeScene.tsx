@@ -122,8 +122,8 @@ const ThreeScene: React.FC = () => {
     // Create polar grid once
     const polarGrid = new PolarGrid(
       scene, 
-      11, 
-      5, 
+      10, 
+      4, 
       6, 
       new THREE.Vector3(0, 0, 0), 
       false, 

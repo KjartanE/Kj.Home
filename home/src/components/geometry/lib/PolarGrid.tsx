@@ -34,7 +34,7 @@ export class PolarGrid {
   constructor(
     scene: THREE.Scene, 
     maxRadius: number = 10, 
-    numCircles: number = 5, 
+    numCircles: number = 4, 
     numDirections: number = 6,
     position: THREE.Vector3 = new THREE.Vector3(0, 0, 0),
     isNestedGrid: boolean = false,
