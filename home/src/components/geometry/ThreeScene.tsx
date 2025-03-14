@@ -2,9 +2,9 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { SceneSteps } from "./SceneSteps";
-import { useArrowKeys, ArrowKeyEvent } from "./ArrowKeyControls";
-import { GeometrySteps } from "./steps";
+import { SceneSteps } from "./lib/SceneSteps";
+import { useArrowKeys, ArrowKeyEvent } from "./lib/ArrowKeyControls";
+import { GeometrySteps } from "./lib/steps";
 
 const ThreeScene: React.FC = () => {
   // ===== State and Refs =====

@@ -14,6 +14,7 @@ export interface Point {
   x: number;
   y: number;
   z?: number;
+  id?: string;  // Add unique identifier for points
 }
 
 const DEFAULT_OPTIONS: GeometryOptions = {
