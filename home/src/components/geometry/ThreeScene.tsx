@@ -42,7 +42,15 @@ const ThreeScene: React.FC = () => {
     container.appendChild(renderer.domElement);
 
     // Create a polar grid with 6 cardinal directions
-    const polarGrid = new PolarGrid(scene, 12, 5, 6);
+    const polarGrid = new PolarGrid(
+      scene, 
+      11, 
+      5, 
+      6, 
+      new THREE.Vector3(0, 0, 0), 
+      false, 
+      1
+    );
     polarGridRef.current = polarGrid;
 
     // Create a grid helper (original grid, now as a background reference)
