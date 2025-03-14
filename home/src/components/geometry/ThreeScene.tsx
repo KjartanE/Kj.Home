@@ -5,11 +5,13 @@ import * as THREE from "three";
 import { SceneSteps } from "./lib/SceneSteps";
 import { useArrowKeys, ArrowKeyEvent } from "./lib/ArrowKeyControls";
 import { GeometrySteps } from "./lib/steps";
+import { PolarGrid } from "./lib/PolarGrid";
 
 const ThreeScene: React.FC = () => {
   // ===== State and Refs =====
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneStepsRef = useRef<SceneSteps | null>(null);
+  const polarGridRef = useRef<PolarGrid | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [totalSteps, setTotalSteps] = useState<number>(0);
 
@@ -39,12 +41,16 @@ const ThreeScene: React.FC = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
-    // Create a grid helper
-    const size = 20;
-    const divisions = 20;
-    const gridHelper = new THREE.GridHelper(size, divisions);
-    gridHelper.position.set(0, -0.1, 0);
-    scene.add(gridHelper);
+    // Create a polar grid with 6 cardinal directions
+    const polarGrid = new PolarGrid(scene, 12, 5, 6);
+    polarGridRef.current = polarGrid;
+
+    // Create a grid helper (original grid, now as a background reference)
+    // const size = 20;
+    // const divisions = 20;
+    // const gridHelper = new THREE.GridHelper(size, divisions);
+    // gridHelper.position.set(0, -0.1, 0);
+    // scene.add(gridHelper);
 
     // Initialize SceneSteps
     const sceneSteps = new SceneSteps(scene, GeometrySteps);
@@ -78,6 +84,11 @@ const ThreeScene: React.FC = () => {
         sceneStepsRef.current.getCurrentGeometry()?.update();
       }
 
+      // Update polar grid if needed
+      if (polarGridRef.current) {
+        polarGridRef.current.update();
+      }
+
       renderer.render(scene, camera);
     };
 
@@ -91,6 +102,9 @@ const ThreeScene: React.FC = () => {
       }
       if (sceneStepsRef.current) {
         sceneStepsRef.current.clear();
+      }
+      if (polarGridRef.current) {
+        polarGridRef.current.dispose();
       }
     };
   }, []);

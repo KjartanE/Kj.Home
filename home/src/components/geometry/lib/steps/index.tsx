@@ -3,6 +3,12 @@ import { StepConfig } from "../SceneSteps";
 
 export const GeometrySteps: StepConfig[] = [
   {
+    name: "base",
+    setupGeometry: (geometry: Geometry) => {
+      geometry.createCircle({ x: 0, y: 0, z: 0 }, 1, { strokeColor: 0xff4400, animationDuration: 3 });
+    }
+  },
+  {
     name: "Vesica Piscis",
     setupGeometry: (geometry: Geometry) => {
       geometry.createCircle({ x: 4, y: 0, z: 0 }, 6, { strokeColor: 0xff4400, animationDuration: 3 });
