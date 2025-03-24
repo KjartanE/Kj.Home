@@ -153,11 +153,12 @@ export const GeometrySteps: StepConfig[] = [
         const point = getPolarGridPoint(1, i);
         geometry.createCircle(point, getPolarGridRadius(1), { strokeColor: 0xff4400, animationDuration: 2 });
       }
-      // Create second ring (12 circles)
-      for (let i = 0; i < 12; i++) {
-        const point = getPolarGridPoint(2, i, 0, 4, 12);
+
+      // Create second ring (6 circles)
+      for (let i = 0; i < 6; i++) {
+        const point = getPolarGridPoint(2, i);
         geometry.createCircle(point, getPolarGridRadius(1), { strokeColor: 0xff4400, animationDuration: 2 });
-      }
+      }  
     }
   },
   {
@@ -337,195 +338,196 @@ export const GeometrySteps: StepConfig[] = [
         segments: 64
       });
     }
-  },
-  {
-    name: "Tree of Life",
-    setupGeometry: (geometry: Geometry) => {
-      // Create points at grid intersections
-      const topPoint = getPolarGridPoint(4, 0);
-      const bottomPoint = getPolarGridPoint(4, 3);
-      const centerPoint = getPolarGridPoint(0, 0); // Center
-
-      // Middle layer points
-      const middleRightPoint = getPolarGridPoint(2, 1);
-      const middleLeftPoint = getPolarGridPoint(2, 5);
-
-      // Bottom layer points
-      const bottomRightPoint = getPolarGridPoint(3, 2);
-      const bottomLeftPoint = getPolarGridPoint(3, 4);
-
-      // Middle vertical point
-      const middleTopPoint = getPolarGridPoint(2, 0);
-
-      // Create vertical lines
-      geometry.createLine(centerPoint, topPoint, { color: 0xff4400, animationDuration: 2 });
-      geometry.createLine(centerPoint, bottomPoint, { color: 0xff4400, animationDuration: 2 });
-
-      // Create diagonal lines from center
-      geometry.createLine(centerPoint, middleRightPoint, { color: 0xff4400, animationDuration: 2 });
-      geometry.createLine(centerPoint, middleLeftPoint, { color: 0xff4400, animationDuration: 2 });
-      geometry.createLine(centerPoint, bottomRightPoint, { color: 0xff4400, animationDuration: 2 });
-      geometry.createLine(centerPoint, bottomLeftPoint, { color: 0xff4400, animationDuration: 2 });
-
-      // Create top connections
-      geometry.createLine(topPoint, middleRightPoint, { color: 0xff4400, animationDuration: 2 });
-      geometry.createLine(topPoint, middleLeftPoint, { color: 0xff4400, animationDuration: 2 });
-
-      // Create bottom connections
-      geometry.createLine(bottomPoint, bottomRightPoint, { color: 0xff4400, animationDuration: 2 });
-      geometry.createLine(bottomPoint, bottomLeftPoint, { color: 0xff4400, animationDuration: 2 });
-
-      // Create side vertical connections
-      geometry.createLine(middleRightPoint, bottomRightPoint, { color: 0xff4400, animationDuration: 2 });
-      geometry.createLine(middleLeftPoint, bottomLeftPoint, { color: 0xff4400, animationDuration: 2 });
-
-      // Create horizontal connections
-      geometry.createLine(middleRightPoint, middleLeftPoint, { color: 0xff4400, animationDuration: 2 });
-      geometry.createLine(bottomRightPoint, bottomLeftPoint, { color: 0xff4400, animationDuration: 2 });
-
-      // Create middle connections
-      geometry.createLine(middleTopPoint, middleRightPoint, { color: 0xff4400, animationDuration: 2 });
-      geometry.createLine(middleTopPoint, middleLeftPoint, { color: 0xff4400, animationDuration: 2 });
-    }
-  },
-  {
-    name: "Merkaba",
-    setupGeometry: (geometry: Geometry) => {
-      // Create a Star Tetrahedron (Merkaba) aligned with grid points
-      const topPoint = getPolarGridPoint(4, 0);
-      const bottomPoint = getPolarGridPoint(4, 3);
-
-      // First tetrahedron points
-      const tetra1Point1 = getPolarGridPoint(3.5, 1);
-      const tetra1Point2 = getPolarGridPoint(3.5, 3);
-      const tetra1Point3 = getPolarGridPoint(3.5, 5);
-
-      // Second tetrahedron points
-      const tetra2Point1 = getPolarGridPoint(3, 0);
-      const tetra2Point2 = getPolarGridPoint(3, 2);
-      const tetra2Point3 = getPolarGridPoint(3, 4);
-
-      // Create first tetrahedron
-      geometry.createLine(topPoint, tetra1Point1, { color: 0xff4400, animationDuration: 3 });
-      geometry.createLine(topPoint, tetra1Point2, { color: 0xff4400, animationDuration: 3 });
-      geometry.createLine(topPoint, tetra1Point3, { color: 0xff4400, animationDuration: 3 });
-      geometry.createLine(tetra1Point1, tetra1Point2, { color: 0xff4400, animationDuration: 3 });
-      geometry.createLine(tetra1Point2, tetra1Point3, { color: 0xff4400, animationDuration: 3 });
-      geometry.createLine(tetra1Point3, tetra1Point1, { color: 0xff4400, animationDuration: 3 });
-
-      // Create second tetrahedron
-      geometry.createLine(bottomPoint, tetra2Point1, { color: 0xff4400, animationDuration: 3 });
-      geometry.createLine(bottomPoint, tetra2Point2, { color: 0xff4400, animationDuration: 3 });
-      geometry.createLine(bottomPoint, tetra2Point3, { color: 0xff4400, animationDuration: 3 });
-      geometry.createLine(tetra2Point1, tetra2Point2, { color: 0xff4400, animationDuration: 3 });
-      geometry.createLine(tetra2Point2, tetra2Point3, { color: 0xff4400, animationDuration: 3 });
-      geometry.createLine(tetra2Point3, tetra2Point1, { color: 0xff4400, animationDuration: 3 });
-
-      // Fix type issues by using an array that explicitly defines the type
-      const tetra1Points = [tetra1Point1, tetra1Point2, tetra1Point3];
-      const tetra2Points = [tetra2Point1, tetra2Point2, tetra2Point3];
-
-      // Create connecting lines between tetrahedrons
-      for (let i = 0; i < 3; i++) {
-        const tetra1Point = tetra1Points[i];
-        const tetra2Point = tetra2Points[i];
-        geometry.createLine(tetra1Point, tetra2Point, { color: 0xff4400, animationDuration: 3 });
-      }
-    }
-  },
-  {
-    name: "64 Tetrahedron",
-    setupGeometry: (geometry: Geometry) => {
-      // Placeholder for 64 tetrahedron grid
-      for (let i = 1; i <= 4; i++) {
-        for (let j = 0; j < 6; j++) {
-          const point = getPolarGridPoint(i, j);
-          geometry.createCircle(point, 0.5, { strokeColor: 0x0088ff, animationDuration: 2 });
-        }
-      }
-    }
-  },
-  {
-    name: "Vector Equilibrium",
-    setupGeometry: (geometry: Geometry) => {
-      // Create a vector equilibrium (cuboctahedron) aligned with the grid
-      // This consists of 12 vertices and 24 edges
-
-      // Create top and bottom points
-      const topPoint = getPolarGridPoint(2, 0);
-      const bottomPoint = getPolarGridPoint(2, 3);
-
-      // Create middle layer points (hexagon)
-      const middlePoints: { x: number; y: number; z: number }[] = [];
-      for (let i = 0; i < 6; i++) {
-        middlePoints.push(getPolarGridPoint(1.5, i));
-      }
-
-      // Create connections between top and middle layer
-      for (let i = 0; i < 6; i++) {
-        geometry.createLine(topPoint, middlePoints[i], { color: 0x0088ff, animationDuration: 2 });
-      }
-
-      // Create connections between bottom and middle layer
-      for (let i = 0; i < 6; i++) {
-        geometry.createLine(bottomPoint, middlePoints[i], { color: 0x0088ff, animationDuration: 2 });
-      }
-
-      // Create hexagon in middle layer
-      for (let i = 0; i < 6; i++) {
-        geometry.createLine(middlePoints[i], middlePoints[(i + 1) % 6], { color: 0x0088ff, animationDuration: 2 });
-      }
-    }
-  },
-  {
-    name: "Vector Equilibrium 2",
-    setupGeometry: (geometry: Geometry) => {
-      // Create a larger vector equilibrium with more detail
-      // Similar to the Vector Equilibrium but with additional elements
-
-      // Create top and bottom points
-      const topPoint = getPolarGridPoint(2.5, 0);
-      const bottomPoint = getPolarGridPoint(2.5, 3);
-
-      // Create middle layer points (hexagon)
-      const middlePointsVE2: { x: number; y: number; z: number }[] = [];
-      for (let i = 0; i < 6; i++) {
-        middlePointsVE2.push(getPolarGridPoint(2, i));
-      }
-
-      // Create inner layer points (hexagon)
-      const innerPoints: { x: number; y: number; z: number }[] = [];
-      for (let i = 0; i < 6; i++) {
-        innerPoints.push(getPolarGridPoint(1, i));
-      }
-
-      // Create connections between top and middle layer
-      for (let i = 0; i < 6; i++) {
-        geometry.createLine(topPoint, middlePointsVE2[i], { color: 0x0088ff, animationDuration: 2 });
-      }
-
-      // Create connections between bottom and middle layer
-      for (let i = 0; i < 6; i++) {
-        geometry.createLine(bottomPoint, middlePointsVE2[i], { color: 0x0088ff, animationDuration: 2 });
-      }
-
-      // Create hexagon in middle layer
-      for (let i = 0; i < 6; i++) {
-        geometry.createLine(middlePointsVE2[i], middlePointsVE2[(i + 1) % 6], {
-          color: 0x0088ff,
-          animationDuration: 2
-        });
-      }
-
-      // Create hexagon in inner layer
-      for (let i = 0; i < 6; i++) {
-        geometry.createLine(innerPoints[i], innerPoints[(i + 1) % 6], { color: 0x0088ff, animationDuration: 2 });
-      }
-
-      // Connect inner and middle layer
-      for (let i = 0; i < 6; i++) {
-        geometry.createLine(innerPoints[i], middlePointsVE2[i], { color: 0x0088ff, animationDuration: 2 });
-      }
-    }
   }
+  // ,
+  // {
+  //   name: "Tree of Life",
+  //   setupGeometry: (geometry: Geometry) => {
+  //     // Create points at grid intersections
+  //     const topPoint = getPolarGridPoint(4, 0);
+  //     const bottomPoint = getPolarGridPoint(4, 3);
+  //     const centerPoint = getPolarGridPoint(0, 0); // Center
+
+  //     // Middle layer points
+  //     const middleRightPoint = getPolarGridPoint(2, 1);
+  //     const middleLeftPoint = getPolarGridPoint(2, 5);
+
+  //     // Bottom layer points
+  //     const bottomRightPoint = getPolarGridPoint(3, 2);
+  //     const bottomLeftPoint = getPolarGridPoint(3, 4);
+
+  //     // Middle vertical point
+  //     const middleTopPoint = getPolarGridPoint(2, 0);
+
+  //     // Create vertical lines
+  //     geometry.createLine(centerPoint, topPoint, { color: 0xff4400, animationDuration: 2 });
+  //     geometry.createLine(centerPoint, bottomPoint, { color: 0xff4400, animationDuration: 2 });
+
+  //     // Create diagonal lines from center
+  //     geometry.createLine(centerPoint, middleRightPoint, { color: 0xff4400, animationDuration: 2 });
+  //     geometry.createLine(centerPoint, middleLeftPoint, { color: 0xff4400, animationDuration: 2 });
+  //     geometry.createLine(centerPoint, bottomRightPoint, { color: 0xff4400, animationDuration: 2 });
+  //     geometry.createLine(centerPoint, bottomLeftPoint, { color: 0xff4400, animationDuration: 2 });
+
+  //     // Create top connections
+  //     geometry.createLine(topPoint, middleRightPoint, { color: 0xff4400, animationDuration: 2 });
+  //     geometry.createLine(topPoint, middleLeftPoint, { color: 0xff4400, animationDuration: 2 });
+
+  //     // Create bottom connections
+  //     geometry.createLine(bottomPoint, bottomRightPoint, { color: 0xff4400, animationDuration: 2 });
+  //     geometry.createLine(bottomPoint, bottomLeftPoint, { color: 0xff4400, animationDuration: 2 });
+
+  //     // Create side vertical connections
+  //     geometry.createLine(middleRightPoint, bottomRightPoint, { color: 0xff4400, animationDuration: 2 });
+  //     geometry.createLine(middleLeftPoint, bottomLeftPoint, { color: 0xff4400, animationDuration: 2 });
+
+  //     // Create horizontal connections
+  //     geometry.createLine(middleRightPoint, middleLeftPoint, { color: 0xff4400, animationDuration: 2 });
+  //     geometry.createLine(bottomRightPoint, bottomLeftPoint, { color: 0xff4400, animationDuration: 2 });
+
+  //     // Create middle connections
+  //     geometry.createLine(middleTopPoint, middleRightPoint, { color: 0xff4400, animationDuration: 2 });
+  //     geometry.createLine(middleTopPoint, middleLeftPoint, { color: 0xff4400, animationDuration: 2 });
+  //   }
+  // },
+  // {
+  //   name: "Merkaba",
+  //   setupGeometry: (geometry: Geometry) => {
+  //     // Create a Star Tetrahedron (Merkaba) aligned with grid points
+  //     const topPoint = getPolarGridPoint(4, 0);
+  //     const bottomPoint = getPolarGridPoint(4, 3);
+
+  //     // First tetrahedron points
+  //     const tetra1Point1 = getPolarGridPoint(3.5, 1);
+  //     const tetra1Point2 = getPolarGridPoint(3.5, 3);
+  //     const tetra1Point3 = getPolarGridPoint(3.5, 5);
+
+  //     // Second tetrahedron points
+  //     const tetra2Point1 = getPolarGridPoint(3, 0);
+  //     const tetra2Point2 = getPolarGridPoint(3, 2);
+  //     const tetra2Point3 = getPolarGridPoint(3, 4);
+
+  //     // Create first tetrahedron
+  //     geometry.createLine(topPoint, tetra1Point1, { color: 0xff4400, animationDuration: 3 });
+  //     geometry.createLine(topPoint, tetra1Point2, { color: 0xff4400, animationDuration: 3 });
+  //     geometry.createLine(topPoint, tetra1Point3, { color: 0xff4400, animationDuration: 3 });
+  //     geometry.createLine(tetra1Point1, tetra1Point2, { color: 0xff4400, animationDuration: 3 });
+  //     geometry.createLine(tetra1Point2, tetra1Point3, { color: 0xff4400, animationDuration: 3 });
+  //     geometry.createLine(tetra1Point3, tetra1Point1, { color: 0xff4400, animationDuration: 3 });
+
+  //     // Create second tetrahedron
+  //     geometry.createLine(bottomPoint, tetra2Point1, { color: 0xff4400, animationDuration: 3 });
+  //     geometry.createLine(bottomPoint, tetra2Point2, { color: 0xff4400, animationDuration: 3 });
+  //     geometry.createLine(bottomPoint, tetra2Point3, { color: 0xff4400, animationDuration: 3 });
+  //     geometry.createLine(tetra2Point1, tetra2Point2, { color: 0xff4400, animationDuration: 3 });
+  //     geometry.createLine(tetra2Point2, tetra2Point3, { color: 0xff4400, animationDuration: 3 });
+  //     geometry.createLine(tetra2Point3, tetra2Point1, { color: 0xff4400, animationDuration: 3 });
+
+  //     // Fix type issues by using an array that explicitly defines the type
+  //     const tetra1Points = [tetra1Point1, tetra1Point2, tetra1Point3];
+  //     const tetra2Points = [tetra2Point1, tetra2Point2, tetra2Point3];
+
+  //     // Create connecting lines between tetrahedrons
+  //     for (let i = 0; i < 3; i++) {
+  //       const tetra1Point = tetra1Points[i];
+  //       const tetra2Point = tetra2Points[i];
+  //       geometry.createLine(tetra1Point, tetra2Point, { color: 0xff4400, animationDuration: 3 });
+  //     }
+  //   }
+  // },
+  // {
+  //   name: "64 Tetrahedron",
+  //   setupGeometry: (geometry: Geometry) => {
+  //     // Placeholder for 64 tetrahedron grid
+  //     for (let i = 1; i <= 4; i++) {
+  //       for (let j = 0; j < 6; j++) {
+  //         const point = getPolarGridPoint(i, j);
+  //         geometry.createCircle(point, 0.5, { strokeColor: 0x0088ff, animationDuration: 2 });
+  //       }
+  //     }
+  //   }
+  // },
+  // {
+  //   name: "Vector Equilibrium",
+  //   setupGeometry: (geometry: Geometry) => {
+  //     // Create a vector equilibrium (cuboctahedron) aligned with the grid
+  //     // This consists of 12 vertices and 24 edges
+
+  //     // Create top and bottom points
+  //     const topPoint = getPolarGridPoint(2, 0);
+  //     const bottomPoint = getPolarGridPoint(2, 3);
+
+  //     // Create middle layer points (hexagon)
+  //     const middlePoints: { x: number; y: number; z: number }[] = [];
+  //     for (let i = 0; i < 6; i++) {
+  //       middlePoints.push(getPolarGridPoint(1.5, i));
+  //     }
+
+  //     // Create connections between top and middle layer
+  //     for (let i = 0; i < 6; i++) {
+  //       geometry.createLine(topPoint, middlePoints[i], { color: 0x0088ff, animationDuration: 2 });
+  //     }
+
+  //     // Create connections between bottom and middle layer
+  //     for (let i = 0; i < 6; i++) {
+  //       geometry.createLine(bottomPoint, middlePoints[i], { color: 0x0088ff, animationDuration: 2 });
+  //     }
+
+  //     // Create hexagon in middle layer
+  //     for (let i = 0; i < 6; i++) {
+  //       geometry.createLine(middlePoints[i], middlePoints[(i + 1) % 6], { color: 0x0088ff, animationDuration: 2 });
+  //     }
+  //   }
+  // },
+  // {
+  //   name: "Vector Equilibrium 2",
+  //   setupGeometry: (geometry: Geometry) => {
+  //     // Create a larger vector equilibrium with more detail
+  //     // Similar to the Vector Equilibrium but with additional elements
+
+  //     // Create top and bottom points
+  //     const topPoint = getPolarGridPoint(2.5, 0);
+  //     const bottomPoint = getPolarGridPoint(2.5, 3);
+
+  //     // Create middle layer points (hexagon)
+  //     const middlePointsVE2: { x: number; y: number; z: number }[] = [];
+  //     for (let i = 0; i < 6; i++) {
+  //       middlePointsVE2.push(getPolarGridPoint(2, i));
+  //     }
+
+  //     // Create inner layer points (hexagon)
+  //     const innerPoints: { x: number; y: number; z: number }[] = [];
+  //     for (let i = 0; i < 6; i++) {
+  //       innerPoints.push(getPolarGridPoint(1, i));
+  //     }
+
+  //     // Create connections between top and middle layer
+  //     for (let i = 0; i < 6; i++) {
+  //       geometry.createLine(topPoint, middlePointsVE2[i], { color: 0x0088ff, animationDuration: 2 });
+  //     }
+
+  //     // Create connections between bottom and middle layer
+  //     for (let i = 0; i < 6; i++) {
+  //       geometry.createLine(bottomPoint, middlePointsVE2[i], { color: 0x0088ff, animationDuration: 2 });
+  //     }
+
+  //     // Create hexagon in middle layer
+  //     for (let i = 0; i < 6; i++) {
+  //       geometry.createLine(middlePointsVE2[i], middlePointsVE2[(i + 1) % 6], {
+  //         color: 0x0088ff,
+  //         animationDuration: 2
+  //       });
+  //     }
+
+  //     // Create hexagon in inner layer
+  //     for (let i = 0; i < 6; i++) {
+  //       geometry.createLine(innerPoints[i], innerPoints[(i + 1) % 6], { color: 0x0088ff, animationDuration: 2 });
+  //     }
+
+  //     // Connect inner and middle layer
+  //     for (let i = 0; i < 6; i++) {
+  //       geometry.createLine(innerPoints[i], middlePointsVE2[i], { color: 0x0088ff, animationDuration: 2 });
+  //     }
+  //   }
+  // }
 ];

@@ -32,7 +32,7 @@ export default class PenroseManager {
     this.theme = theme;
     this.themeColor = this.theme === "dark" ? 1.0 : 0.0;
     this.distanceScale = 0.15;
-    this.baseWidth = this.theme === "dark" ? 0.015 : 0.06;
+    this.baseWidth = this.theme === "dark" ? 0.02 : 0.06;
 
     this.lineGeometry = new THREE.BufferGeometry();
     this.lineMaterial = new THREE.ShaderMaterial({

@@ -22,7 +22,17 @@ const ThreeScene: React.FC = () => {
 
   // Memoize viewport calculations
   const viewportConfig = useMemo(() => {
-    const aspectRatio = window.innerWidth / window.innerHeight;
+    if (!containerRef.current) return {
+      viewSize: 25,
+      aspectRatio: 1,
+      left: -12.5,
+      right: 12.5,
+      top: 12.5,
+      bottom: -12.5,
+    };
+
+    const { width, height } = containerRef.current.getBoundingClientRect();
+    const aspectRatio = width / height;
     const viewSize = 25;
     return {
       viewSize,
@@ -36,11 +46,10 @@ const ThreeScene: React.FC = () => {
 
   // Handle resize with memoized resize function
   const handleResize = useCallback(() => {
-    if (!cameraRef.current || !rendererRef.current) return;
+    if (!cameraRef.current || !rendererRef.current || !containerRef.current) return;
     
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const newAspectRatio = width / height;
+    const container = containerRef.current;
+    const newAspectRatio = container.clientWidth / container.clientHeight;
     const viewSize = viewportConfig.viewSize;
     
     // Update camera properties
@@ -51,7 +60,7 @@ const ThreeScene: React.FC = () => {
     cameraRef.current.updateProjectionMatrix();
     
     // Update renderer size
-    rendererRef.current.setSize(width, height);
+    rendererRef.current.setSize(container.clientWidth, container.clientHeight);
   }, [viewportConfig]);
 
   // Animation loop with useCallback
@@ -115,7 +124,8 @@ const ThreeScene: React.FC = () => {
 
     // Create renderer once
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    const { width, height } = container.getBoundingClientRect();
+    renderer.setSize(width, height);
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
