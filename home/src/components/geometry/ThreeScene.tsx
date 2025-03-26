@@ -1,72 +1,28 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import * as THREE from "three";
 import { SceneSteps } from "./lib/SceneSteps";
 import { useArrowKeys, ArrowKeyEvent } from "./lib/ArrowKeyControls";
 import { GeometrySteps } from "./lib/steps";
 import { PolarGrid } from "./lib/PolarGrid";
+import { Scene } from "@/lib/three/scene";
 
 const ThreeScene: React.FC = () => {
   // ===== State and Refs =====
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const sceneRef = useRef<Scene | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const sceneStepsRef = useRef<SceneSteps | null>(null);
   const polarGridRef = useRef<PolarGrid | null>(null);
-  
+
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [totalSteps, setTotalSteps] = useState<number>(0);
 
-  // Memoize viewport calculations
-  const viewportConfig = useMemo(() => {
-    if (!containerRef.current) return {
-      viewSize: 25,
-      aspectRatio: 1,
-      left: -12.5,
-      right: 12.5,
-      top: 12.5,
-      bottom: -12.5,
-    };
-
-    const { width, height } = containerRef.current.getBoundingClientRect();
-    const aspectRatio = width / height;
-    const viewSize = 25;
-    return {
-      viewSize,
-      aspectRatio,
-      left: -aspectRatio * viewSize / 2,
-      right: aspectRatio * viewSize / 2,
-      top: viewSize / 2,
-      bottom: -viewSize / 2,
-    };
-  }, []);
-
-  // Handle resize with memoized resize function
-  const handleResize = useCallback(() => {
-    if (!cameraRef.current || !rendererRef.current || !containerRef.current) return;
-    
-    const container = containerRef.current;
-    const newAspectRatio = container.clientWidth / container.clientHeight;
-    const viewSize = viewportConfig.viewSize;
-    
-    // Update camera properties
-    cameraRef.current.left = -newAspectRatio * viewSize / 2;
-    cameraRef.current.right = newAspectRatio * viewSize / 2;
-    cameraRef.current.top = viewSize / 2;
-    cameraRef.current.bottom = -viewSize / 2;
-    cameraRef.current.updateProjectionMatrix();
-    
-    // Update renderer size
-    rendererRef.current.setSize(container.clientWidth, container.clientHeight);
-  }, [viewportConfig]);
-
   // Animation loop with useCallback
   const animate = useCallback(() => {
-    if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
-    
+    if (!sceneRef.current) return;
+
     animationFrameRef.current = requestAnimationFrame(animate);
 
     // Update geometry animations
@@ -79,7 +35,7 @@ const ThreeScene: React.FC = () => {
       polarGridRef.current.update();
     }
 
-    rendererRef.current.render(sceneRef.current, cameraRef.current);
+    sceneRef.current.render();
   }, []);
 
   // Arrow key navigation
@@ -102,79 +58,67 @@ const ThreeScene: React.FC = () => {
   // Setup Three.js scene
   useEffect(() => {
     if (!containerRef.current) return;
+    const scene = new Scene();
+    sceneRef.current = scene;
     const container = containerRef.current;
 
-    // Create scene once
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
-    
-    // Create camera once with memoized values
-    const camera = new THREE.OrthographicCamera(
-      viewportConfig.left,
-      viewportConfig.right,
-      viewportConfig.top,
-      viewportConfig.bottom,
-      0.1,
-      1000
-    );
-    camera.position.set(0, 20, 0);
-    camera.lookAt(0, 0, 0);
-    camera.up.set(0, 0, -1);
-    cameraRef.current = camera;
+    const { width, height } = containerRef.current.getBoundingClientRect();
 
-    // Create renderer once
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    const { width, height } = container.getBoundingClientRect();
-    renderer.setSize(width, height);
-    container.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
+    const aspectRatio = width / height;
+    const viewSize = 25;
+    const newWidth = aspectRatio * viewSize;
+    const newHeight = viewSize;
+
+    // Set fixed size for renderer
+    scene.renderer.setSize(width, height);
+    container.appendChild(scene.renderer.domElement);
 
     // Create polar grid once
-    const polarGrid = new PolarGrid(
-      scene, 
-      10, 
-      4, 
-      6, 
-      new THREE.Vector3(0, 0, 0), 
-      false, 
-      1
-    );
+    const polarGrid = new PolarGrid(scene.scene, 10, 4, 6, new THREE.Vector3(0, 0, 0), false, 1);
     polarGridRef.current = polarGrid;
 
     // Initialize SceneSteps once
-    const sceneSteps = new SceneSteps(scene, GeometrySteps);
+    const sceneSteps = new SceneSteps(scene.scene, GeometrySteps);
     sceneStepsRef.current = sceneSteps;
     setCurrentStep(sceneSteps.getCurrentStepIndex());
     setTotalSteps(sceneSteps.getTotalSteps());
 
-    // Add resize listener
-    window.addEventListener("resize", handleResize);
-    
+    scene.camera = new THREE.OrthographicCamera(-newWidth / 2, newWidth / 2, newHeight / 2, -newHeight / 2, 0.1, 1000);
+    scene.camera.position.set(0, 20, 0);
+    scene.camera.lookAt(0, 0, 0);
+    scene.camera.up.set(0, 0, -1);
+
     // Start animation loop
     animate();
 
+    const handleResize = () => {
+      scene.resize();
+    };
+
+    // Add resize listener
+    window.addEventListener("resize", handleResize);
+
     // Clean up on unmount
     return () => {
-      window.removeEventListener("resize", handleResize);
-      
       if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      
-      if (container && rendererRef.current) {
-        container.removeChild(rendererRef.current.domElement);
-        rendererRef.current.dispose();
+      window.removeEventListener("resize", handleResize);
+
+      if (container && sceneRef.current) {
+        container.removeChild(sceneRef.current.renderer.domElement);
+        sceneRef.current.renderer.dispose();
       }
-      
+
       if (sceneStepsRef.current) {
         sceneStepsRef.current.clear();
       }
-      
+
       if (polarGridRef.current) {
         polarGridRef.current.dispose();
       }
     };
-  }, [viewportConfig, handleResize, animate]);
+  }, [animate]);
 
   // Handle arrow key navigation with the memoized callback
   useArrowKeys(
