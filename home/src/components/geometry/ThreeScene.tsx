@@ -62,6 +62,7 @@ const ThreeScene: React.FC = () => {
     sceneRef.current = scene;
     const container = containerRef.current;
 
+    scene.renderer.setPixelRatio(window.devicePixelRatio);
     const { width, height } = containerRef.current.getBoundingClientRect();
 
     const aspectRatio = width / height;

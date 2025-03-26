@@ -16,7 +16,7 @@ export class Scene {
 
     this.scene.background = new THREE.Color(this.backgroundColor);
 
-    this.renderer = new THREE.WebGLRenderer({ premultipliedAlpha: false });
+    this.renderer = new THREE.WebGLRenderer({ premultipliedAlpha: false, antialias: true });
     this.renderer.setSize(this.width, this.height);
 
     document.body.appendChild(this.renderer.domElement);
