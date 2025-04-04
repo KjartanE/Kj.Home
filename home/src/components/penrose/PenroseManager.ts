@@ -21,7 +21,7 @@ export default class PenroseManager {
   private lastGeneratedStep: number;
   public steps: number;
   public drawLine: (start: THREE.Vector3, end: THREE.Vector3, width: number) => void;
-  public renderLines: () => THREE.LineSegments;
+  public renderLines: (notFade?: boolean) => THREE.LineSegments;
   public generateLines: (location: RefObject<IPosition | null>, penroseLSystem: PenroseLSystem) => void;
   public generateIncrementalLines: (
     location: RefObject<IPosition | null>,
@@ -57,7 +57,7 @@ export default class PenroseManager {
       this.widths.push(width, width);
     };
 
-    this.renderLines = () => {
+    this.renderLines = (notFade?: boolean) => {
       if (this.lineGeometry) {
         this.lineGeometry.dispose();
       }
@@ -69,6 +69,14 @@ export default class PenroseManager {
 
       this.lineGeometry.setAttribute("position", new THREE.BufferAttribute(positionsArray, 3));
       this.lineGeometry.setAttribute("width", new THREE.BufferAttribute(widthsArray, 1));
+
+      if (notFade) {
+        const material = this.lineMaterial as THREE.ShaderMaterial;
+        material.uniforms.themeColor.value = 0.0;
+        material.needsUpdate = true;
+
+        return new THREE.LineSegments(this.lineGeometry, material);
+      }
 
       return new THREE.LineSegments(this.lineGeometry, this.lineMaterial);
     };
