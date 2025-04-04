@@ -73,6 +73,7 @@ export default class PenroseManager {
       if (notFade) {
         const material = this.lineMaterial as THREE.ShaderMaterial;
         material.uniforms.themeColor.value = 0.0;
+        material.uniforms.baseWidth.value = 1.0;
         material.needsUpdate = true;
 
         return new THREE.LineSegments(this.lineGeometry, material);
