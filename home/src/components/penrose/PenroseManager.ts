@@ -32,7 +32,7 @@ export default class PenroseManager {
     this.theme = theme;
     this.themeColor = this.theme === "dark" ? 1.0 : 0.0;
     this.distanceScale = 0.15;
-    this.baseWidth = this.theme === "dark" ? 0.02 : 0.06;
+    this.baseWidth = this.theme === "dark" ? 0.04 : 0.09;
 
     this.lineGeometry = new THREE.BufferGeometry();
     this.lineMaterial = new THREE.ShaderMaterial({
@@ -40,15 +40,10 @@ export default class PenroseManager {
       fragmentShader: fadeFragmentShader,
       uniforms: {
         themeColor: { value: this.themeColor },
-        baseWidth: { value: 0.01 },
-        distanceScale: { value: 0.01 }
+        baseWidth: { value: this.baseWidth },
+        distanceScale: { value: this.distanceScale }
       }
     });
-
-    this.lineMaterial.uniforms.distanceScale.value = this.distanceScale;
-    this.lineMaterial.uniforms.baseWidth.value = this.baseWidth;
-
-    this.lineMaterial.needsUpdate = true;
 
     this.steps = 0;
     this.lastGeneratedStep = 0;

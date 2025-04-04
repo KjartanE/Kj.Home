@@ -9,6 +9,8 @@ import PenroseScene, { IPosition } from "./PenroseScene";
 import { memo } from "react";
 import { ThreeCleanup } from "@/lib/three/cleanup";
 
+const MIN_STEP_SIZE = 16;
+
 const PenroseLSystemRenderer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -74,7 +76,7 @@ const PenroseLSystemRenderer: React.FC = () => {
       let shouldRender = false;
       while (accumulatedTime >= renderInterval) {
         if (penroseManager.steps < penroseLSystem.production.length) {
-          penroseManager.steps += Math.min(12, penroseLSystem.production.length - penroseManager.steps);
+          penroseManager.steps += Math.min(MIN_STEP_SIZE, penroseLSystem.production.length - penroseManager.steps);
 
           const newLines = penroseManager.generateIncrementalLines(location, penroseLSystem);
 
