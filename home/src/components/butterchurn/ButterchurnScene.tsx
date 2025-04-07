@@ -72,6 +72,24 @@ export default function ButterchurnScene() {
   const updateVisualizerSize = useCallback(() => {
     if (!visualizerRef.current || !canvasRef.current || !window) return;
 
+    // Check if we're in fullscreen mode
+    const isFullscreen = !!document.fullscreenElement;
+    
+    // In fullscreen mode, use the entire viewport
+    if (isFullscreen) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      
+      // Update canvas dimensions to fill the entire viewport
+      canvasRef.current.width = width;
+      canvasRef.current.height = height;
+      
+      // Update visualizer size
+      visualizerRef.current.setRendererSize(width, height);
+      return;
+    }
+    
+    // Non-fullscreen mode - use the original sizing logic
     const availableWidth = window.innerWidth;
     const availableHeight = window.innerHeight; // Account for header
 
@@ -164,7 +182,18 @@ export default function ButterchurnScene() {
     if (!window) return;
 
     window.addEventListener("resize", updateVisualizerSize);
-    return () => window.removeEventListener("resize", updateVisualizerSize);
+    
+    // Also listen for fullscreen changes to update the canvas size
+    const handleFullscreenChange = () => {
+      updateVisualizerSize();
+    };
+    
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    
+    return () => {
+      window.removeEventListener("resize", updateVisualizerSize);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
   }, [updateVisualizerSize]);
 
   // Early return if not supported
