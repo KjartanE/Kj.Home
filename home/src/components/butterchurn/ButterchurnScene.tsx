@@ -11,7 +11,7 @@ import { Visualizer } from "@/components/butterchurn/types";
 export default function ButterchurnScene() {
   // Move the browser check to a state to avoid hydration issues
   const [isBrowserSupported, setIsBrowserSupported] = useState(false);
-  
+
   // Check browser support on mount
   useEffect(() => {
     setIsBrowserSupported(isButterchurnSupported());
@@ -33,7 +33,7 @@ export default function ButterchurnScene() {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
-      
+
       // Properly dispose of the visualizer
       if (visualizerRef.current) {
         try {
@@ -42,11 +42,11 @@ export default function ButterchurnScene() {
             // Disconnect the audio source
             visualizerRef.current.audio.source.disconnect();
           }
-          
+
           // Dispose of the visualizer
           // Note: The Visualizer interface doesn't have a dispose method,
           // but we'll check if it exists at runtime
-          if (typeof (visualizerRef.current as any).dispose === 'function') {
+          if (typeof (visualizerRef.current as any).dispose === "function") {
             (visualizerRef.current as any).dispose();
           }
           visualizerRef.current = null;
@@ -54,13 +54,13 @@ export default function ButterchurnScene() {
           console.error("Error disposing visualizer:", err);
         }
       }
-      
+
       // Dispose of the audio analyzer
       if (analyzerRef.current) {
         analyzerRef.current.dispose();
         analyzerRef.current = null;
       }
-      
+
       // Reset state
       setIsCapturing(false);
       setError(null);
@@ -105,30 +105,49 @@ export default function ButterchurnScene() {
 
     // Check if we're in fullscreen mode
     const isFullscreen = !!document.fullscreenElement;
-    
+
     // In fullscreen mode, use the entire viewport
     if (isFullscreen) {
       const width = window.innerWidth;
       const height = window.innerHeight;
-      
+
       // Update canvas dimensions to fill the entire viewport
       canvasRef.current.width = width;
       canvasRef.current.height = height;
-      
+
       // Update visualizer size
       visualizerRef.current.setRendererSize(width, height);
       return;
     }
-    
+
     // Non-fullscreen mode - use the original sizing logic
     const availableWidth = window.innerWidth;
-    const availableHeight = window.innerHeight; // Account for header
+    const availableHeight = window.innerHeight;
 
-    // Use 21:9 aspect ratio (ultrawide)
+    // Check if we're on a mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // For mobile devices, use a different approach
+    if (isMobile) {
+      // On mobile, use the full available space
+      const width = availableWidth;
+      const height = availableHeight;
+
+      // Update canvas dimensions
+      canvasRef.current.width = width;
+      canvasRef.current.height = height;
+
+      // Update visualizer size
+      visualizerRef.current.setRendererSize(width, height);
+      return;
+    }
+
+    // Desktop mode - use the original sizing logic
+    // Use 16:9 aspect ratio
     const aspectRatio = 16 / 9;
 
     // Target a more reasonable base size
-    const baseWidth = Math.min(1920, availableWidth); // Increased for wider aspect ratio
+    const baseWidth = Math.min(1920, availableWidth);
     const baseHeight = Math.min(1080, availableHeight);
 
     let width = baseWidth;
@@ -161,9 +180,13 @@ export default function ButterchurnScene() {
         throw new Error("Canvas or AudioContext not initialized");
       }
 
+      // Get current dimensions
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
       visualizerRef.current = butterchurn.createVisualizer(analyzer.audioContext, canvasRef.current, {
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: width,
+        height: height,
         pixelRatio: window.devicePixelRatio || 1,
         // Add these settings to make it more responsive
         meshWidth: 96, // Increased mesh resolution
@@ -213,17 +236,26 @@ export default function ButterchurnScene() {
     if (!window) return;
 
     window.addEventListener("resize", updateVisualizerSize);
-    
+
     // Also listen for fullscreen changes to update the canvas size
     const handleFullscreenChange = () => {
       updateVisualizerSize();
     };
-    
+
     document.addEventListener("fullscreenchange", handleFullscreenChange);
-    
+
+    // Add orientation change listener for mobile devices
+    const handleOrientationChange = () => {
+      // Small delay to ensure the browser has updated dimensions
+      setTimeout(updateVisualizerSize, 100);
+    };
+
+    window.addEventListener("orientationchange", handleOrientationChange);
+
     return () => {
       window.removeEventListener("resize", updateVisualizerSize);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("orientationchange", handleOrientationChange);
     };
   }, [updateVisualizerSize]);
 
@@ -234,8 +266,12 @@ export default function ButterchurnScene() {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
-      <div className="relative flex items-center justify-center">
-        <canvas ref={canvasRef} className="max-h-full max-w-full" />
+      <div className="relative flex h-full w-full items-center justify-center">
+        <canvas
+          ref={canvasRef}
+          className="h-full max-h-full w-full max-w-full object-contain"
+          style={{ touchAction: "none" }}
+        />
       </div>
 
       <ButterchurnControls
