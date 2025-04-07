@@ -6,10 +6,12 @@ import { resume } from "@/constants/resume";
 import IntroductionComponent from "@/components/about/IntroductionComponent";
 import QuartechComponent from "@/components/about/QuartechComponent";
 import SkillsSection from "@/components/about/SkillsSection";
+import PersistentPenroseBackground from "@/components/penrose/background/PersistentPenroseBackground";
 
 export default function AboutPage() {
   return (
     <div className="container mx-auto mt-14 py-8">
+      <PersistentPenroseBackground />
       {/*
         Show for desktop and tablet
       */}

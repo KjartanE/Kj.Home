@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import PersistentPenroseBackground from "@/components/penrose/background/PersistentPenroseBackground";
+
 // main page
 export default function Home() {
   return (
     <>
+      <PersistentPenroseBackground />
       <div className="flex h-[calc(100vh-3.5rem)] items-center overflow-hidden">
         <div className="container mx-auto flex flex-col items-center justify-center px-4">
           <h1 className="text-balance text-center text-4xl font-bold tracking-tighter sm:text-6xl md:text-7xl">

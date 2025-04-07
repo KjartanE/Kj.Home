@@ -4,7 +4,6 @@ import { ThemeProvider } from "../components/providers/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/react";
-import PersistentPenroseBackground from "@/components/penrose/background/PersistentPenroseBackground";
 
 export const metadata: Metadata = {
   title: "kj.home",
@@ -19,7 +18,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className="flex min-h-screen flex-col">
         <ThemeProvider attribute="class" defaultTheme="dark">
-          <PersistentPenroseBackground />
           <Header />
           <main className="flex-1">{children}</main>
         </ThemeProvider>

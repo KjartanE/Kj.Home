@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import PersistentPenroseBackground from "@/components/penrose/background/PersistentPenroseBackground";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -93,6 +94,7 @@ export default function ContactPage() {
 
   return (
     <div className="container mx-auto mt-14 flex min-h-[80vh] items-center justify-center px-4 py-8">
+      <PersistentPenroseBackground />
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Contact Me</CardTitle>
