@@ -31,8 +31,39 @@ export default function ButterchurnScene() {
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
-      analyzerRef.current?.dispose();
+      
+      // Properly dispose of the visualizer
+      if (visualizerRef.current) {
+        try {
+          // Disconnect audio sources if they exist
+          if (visualizerRef.current.audio && visualizerRef.current.audio.source) {
+            // Disconnect the audio source
+            visualizerRef.current.audio.source.disconnect();
+          }
+          
+          // Dispose of the visualizer
+          // Note: The Visualizer interface doesn't have a dispose method,
+          // but we'll check if it exists at runtime
+          if (typeof (visualizerRef.current as any).dispose === 'function') {
+            (visualizerRef.current as any).dispose();
+          }
+          visualizerRef.current = null;
+        } catch (err) {
+          console.error("Error disposing visualizer:", err);
+        }
+      }
+      
+      // Dispose of the audio analyzer
+      if (analyzerRef.current) {
+        analyzerRef.current.dispose();
+        analyzerRef.current = null;
+      }
+      
+      // Reset state
+      setIsCapturing(false);
+      setError(null);
     };
   }, []);
 
