@@ -5,15 +5,18 @@ interface ButterchurnControlsProps {
   onNextPreset: () => void;
   onPreviousPreset: () => void;
   onRandomPreset: () => void;
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
 }
 
 export function ButterchurnControls({
   isCapturing,
   onNextPreset,
   onPreviousPreset,
-  onRandomPreset
+  onRandomPreset,
+  isFullscreen,
+  onToggleFullscreen
 }: ButterchurnControlsProps) {
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const touchStartX = useRef(0);
@@ -40,22 +43,6 @@ export function ButterchurnControls({
       }
     };
   }, []);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement
-        .requestFullscreen()
-        .catch((err) => {
-          console.error(`Error attempting to enable fullscreen: ${err.message}`);
-        })
-        .then(() => {
-          console.log("Fullscreen enabled");
-          setIsFullscreen(true);
-        });
-    } else {
-      document.exitFullscreen();
-    }
-  };
 
   // Handle touch gestures for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -101,37 +88,16 @@ export function ButterchurnControls({
       if (deltaY < 0) {
         // Swipe up - enter fullscreen
         if (!isFullscreen) {
-          toggleFullscreen();
+          onToggleFullscreen();
         }
       } else {
         // Swipe down - exit fullscreen
         if (isFullscreen) {
-          toggleFullscreen();
+          onToggleFullscreen();
         }
       }
     }
   };
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-      // Toggle header visibility
-      const header = document.querySelector("header");
-      if (header) {
-        header.style.display = document.fullscreenElement ? "none" : "block";
-      }
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      // Clear any pending timeouts when component unmounts
-      if (controlsTimeoutRef.current) {
-        window.clearTimeout(controlsTimeoutRef.current);
-        controlsTimeoutRef.current = null;
-      }
-    };
-  }, []);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -152,14 +118,14 @@ export function ButterchurnControls({
           break;
         case "Backslash":
           event.preventDefault();
-          toggleFullscreen();
+          onToggleFullscreen();
           break;
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isCapturing, onNextPreset, onPreviousPreset, onRandomPreset]);
+  }, [isCapturing, onNextPreset, onPreviousPreset, onRandomPreset, onToggleFullscreen]);
 
   if (!isCapturing) return null;
 
