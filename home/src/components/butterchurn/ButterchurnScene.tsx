@@ -18,7 +18,6 @@ export default function ButterchurnScene() {
   }, []);
 
   const [isCapturing, setIsCapturing] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const analyzerRef = useRef<AudioAnalyzer | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -101,19 +100,11 @@ export default function ButterchurnScene() {
     setCurrentPresetIndex(randomIndex);
   }, []);
 
-  const toggleFullscreen = useCallback(() => {
-    setIsFullscreen((prev) => {
-      // Toggle header visibility based on the new state
-      const header = document.querySelector("header");
-      if (header) {
-        header.style.display = prev ? "block" : "none";
-      }
-      return !prev;
-    });
-  }, []);
-
   const updateVisualizerSize = useCallback(() => {
     if (!visualizerRef.current || !canvasRef.current || !window) return;
+
+    // Check if we're in fullscreen mode
+    const isFullscreen = !!document.fullscreenElement;
 
     // In fullscreen mode, use the entire viewport
     if (isFullscreen) {
@@ -174,7 +165,7 @@ export default function ButterchurnScene() {
 
     // Update visualizer size
     visualizerRef.current.setRendererSize(width, height);
-  }, [isFullscreen]);
+  }, []);
 
   const startAudioCapture = async () => {
     if (!window) return;
@@ -246,6 +237,13 @@ export default function ButterchurnScene() {
 
     window.addEventListener("resize", updateVisualizerSize);
 
+    // Also listen for fullscreen changes to update the canvas size
+    const handleFullscreenChange = () => {
+      updateVisualizerSize();
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
     // Add orientation change listener for mobile devices
     const handleOrientationChange = () => {
       // Small delay to ensure the browser has updated dimensions
@@ -256,14 +254,10 @@ export default function ButterchurnScene() {
 
     return () => {
       window.removeEventListener("resize", updateVisualizerSize);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
       window.removeEventListener("orientationchange", handleOrientationChange);
     };
   }, [updateVisualizerSize]);
-
-  // Update visualizer size when fullscreen state changes
-  useEffect(() => {
-    updateVisualizerSize();
-  }, [isFullscreen, updateVisualizerSize]);
 
   // Early return if not supported
   if (!isBrowserSupported) {
@@ -271,12 +265,11 @@ export default function ButterchurnScene() {
   }
 
   return (
-    <div className={`fixed inset-0 flex items-center justify-center overflow-hidden ${isFullscreen ? "z-50" : ""}`}>
-      <div
-        className={`relative flex items-center justify-center ${isFullscreen ? "h-screen w-screen" : "h-full w-full"}`}>
+    <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
+      <div className="relative flex h-full w-full items-center justify-center">
         <canvas
           ref={canvasRef}
-          className={`${isFullscreen ? "h-screen w-screen" : "h-full max-h-full w-full max-w-full"} object-contain`}
+          className="h-full max-h-full w-full max-w-full object-contain"
           style={{ touchAction: "none" }}
         />
       </div>
@@ -286,8 +279,6 @@ export default function ButterchurnScene() {
         onNextPreset={loadNextPreset}
         onPreviousPreset={loadPreviousPreset}
         onRandomPreset={loadRandomPreset}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={toggleFullscreen}
       />
 
       {error && (

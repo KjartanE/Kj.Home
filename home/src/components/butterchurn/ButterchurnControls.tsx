@@ -5,23 +5,21 @@ interface ButterchurnControlsProps {
   onNextPreset: () => void;
   onPreviousPreset: () => void;
   onRandomPreset: () => void;
-  isFullscreen: boolean;
-  onToggleFullscreen: () => void;
 }
 
 export function ButterchurnControls({
   isCapturing,
   onNextPreset,
   onPreviousPreset,
-  onRandomPreset,
-  isFullscreen,
-  onToggleFullscreen
+  onRandomPreset
 }: ButterchurnControlsProps) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const controlsTimeoutRef = useRef<number | null>(null);
+  const lastTapTime = useRef(0);
 
   // Detect if we're on a mobile device
   useEffect(() => {
@@ -44,12 +42,28 @@ export function ButterchurnControls({
     };
   }, []);
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement
+        .requestFullscreen()
+        .catch((err) => {
+          console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        })
+        .then(() => {
+          console.log("Fullscreen enabled");
+          setIsFullscreen(true);
+        });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
   // Handle touch gestures for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
 
-    // Show controls briefly on touch
+    // Show controls on touch
     setShowControls(true);
 
     // Clear any existing timeout
@@ -82,22 +96,56 @@ export function ButterchurnControls({
         onNextPreset();
       }
     }
-
-    // Check for vertical swipe (for toggling fullscreen)
-    if (Math.abs(deltaY) > 50 && Math.abs(deltaX) < 50) {
-      if (deltaY < 0) {
-        // Swipe up - enter fullscreen
-        if (!isFullscreen) {
-          onToggleFullscreen();
-        }
-      } else {
-        // Swipe down - exit fullscreen
-        if (isFullscreen) {
-          onToggleFullscreen();
-        }
-      }
+    
+    // Check for downward swipe from top (for exiting fullscreen)
+    if (isFullscreen && deltaY > 100 && touchStartY.current < 100) {
+      document.exitFullscreen();
     }
   };
+
+  // Handle tap to show controls
+  const handleTap = () => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTapTime.current;
+    
+    if (tapLength < 500 && tapLength > 0) {
+      // Double tap detected
+      setShowControls(true);
+      
+      // Clear any existing timeout
+      if (controlsTimeoutRef.current) {
+        window.clearTimeout(controlsTimeoutRef.current);
+      }
+      
+      // Hide controls after 3 seconds
+      controlsTimeoutRef.current = window.setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    }
+    
+    lastTapTime.current = currentTime;
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+      // Toggle header visibility
+      const header = document.querySelector("header");
+      if (header) {
+        header.style.display = document.fullscreenElement ? "none" : "block";
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      // Clear any pending timeouts when component unmounts
+      if (controlsTimeoutRef.current) {
+        window.clearTimeout(controlsTimeoutRef.current);
+        controlsTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -118,35 +166,94 @@ export function ButterchurnControls({
           break;
         case "Backslash":
           event.preventDefault();
-          onToggleFullscreen();
+          toggleFullscreen();
           break;
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isCapturing, onNextPreset, onPreviousPreset, onRandomPreset, onToggleFullscreen]);
+  }, [isCapturing, onNextPreset, onPreviousPreset, onRandomPreset]);
 
   if (!isCapturing) return null;
 
   return (
     <>
       {/* Touch area for gestures - covers the entire screen */}
-      <div className="absolute inset-0 z-10" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} />
+      <div 
+        className="absolute inset-0 z-10" 
+        onTouchStart={handleTouchStart} 
+        onTouchEnd={handleTouchEnd}
+        onClick={handleTap}
+      />
 
       {/* Mobile controls overlay */}
       {isMobile && (
-        <div
-          className={`fixed bottom-0 left-0 right-0 z-20 transition-opacity duration-300 ${
-            isFullscreen ? (showControls ? "opacity-0 hover:opacity-100" : "opacity-100") : "opacity-100"
-          }`}>
-          <div className="bg-black/50 px-4 py-2 text-center text-white">
-            <div className="text-xs text-gray-300">
-              <span className="mx-1">Swipe left/right: Change Preset</span>
-              <span className="mx-1">Swipe up/down: {isFullscreen ? "Exit" : "Enter"} Fullscreen</span>
+        <>
+          {/* Top swipe indicator for fullscreen exit */}
+          {isFullscreen && (
+            <div className="fixed top-0 left-0 right-0 h-1 bg-white/30 z-30" />
+          )}
+          
+          {/* Sleeker controls */}
+          <div
+            className={`fixed bottom-0 left-0 right-0 z-20 transition-all duration-300 ${
+              showControls ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
+            }`}>
+            <div className="bg-black/30 backdrop-blur-sm px-4 py-3 text-center text-white">
+              <div className="flex justify-center items-center space-x-4">
+                <button
+                  onClick={onPreviousPreset}
+                  className="p-2 rounded-full bg-black/30 hover:bg-black/50 transition-colors"
+                  aria-label="Previous preset">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                </button>
+                
+                <button
+                  onClick={onRandomPreset}
+                  className="p-2 rounded-full bg-black/30 hover:bg-black/50 transition-colors"
+                  aria-label="Random preset">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <path d="M3.27 6.96L12 12.01l8.73-5.05" />
+                    <path d="M12 22.08V12" />
+                  </svg>
+                </button>
+                
+                <button
+                  onClick={onNextPreset}
+                  className="p-2 rounded-full bg-black/30 hover:bg-black/50 transition-colors"
+                  aria-label="Next preset">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+                
+                <button
+                  onClick={toggleFullscreen}
+                  className="p-2 rounded-full bg-black/30 hover:bg-black/50 transition-colors"
+                  aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}>
+                  {isFullscreen ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              
+              <div className="text-xs text-gray-300 mt-2">
+                <span>Swipe left/right: Change Preset</span>
+                {isFullscreen && <span className="ml-2">• Swipe down from top: Exit Fullscreen</span>}
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Desktop controls */}
