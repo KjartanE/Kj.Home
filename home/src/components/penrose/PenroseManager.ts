@@ -21,7 +21,7 @@ export default class PenroseManager {
   private lastGeneratedStep: number;
   public steps: number;
   public drawLine: (start: THREE.Vector3, end: THREE.Vector3, width: number) => void;
-  public renderLines: () => THREE.LineSegments;
+  public renderLines: (notFade?: boolean) => THREE.LineSegments;
   public generateLines: (location: RefObject<IPosition | null>, penroseLSystem: PenroseLSystem) => void;
   public generateIncrementalLines: (
     location: RefObject<IPosition | null>,
@@ -32,7 +32,7 @@ export default class PenroseManager {
     this.theme = theme;
     this.themeColor = this.theme === "dark" ? 1.0 : 0.0;
     this.distanceScale = 0.15;
-    this.baseWidth = this.theme === "dark" ? 0.02 : 0.06;
+    this.baseWidth = this.theme === "dark" ? 0.04 : 0.09;
 
     this.lineGeometry = new THREE.BufferGeometry();
     this.lineMaterial = new THREE.ShaderMaterial({
@@ -40,15 +40,10 @@ export default class PenroseManager {
       fragmentShader: fadeFragmentShader,
       uniforms: {
         themeColor: { value: this.themeColor },
-        baseWidth: { value: 0.01 },
-        distanceScale: { value: 0.01 }
+        baseWidth: { value: this.baseWidth },
+        distanceScale: { value: this.distanceScale }
       }
     });
-
-    this.lineMaterial.uniforms.distanceScale.value = this.distanceScale;
-    this.lineMaterial.uniforms.baseWidth.value = this.baseWidth;
-
-    this.lineMaterial.needsUpdate = true;
 
     this.steps = 0;
     this.lastGeneratedStep = 0;
@@ -62,7 +57,7 @@ export default class PenroseManager {
       this.widths.push(width, width);
     };
 
-    this.renderLines = () => {
+    this.renderLines = (notFade?: boolean) => {
       if (this.lineGeometry) {
         this.lineGeometry.dispose();
       }
@@ -74,6 +69,15 @@ export default class PenroseManager {
 
       this.lineGeometry.setAttribute("position", new THREE.BufferAttribute(positionsArray, 3));
       this.lineGeometry.setAttribute("width", new THREE.BufferAttribute(widthsArray, 1));
+
+      if (notFade) {
+        const material = this.lineMaterial as THREE.ShaderMaterial;
+        material.uniforms.themeColor.value = 0.0;
+        material.uniforms.baseWidth.value = 1.0;
+        material.needsUpdate = true;
+
+        return new THREE.LineSegments(this.lineGeometry, material);
+      }
 
       return new THREE.LineSegments(this.lineGeometry, this.lineMaterial);
     };

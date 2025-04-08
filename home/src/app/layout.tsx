@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "../components/providers/theme-provider";
 import { Header } from "@/components/layout/header";
-import BackgroundLayout from "@/components/layout/BackgroundLayout";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -20,9 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex min-h-screen flex-col">
         <ThemeProvider attribute="class" defaultTheme="dark">
           <Header />
-          <BackgroundLayout>
-            <main className="flex-1">{children}</main>
-          </BackgroundLayout>
+          <main className="flex-1">{children}</main>
         </ThemeProvider>
         <Toaster />
       </body>

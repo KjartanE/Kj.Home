@@ -5,18 +5,21 @@ export default class PlaygroundController {
   public penroseLSystem: PenroseLSystem;
 
   public generations: number;
-  public speed: number;
+  public rotation: number;
+  public rotationSpeed: number;
 
   public resetFlag: boolean;
   public instantFlag: boolean;
-
+  public rotateFlag: boolean;
   constructor() {
     this.color = "black";
     this.penroseLSystem = new PenroseLSystem();
-    this.generations = 1;
-    this.speed = 10;
-    this.resetFlag = false;
-    this.instantFlag = false;
+    this.generations = 6;
+    this.rotation = 0;
+    this.rotationSpeed = 10;
+    this.resetFlag = true;
+    this.instantFlag = true;
+    this.rotateFlag = false;
   }
 
   simulate(generations?: number) {

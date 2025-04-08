@@ -1,10 +1,26 @@
 import * as THREE from "three";
 
 // Constants for the game
-export const GRID_SIZE_Y = 100; // Vertical grid size
-export const GRID_SIZE_X = 200; // Horizontal grid size (wider)
-export const CELL_SIZE = 1;
+export const BASE_CELL_SIZE = 20; // Base size that we'll adjust based on screen size
 export const UPDATE_INTERVAL = 60; // ms between updates
+
+export function getGridSize(containerWidth: number, containerHeight: number) {
+  // Calculate cell size based on container dimensions
+  // We want fewer cells on mobile for better interaction
+  const targetCells = containerWidth < 768 ? 25 : 45; // Fewer cells on mobile
+  const minDimension = Math.min(containerWidth, containerHeight);
+  const cellSize = Math.floor(minDimension / targetCells);
+  
+  // Calculate grid dimensions
+  const gridWidth = Math.floor(containerWidth / cellSize);
+  const gridHeight = Math.floor(containerHeight / cellSize);
+  
+  return { 
+    width: gridWidth, 
+    height: gridHeight,
+    cellSize: cellSize 
+  };
+}
 
 // Class to handle the game logic
 export class GameOfLife {
@@ -13,18 +29,26 @@ export class GameOfLife {
   isRunning: boolean = false;
   updateInterval: number | null = null;
   onUpdate: (() => void) | null = null;
+  width: number;
+  height: number;
 
-  constructor() {
+  constructor(width: number, height: number) {
+    this.width = width;
+    this.height = height;
     // Initialize grids
-    this.grid = Array(GRID_SIZE_X).fill(0).map(() => Array(GRID_SIZE_Y).fill(false));
-    this.nextGrid = Array(GRID_SIZE_X).fill(0).map(() => Array(GRID_SIZE_Y).fill(false));
+    this.grid = Array(width)
+      .fill(0)
+      .map(() => Array(height).fill(false));
+    this.nextGrid = Array(width)
+      .fill(0)
+      .map(() => Array(height).fill(false));
     this.randomize();
   }
 
   // Fill the grid with random values
-  randomize(density: number = 0.3) {
-    for (let i = 0; i < GRID_SIZE_X; i++) {
-      for (let j = 0; j < GRID_SIZE_Y; j++) {
+  randomize(density: number = 0.4) {
+    for (let i = 0; i < this.width; i++) {
+      for (let j = 0; j < this.height; j++) {
         this.grid[i][j] = Math.random() < density;
       }
     }
@@ -33,8 +57,8 @@ export class GameOfLife {
 
   // Clear the grid
   clear() {
-    for (let i = 0; i < GRID_SIZE_X; i++) {
-      for (let j = 0; j < GRID_SIZE_Y; j++) {
+    for (let i = 0; i < this.width; i++) {
+      for (let j = 0; j < this.height; j++) {
         this.grid[i][j] = false;
       }
     }
@@ -43,7 +67,7 @@ export class GameOfLife {
 
   // Toggle a cell's state
   toggleCell(x: number, y: number) {
-    if (x >= 0 && x < GRID_SIZE_X && y >= 0 && y < GRID_SIZE_Y) {
+    if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
       this.grid[x][y] = !this.grid[x][y];
       if (this.onUpdate) this.onUpdate();
     }
@@ -55,8 +79,8 @@ export class GameOfLife {
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
         if (i === 0 && j === 0) continue;
-        const nx = (x + i + GRID_SIZE_X) % GRID_SIZE_X;
-        const ny = (y + j + GRID_SIZE_Y) % GRID_SIZE_Y;
+        const nx = (x + i + this.width) % this.width;
+        const ny = (y + j + this.height) % this.height;
         if (this.grid[nx][ny]) count++;
       }
     }
@@ -66,8 +90,8 @@ export class GameOfLife {
   // Update the grid according to Conway's rules
   update() {
     // Calculate next generation
-    for (let i = 0; i < GRID_SIZE_X; i++) {
-      for (let j = 0; j < GRID_SIZE_Y; j++) {
+    for (let i = 0; i < this.width; i++) {
+      for (let j = 0; j < this.height; j++) {
         const neighbors = this.countNeighbors(i, j);
         const isAlive = this.grid[i][j];
 
@@ -112,79 +136,75 @@ export class GameOfLife {
 }
 
 // Helper functions for THREE.js visualization
-export function createGridGeometry(): THREE.BufferGeometry {
+export function createGridGeometry(width: number, height: number, cellSize: number): THREE.BufferGeometry {
   const geometry = new THREE.BufferGeometry();
   const vertices: number[] = [];
-  
+
   // Create grid lines
   // Horizontal lines
-  for (let i = 0; i <= GRID_SIZE_Y; i++) {
-    vertices.push(0, i * CELL_SIZE, 0);
-    vertices.push(GRID_SIZE_X * CELL_SIZE, i * CELL_SIZE, 0);
+  for (let i = 0; i <= height; i++) {
+    vertices.push(0, i * cellSize, 0);
+    vertices.push(width * cellSize, i * cellSize, 0);
   }
-  
+
   // Vertical lines
-  for (let i = 0; i <= GRID_SIZE_X; i++) {
-    vertices.push(i * CELL_SIZE, 0, 0);
-    vertices.push(i * CELL_SIZE, GRID_SIZE_Y * CELL_SIZE, 0);
+  for (let i = 0; i <= width; i++) {
+    vertices.push(i * cellSize, 0, 0);
+    vertices.push(i * cellSize, height * cellSize, 0);
   }
-  
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
   return geometry;
 }
 
 export function createCellsMaterial(): THREE.PointsMaterial {
   return new THREE.PointsMaterial({
-    color: 0xFFFFFF,
-    size: CELL_SIZE * 0.9,
-    sizeAttenuation: true,
+    color: 0xffffff,
+    size: BASE_CELL_SIZE * 0.9,
+    sizeAttenuation: true
   });
 }
 
 export function updateCellPositions(game: GameOfLife, points: THREE.Points) {
   const positions: number[] = [];
-  
+
   // Add live cells to the positions array
-  for (let i = 0; i < GRID_SIZE_X; i++) {
-    for (let j = 0; j < GRID_SIZE_Y; j++) {
+  for (let i = 0; i < game.width; i++) {
+    for (let j = 0; j < game.height; j++) {
       if (game.grid[i][j]) {
         // Center each cell by adding CELL_SIZE/2
-        positions.push(
-          i * CELL_SIZE + CELL_SIZE / 2,
-          j * CELL_SIZE + CELL_SIZE / 2,
-          0
-        );
+        positions.push(i * BASE_CELL_SIZE + BASE_CELL_SIZE / 2, j * BASE_CELL_SIZE + BASE_CELL_SIZE / 2, 0);
       }
     }
   }
-  
+
   // Update the geometry
   const positionAttribute = new THREE.Float32BufferAttribute(positions, 3);
-  points.geometry.setAttribute('position', positionAttribute);
+  points.geometry.setAttribute("position", positionAttribute);
   points.geometry.attributes.position.needsUpdate = true;
 }
 
 // Convert screen coordinates to grid coordinates
 export function screenToGrid(
-  x: number, 
-  y: number, 
+  x: number,
+  y: number,
   camera: THREE.OrthographicCamera,
   containerWidth: number,
   containerHeight: number
-): { x: number, y: number } {
+): { x: number; y: number } {
   // Normalize device coordinates (NDC)
   const ndcX = (x / containerWidth) * 2 - 1;
   const ndcY = -(y / containerHeight) * 2 + 1;
-  
+
   // Create a vector from NDC
   const vector = new THREE.Vector3(ndcX, ndcY, 0);
-  
+
   // Unproject the vector
   vector.unproject(camera);
-  
+
   // Calculate grid coordinates
-  const gridX = Math.floor(vector.x / CELL_SIZE);
-  const gridY = Math.floor(vector.y / CELL_SIZE);
-  
+  const gridX = Math.floor(vector.x / BASE_CELL_SIZE);
+  const gridY = Math.floor(vector.y / BASE_CELL_SIZE);
+
   return { x: gridX, y: gridY };
 }

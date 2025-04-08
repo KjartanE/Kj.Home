@@ -1,24 +1,21 @@
 "use client";
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { DndContext, useDraggable } from "@dnd-kit/core";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useHasMounted } from "@/hooks/useHasMounted";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { Slider } from "@/components/ui/slider";
 
 interface ControlsProps {
-  onGenerationsChange: (value: number) => void;
-  onSpeedChange: (value: number) => void;
-  onInstantChange: (value: boolean) => void;
-  onRender: () => void;
+  onRotationChange: (value: number) => void;
+  onRotationSpeedChange: (value: number) => void;
   initialValues: {
-    generations: number;
-    speed: number;
-    instant: boolean;
+    rotation: number;
+    rotationSpeed: number;
   };
 }
 
@@ -77,18 +74,13 @@ function DraggableCard({
   );
 }
 
-export function Controls({
-  onGenerationsChange,
-  onSpeedChange,
-  onInstantChange,
-  onRender,
-  initialValues
-}: ControlsProps) {
+export function Controls({ onRotationChange, onRotationSpeedChange, initialValues }: ControlsProps) {
   const hasMounted = useHasMounted();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isExpanded, setIsExpanded] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 80 });
-  const [values, setValues] = useState(initialValues);
+  const [rotation, setRotation] = useState(initialValues.rotation);
+  const [rotationSpeed, setRotationSpeed] = useState(initialValues.rotationSpeed);
 
   if (!hasMounted) {
     return null;
@@ -109,44 +101,31 @@ export function Controls({
           <CardContent className={`p-4 ${isMobile ? "max-h-[70vh] overflow-y-auto" : ""}`}>
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label>Generations: {values.generations}</Label>
+                <Label>Rotation: {rotation}</Label>
                 <Slider
-                  value={[values.generations]}
+                  value={[rotation]}
                   min={0}
-                  max={8}
-                  step={1}
+                  max={Math.PI}
+                  step={0.001}
                   onValueChange={([value]) => {
-                    setValues((prev) => ({ ...prev, generations: value }));
-                    onGenerationsChange(value);
+                    setRotation(value);
+                    onRotationChange(value);
                   }}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Speed: {values.speed}</Label>
+                <Label>Rotation Speed: {rotationSpeed}</Label>
                 <Slider
-                  value={[values.speed]}
-                  min={10}
-                  max={1000}
-                  step={10}
+                  value={[rotationSpeed]}
+                  min={0}
+                  max={0.001}
+                  step={0.0001}
                   onValueChange={([value]) => {
-                    setValues((prev) => ({ ...prev, speed: value }));
-                    onSpeedChange(value);
+                    setRotationSpeed(value);
+                    onRotationSpeedChange(value);
                   }}
                 />
               </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={values.instant}
-                  onCheckedChange={(checked) => {
-                    setValues((prev) => ({ ...prev, instant: checked }));
-                    onInstantChange(checked);
-                  }}
-                />
-                <Label>Instant Render</Label>
-              </div>
-              <Button variant="default" className="w-full" onClick={onRender}>
-                Render
-              </Button>
             </div>
           </CardContent>
         )}

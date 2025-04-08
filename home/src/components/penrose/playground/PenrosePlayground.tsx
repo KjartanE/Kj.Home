@@ -10,9 +10,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Controls } from "./Controls";
 
 const initialControlValues = {
-  generations: 1,
-  speed: 10,
-  instant: false
+  rotation: 0,
+  rotationSpeed: 0
 };
 
 const PenrosePlayground: React.FC = () => {
@@ -28,55 +27,41 @@ const PenrosePlayground: React.FC = () => {
   // Memoize all dependencies
   const playgroundController = useMemo(() => {
     const controller = new PlaygroundController();
-    controller.generations = 3;
-    controller.speed = 100;
+    controller.rotation = initialControlValues.rotation;
+    controller.rotationSpeed = initialControlValues.rotationSpeed;
     controller.simulate();
     return controller;
   }, []);
 
   const penroseManager = useMemo(() => new PenroseManager(theme.resolvedTheme || "dark"), [theme.resolvedTheme]);
 
+  const penroseManager2 = useMemo(() => new PenroseManager(theme.resolvedTheme || "dark"), [theme.resolvedTheme]);
+
   const location = useRef<IPosition | null>({
     position: new THREE.Vector3(0, 0, 0),
     rotation: 0
   });
 
-  const handleGenerationsChange = (value: number) => {
-    playgroundController.generations = value;
-    playgroundController.simulate();
-  };
+  const location2 = useRef<IPosition | null>({
+    position: new THREE.Vector3(0, 0, 0),
+    rotation: 0
+  });
 
-  const handleSpeedChange = (value: number) => {
-    playgroundController.speed = value;
-  };
+  // Add a reference to track the second penrose line
+  const secondPenroseLineRef = useRef<THREE.Line | null>(null);
 
-  const handleInstantChange = (value: boolean) => {
-    playgroundController.instantFlag = value;
-    if (value) {
-      // Immediately render the full pattern when instant mode is enabled
-      penroseManager.steps = playgroundController.penroseLSystem.production.length;
-      penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
-      if (sceneRef.current) {
-        sceneRef.current.scene.clear();
-        sceneRef.current.scene.add(penroseManager.renderLines());
-        sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
-      }
+  const handleRotationChange = (value: number) => {
+    playgroundController.rotation = value;
+    if (location.current) {
+      location.current.rotation = value;
     }
+
+    playgroundController.rotateFlag = true;
   };
 
-  const handleRender = () => {
-    playgroundController.reset();
-    playgroundController.simulate();
-
-    if (playgroundController.instantFlag) {
-      penroseManager.steps = playgroundController.penroseLSystem.production.length;
-      penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
-      if (sceneRef.current) {
-        sceneRef.current.scene.clear();
-        sceneRef.current.scene.add(penroseManager.renderLines());
-        sceneRef.current.renderer.render(sceneRef.current.scene, sceneRef.current.camera);
-      }
-    }
+  const handleRotationSpeedChange = (value: number) => {
+    playgroundController.rotationSpeed = value;
+    playgroundController.rotateFlag = true;
   };
 
   useEffect(() => {
@@ -98,8 +83,6 @@ const PenrosePlayground: React.FC = () => {
     scene.background = new THREE.Color(0xff0000);
 
     function animate() {
-      const stepSize = Math.max(1, Math.floor(playgroundController.speed / 20));
-
       if (playgroundController.resetFlag) {
         playgroundController.resetFlag = false;
         scene.clear();
@@ -110,20 +93,42 @@ const PenrosePlayground: React.FC = () => {
         if (playgroundController.instantFlag) {
           penroseManager.steps = playgroundController.penroseLSystem.production.length;
           penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
-          const line = penroseManager.renderLines();
+          const line = penroseManager.renderLines(true);
           scene.add(line);
+
+          penroseManager2.steps = playgroundController.penroseLSystem.production.length;
+          penroseManager2.generateIncrementalLines(location2, playgroundController.penroseLSystem);
+          const line2 = penroseManager2.renderLines(true);
+          secondPenroseLineRef.current = line2;
+          scene.add(line2);
         }
       }
 
-      if (
-        !playgroundController.instantFlag &&
-        penroseManager.steps < playgroundController.penroseLSystem.production.length
-      ) {
-        penroseManager.steps += stepSize;
-        scene.clear();
-        penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
-        const line = penroseManager.renderLines();
-        scene.add(line);
+      if (playgroundController.rotateFlag && location2.current) {
+        if (playgroundController.rotationSpeed > 0) {
+          location2.current.rotation += playgroundController.rotationSpeed;
+
+          if (secondPenroseLineRef.current) {
+            secondPenroseLineRef.current.rotation.z = location2.current.rotation;
+          }
+        } else {
+          location2.current.rotation = playgroundController.rotation;
+          penroseManager2.reset();
+          penroseManager2.steps = 0;
+          penroseManager2.steps = playgroundController.penroseLSystem.production.length;
+          penroseManager2.generateIncrementalLines(location2, playgroundController.penroseLSystem);
+
+          // Remove the previous second penrose line if it exists
+          if (secondPenroseLineRef.current) {
+            scene.remove(secondPenroseLineRef.current);
+          }
+
+          playgroundController.rotateFlag = false;
+          const line2 = penroseManager2.renderLines(true);
+          // Store the reference to the new line
+          secondPenroseLineRef.current = line2;
+          scene.add(line2);
+        }
       }
 
       controls.update();
@@ -133,8 +138,15 @@ const PenrosePlayground: React.FC = () => {
 
     // Initial render
     penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
-    const initialLine = penroseManager.renderLines();
+    const initialLine = penroseManager.renderLines(true);
     scene.add(initialLine);
+
+    penroseManager2.generateIncrementalLines(location2, playgroundController.penroseLSystem);
+    const initialLine2 = penroseManager2.renderLines(true);
+    // Store the reference to the initial second line
+    secondPenroseLineRef.current = initialLine2;
+    scene.add(initialLine2);
+
     renderer.render(scene, camera);
 
     animate();
@@ -150,16 +162,14 @@ const PenrosePlayground: React.FC = () => {
         container.removeChild(renderer.domElement);
       }
     };
-  }, [theme.resolvedTheme, penroseManager, playgroundController]);
+  }, [theme.resolvedTheme, penroseManager, penroseManager2, playgroundController]);
 
   return (
     <div className="relative h-full w-full">
       <div ref={containerRef} className="h-full w-full" />
       <Controls
-        onGenerationsChange={handleGenerationsChange}
-        onSpeedChange={handleSpeedChange}
-        onInstantChange={handleInstantChange}
-        onRender={handleRender}
+        onRotationChange={handleRotationChange}
+        onRotationSpeedChange={handleRotationSpeedChange}
         initialValues={initialControlValues}
       />
     </div>
