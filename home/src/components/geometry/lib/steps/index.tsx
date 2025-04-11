@@ -6,19 +6,21 @@ const scale = 2;
 // Utility functions for aligning geometry to polar grid
 // These follow the same logic as in PolarGrid.tsx
 const getPolarGridRadius = (circleIndex: number, numCircles: number = 4, maxRadius: number = 10) => {
-  return (circleIndex / numCircles) * maxRadius;
+  const radius = (circleIndex / numCircles) * maxRadius;
+  return radius;
 };
 
 const getPolarGridPoint = (
   circleIndex: number,
   directionIndex: number,
-  y: number = 0,
+  y: number = 0.2,
   numCircles: number = 4,
   numDirections: number = 6,
-  maxRadius: number = 10
+  maxRadius: number = 10,
+  offset: number = 0
 ) => {
   const radius = getPolarGridRadius(circleIndex, numCircles, maxRadius);
-  const theta = (directionIndex / numDirections) * Math.PI * 2 + Math.PI / 6;
+  const theta = (directionIndex / numDirections) * Math.PI * 2 + Math.PI / 6 + offset;
   return {
     x: radius * Math.cos(theta),
     y,
@@ -31,9 +33,10 @@ export const GeometrySteps: StepConfig[] = [
     name: "base",
     setupGeometry: (geometry: Geometry) => {
       // Central circle aligned with the first polar grid circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(scale), {
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(scale), {
         strokeColor: 0xff4400,
-        animationDuration: 3
+        animationDuration: 3,
+        dot: true
       });
     }
   },
@@ -41,14 +44,62 @@ export const GeometrySteps: StepConfig[] = [
     name: "Vesica Piscis",
     setupGeometry: (geometry: Geometry) => {
       // Two circles placed at opposite cardinal points on the grid
-
-      geometry.createCircle({ x: 2, y: 0, z: 0 }, getPolarGridRadius(scale), {
+      const radius = getPolarGridRadius(scale);
+      geometry.createCircle({ x: radius / 2, y: 0.1, z: 0 }, radius, {
         strokeColor: 0xff4400,
-        animationDuration: 3
+        animationDuration: 3,
+        dot: true
       });
-      geometry.createCircle({ x: -2, y: 0, z: 0 }, getPolarGridRadius(scale), {
+      geometry.createCircle({ x: -radius / 2, y: 0.1, z: 0 }, radius, {
         strokeColor: 0xff4400,
-        animationDuration: 3
+        animationDuration: 3,
+        dot: true
+      });
+    }
+  },
+  {
+    name: "Cosmic Womb",
+    setupGeometry: (geometry: Geometry) => {
+      // Two circles placed at opposite cardinal points on the grid
+      const radius = getPolarGridRadius(scale);
+      geometry.createPoint(
+        { x: 0, y: 0.1, z: 0 },
+        {
+          color: 0xff4400,
+          animationDuration: 3
+        }
+      );
+      geometry.createCircle({ x: radius / 2, y: 0.1, z: 0 }, radius, {
+        strokeColor: 0xff4400,
+        animationDuration: 3,
+        dot: true
+      });
+      geometry.createCircle({ x: -radius / 2, y: 0.1, z: 0 }, radius, {
+        strokeColor: 0xff4400,
+        animationDuration: 3,
+        dot: true
+      });
+    }
+  },
+  {
+    name: "Cosmic Eye",
+    setupGeometry: (geometry: Geometry) => {
+      // Two circles placed at opposite cardinal points on the grid
+      const radius = getPolarGridRadius(scale);
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(scale / 2), {
+        strokeColor: 0xff4400,
+        animationDuration: 3,
+        dot: true
+      });
+      geometry.createCircle({ x: 0, y: 0.1, z: radius / 2 }, radius, {
+        strokeColor: 0xff4400,
+        animationDuration: 3,
+        dot: true
+      });
+      geometry.createCircle({ x: 0, y: 0.1, z: -radius / 2 }, radius, {
+        strokeColor: 0xff4400,
+        animationDuration: 3,
+        dot: true
       });
     }
   },
@@ -69,20 +120,14 @@ export const GeometrySteps: StepConfig[] = [
     name: "Seed of Life",
     setupGeometry: (geometry: Geometry) => {
       // Central circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(scale), {
-        strokeColor: 0xff4400,
-        animationDuration: 3
-      });
-
-      // Outer circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(scale * 2), {
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(scale), {
         strokeColor: 0xff4400,
         animationDuration: 3
       });
 
       // Six circles around the center at each cardinal direction
       for (let i = 0; i < 6; i++) {
-        const point = getPolarGridPoint(2, i);
+        const point = getPolarGridPoint(2, i, 0, 4, 6, 10, Math.PI / 6);
         geometry.createCircle(point, getPolarGridRadius(scale), { strokeColor: 0xff4400, animationDuration: 3 });
       }
     }
@@ -91,13 +136,13 @@ export const GeometrySteps: StepConfig[] = [
     name: "Lotus of Life",
     setupGeometry: (geometry: Geometry) => {
       // Central circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(scale), {
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(scale), {
         strokeColor: 0xff4400,
         animationDuration: 3
       });
 
       // Outer circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(scale * 2), {
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(scale * 2), {
         strokeColor: 0xff4400,
         animationDuration: 3
       });
@@ -114,7 +159,7 @@ export const GeometrySteps: StepConfig[] = [
     name: "Torus",
     setupGeometry: (geometry: Geometry) => {
       // Outer circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(scale * 2), {
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(scale * 2), {
         strokeColor: 0xff4400,
         animationDuration: 3
       });
@@ -128,52 +173,284 @@ export const GeometrySteps: StepConfig[] = [
     }
   },
   {
-    name: "Flower of Life",
-    setupGeometry: (geometry: Geometry) => {
-      // Create central circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(1), {
-        strokeColor: 0xff4400,
-        animationDuration: 2
-      });
-
-      //outer circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(3), {
-        strokeColor: 0xff4400,
-        animationDuration: 2
-      });
-
-      //outer circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(3.1), {
-        strokeColor: 0xff4400,
-        animationDuration: 2
-      });
-
-      // Create first ring (6 circles)
-      for (let i = 0; i < 6; i++) {
-        const point = getPolarGridPoint(1, i);
-        geometry.createCircle(point, getPolarGridRadius(1), { strokeColor: 0xff4400, animationDuration: 2 });
-      }
-
-      // Create second ring (6 circles)
-      for (let i = 0; i < 6; i++) {
-        const point = getPolarGridPoint(2, i);
-        geometry.createCircle(point, getPolarGridRadius(1), { strokeColor: 0xff4400, animationDuration: 2 });
-      }  
-    }
-  },
-  {
     name: "Egg of Life",
     setupGeometry: (geometry: Geometry) => {
       // Create central circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(0.5), {
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(1), {
         strokeColor: 0xff4400,
         animationDuration: 3
       });
 
-      // Create the 6 surrounding circles at the first grid circle radius
+      const radius = getPolarGridRadius(1);
+      const xOffset = Math.sqrt(3) * radius;
+      const positions = [
+        { x: xOffset, y: 0.1, z: 0 },
+        { x: -xOffset, y: 0.1, z: 0 },
+        { x: xOffset / 2, y: 0.1, z: (radius * 3) / 2 },
+        { x: xOffset / 2, y: 0.1, z: (-radius * 3) / 2 },
+        { x: -xOffset / 2, y: 0.1, z: (radius * 3) / 2 },
+        { x: -xOffset / 2, y: 0.1, z: (-radius * 3) / 2 }
+      ];
+
+      geometry.createArc(positions[0], getPolarGridRadius(1), -Math.PI + Math.PI / 6, Math.PI - Math.PI / 6, {
+        strokeColor: 0xff4400,
+        animationDuration: 3,
+        segments: 64
+      });
+
+      geometry.createArc(positions[5], getPolarGridRadius(1), -Math.PI * 2 + (Math.PI / 6) * 3, Math.PI / 6, {
+        strokeColor: 0xff4400,
+        animationDuration: 3,
+        segments: 64
+      });
+
+      geometry.createArc(
+        positions[4],
+        getPolarGridRadius(1),
+        -Math.PI * 2 - Math.PI / 6,
+        -Math.PI + (Math.PI / 6) * 3,
+        {
+          strokeColor: 0xff4400,
+          animationDuration: 3,
+          segments: 64
+        }
+      );
+
+      geometry.createArc(positions[3], getPolarGridRadius(1), -Math.PI * 2 + (Math.PI / 6) * 7, Math.PI / 6, {
+        strokeColor: 0xff4400,
+        animationDuration: 3,
+        segments: 64
+      });
+
+      geometry.createArc(positions[2], getPolarGridRadius(1), -Math.PI / 6, (Math.PI / 6) * 5, {
+        strokeColor: 0xff4400,
+        animationDuration: 3,
+        segments: 64
+      });
+
+      geometry.createArc(positions[1], getPolarGridRadius(1), -Math.PI / 2, -Math.PI / 2 - Math.PI, {
+        strokeColor: 0xff4400,
+        animationDuration: 3,
+        segments: 64
+      });
+    }
+  },
+  {
+    name: "Flower of Life",
+    setupGeometry: (geometry: Geometry) => {
+      // Create central circle
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(1), {
+        strokeColor: 0xff4400,
+        animationDuration: 3
+      });
+
+      //outer circle
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(3), {
+        strokeColor: 0xff4400,
+        animationDuration: 3
+      });
+
+      //outer circle
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(3.1), {
+        strokeColor: 0xff4400,
+        animationDuration: 3
+      });
+
+      // Create inner ring (6 circles)
       for (let i = 0; i < 6; i++) {
         const point = getPolarGridPoint(1, i);
-        geometry.createCircle(point, getPolarGridRadius(0.5), { strokeColor: 0xff4400, animationDuration: 3 });
+        geometry.createCircle(point, getPolarGridRadius(1), { strokeColor: 0xff4400, animationDuration: 3 });
+      }
+
+      // Create outer ring (6 circles)
+      for (let i = 0; i < 6; i++) {
+        const point = getPolarGridPoint(2, i);
+        geometry.createCircle(point, getPolarGridRadius(1), { strokeColor: 0xff4400, animationDuration: 3 });
+      }
+
+      const radius = getPolarGridRadius(1);
+      const xOffset = Math.sqrt(3) * radius;
+
+      const circlePositions = [
+        { x: xOffset, y: 0.1, z: 0 },
+        { x: -xOffset, y: 0.1, z: 0 },
+        { x: xOffset / 2, y: 0.1, z: (radius * 3) / 2 },
+        { x: xOffset / 2, y: 0.1, z: (-radius * 3) / 2 },
+        { x: -xOffset / 2, y: 0.1, z: (radius * 3) / 2 },
+        { x: -xOffset / 2, y: 0.1, z: (-radius * 3) / 2 }
+      ];
+
+      for (const position of circlePositions) {
+        geometry.createCircle(position, radius, {
+          strokeColor: 0xff4400,
+          animationDuration: 3
+        });
+      }
+
+      //outer arcs
+
+      const arcPositions = [
+        {
+          position: { x: (xOffset * 3) / 2, y: 0.1, z: (xOffset * Math.sqrt(3)) / 2 },
+          angles: [Math.PI * 2 - Math.PI / 2, Math.PI / 3 + (Math.PI / 6) * 3]
+        },
+        {
+          position: { x: (xOffset * 3) / 2, y: 0.1, z: -(xOffset * Math.sqrt(3)) / 2 },
+          angles: [-Math.PI * 2 + Math.PI / 2, -Math.PI / 3 - Math.PI / 2]
+        },
+        {
+          position: { x: -(xOffset * 3) / 2, y: 0.1, z: -(xOffset * Math.sqrt(3)) / 2 },
+          angles: [-Math.PI - Math.PI / 2, -Math.PI * 2 - Math.PI / 6]
+        },
+        {
+          position: { x: -(xOffset * 3) / 2, y: 0.1, z: (xOffset * Math.sqrt(3)) / 2 },
+          angles: [Math.PI + Math.PI / 2, Math.PI * 2 + Math.PI / 6]
+        },
+        {
+          position: { x: -(xOffset * 3) / 2, y: 0.1, z: radius / 2 },
+          angles: [Math.PI / 2, -Math.PI / 2]
+        },
+        {
+          position: { x: -(xOffset * 3) / 2, y: 0.1, z: -radius / 2 },
+          angles: [Math.PI / 2, -Math.PI / 2]
+        },
+        {
+          position: { x: (xOffset * 3) / 2, y: 0.1, z: radius / 2 },
+          angles: [Math.PI / 2, Math.PI / 2 + Math.PI]
+        },
+        {
+          position: { x: (xOffset * 3) / 2, y: 0.1, z: -radius / 2 },
+          angles: [Math.PI / 2, Math.PI / 2 + Math.PI]
+        },
+        {
+          position: { x: 0, y: 0.1, z: radius * 3 },
+          angles: [-Math.PI / 6, -Math.PI + Math.PI / 6]
+        },
+        {
+          position: { x: 0, y: 0.1, z: -radius * 3 },
+          angles: [Math.PI / 6, Math.PI - Math.PI / 6]
+        },
+        {
+          position: { x: xOffset / 2, y: 0.1, z: radius * 3 - radius / 2 },
+          angles: [-Math.PI / 6, -Math.PI - Math.PI / 6]
+        },
+        {
+          position: { x: xOffset / 2, y: 0.1, z: -radius * 3 + radius / 2 },
+          angles: [Math.PI / 6, Math.PI + Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset / 2, y: 0.1, z: radius * 3 - radius / 2 },
+          angles: [Math.PI / 6, -Math.PI + Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset / 2, y: 0.1, z: -radius * 3 + radius / 2 },
+          angles: [-Math.PI / 6, Math.PI - Math.PI / 6]
+        },
+        {
+          position: { x: xOffset, y: 0.1, z: radius * 2 },
+          angles: [-Math.PI / 6, -Math.PI - Math.PI / 6]
+        },
+        {
+          position: { x: xOffset, y: 0.1, z: -radius * 2 },
+          angles: [Math.PI / 6, Math.PI + Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset, y: 0.1, z: radius * 2 },
+          angles: [Math.PI / 6, -Math.PI + Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset, y: 0.1, z: -radius * 2 },
+          angles: [-Math.PI / 6, Math.PI - Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset * 2, y: 0.1, z: 0 },
+          angles: [-Math.PI / 6, Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset * 2, y: 0.1, z: 0 },
+          angles: [-Math.PI / 6, Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset * 2, y: 0.1, z: radius },
+          angles: [-Math.PI / 6, Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset * 2, y: 0.1, z: -radius },
+          angles: [-Math.PI / 6, Math.PI / 6]
+        },
+        {
+          position: { x: xOffset * 2, y: 0.1, z: 0 },
+          angles: [Math.PI + Math.PI / 6, Math.PI - Math.PI / 6]
+        },
+        {
+          position: { x: xOffset * 2, y: 0.1, z: radius },
+          angles: [Math.PI + Math.PI / 6, Math.PI - Math.PI / 6]
+        },
+        {
+          position: { x: xOffset * 2, y: 0.1, z: -radius },
+          angles: [Math.PI + Math.PI / 6, Math.PI - Math.PI / 6]
+        },
+        {
+          position: { x: xOffset * 1.5, y: 0.1, z: radius * 2.5 },
+          angles: [Math.PI + Math.PI / 6, Math.PI + (Math.PI / 6) * 3]
+        },
+        {
+          position: { x: xOffset, y: 0.1, z: radius * 3 },
+          angles: [Math.PI + Math.PI / 6, Math.PI + (Math.PI / 6) * 3]
+        },
+        {
+          position: { x: xOffset * 0.5, y: 0.1, z: radius * 3.5 },
+          angles: [Math.PI + Math.PI / 6, Math.PI + (Math.PI / 6) * 3]
+        },
+        {
+          position: { x: -xOffset * 1.5, y: 0.1, z: radius * 2.5 },
+          angles: [Math.PI * 1.5, Math.PI * 2 - Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset, y: 0.1, z: radius * 3 },
+          angles: [Math.PI * 1.5, Math.PI * 2 - Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset * 0.5, y: 0.1, z: radius * 3.5 },
+          angles: [Math.PI * 1.5, Math.PI * 2 - Math.PI / 6]
+        },
+        {
+          position: { x: -xOffset * 1.5, y: 0.1, z: -radius * 2.5 },
+          angles: [Math.PI * 2 + Math.PI / 6, Math.PI * 2 + Math.PI / 2]
+        },
+        {
+          position: { x: -xOffset, y: 0.1, z: -radius * 3 },
+          angles: [Math.PI * 2 + Math.PI / 6, Math.PI * 2 + Math.PI / 2]
+        },
+        {
+          position: { x: -xOffset * 0.5, y: 0.1, z: -radius * 3.5 },
+          angles: [Math.PI * 2 + Math.PI / 6, Math.PI * 2 + Math.PI / 2]
+        },
+        {
+          position: { x: xOffset * 1.5, y: 0.1, z: -radius * 2.5 },
+          angles: [Math.PI * 2.5, Math.PI * 2.5 + Math.PI / 3]
+        },
+        {
+          position: { x: xOffset, y: 0.1, z: -radius * 3 },
+          angles: [Math.PI * 2.5, Math.PI * 2.5 + Math.PI / 3]
+        },
+        {
+          position: { x: xOffset * 0.5, y: 0.1, z: -radius * 3.5 },
+          angles: [Math.PI * 2.5, Math.PI * 2.5 + Math.PI / 3]
+        }
+      ];
+
+      for (let i = 0; i < arcPositions.length; i++) {
+        geometry.createArc(
+          arcPositions[i].position,
+          getPolarGridRadius(1),
+          arcPositions[i].angles[0],
+          arcPositions[i].angles[1],
+          {
+            strokeColor: 0xff4400,
+            animationDuration: 3
+          }
+        );
       }
     }
   },
@@ -181,7 +458,7 @@ export const GeometrySteps: StepConfig[] = [
     name: "Fruit of Life",
     setupGeometry: (geometry: Geometry) => {
       // Create central circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(0.5), {
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(0.5), {
         strokeColor: 0xff4400,
         animationDuration: 3
       });
@@ -204,7 +481,7 @@ export const GeometrySteps: StepConfig[] = [
     setupGeometry: (geometry: Geometry) => {
       // Create 3 rings of circles
       // Central circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, getPolarGridRadius(0.5), {
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, getPolarGridRadius(0.5), {
         strokeColor: 0xff4400,
         animationDuration: 3
       });
@@ -228,33 +505,6 @@ export const GeometrySteps: StepConfig[] = [
         geometry.createLine({ x: 0, y: 0.2, z: 0 }, point, { color: 0xff4400, animationDuration: 3 });
       }
 
-      // Lines to second ring
-      for (let i = 0; i < 6; i++) {
-        const point = getPolarGridPoint(4, i);
-        geometry.createLine({ x: 0, y: 0.2, z: 0 }, point, { color: 0xff4400, animationDuration: 3 });
-      }
-
-      // Connect the circles in the first ring (hexagon)
-      for (let i = 0; i < 6; i++) {
-        const startPoint = getPolarGridPoint(1, i);
-        const endPoint = getPolarGridPoint(1, (i + 1) % 6);
-        geometry.createLine(startPoint, endPoint, { color: 0xff4400, animationDuration: 3 });
-      }
-
-      // Connect the circles in the second ring (hexagon)
-      for (let i = 0; i < 6; i++) {
-        const startPoint = getPolarGridPoint(2, i);
-        const endPoint = getPolarGridPoint(2, (i + 1) % 6);
-        geometry.createLine(startPoint, endPoint, { color: 0xff4400, animationDuration: 3 });
-      }
-
-      // Connect first and second ring
-      for (let i = 0; i < 6; i++) {
-        const firstRingPoint = getPolarGridPoint(1, i);
-        const secondRingPoint = getPolarGridPoint(2, i);
-        geometry.createLine(firstRingPoint, secondRingPoint, { color: 0xff4400, animationDuration: 3 });
-      }
-
       // Create diagonal connections between rings
       for (let i = 0; i < 6; i++) {
         const firstRingPoint = getPolarGridPoint(1, i);
@@ -262,6 +512,19 @@ export const GeometrySteps: StepConfig[] = [
         // Connect to opposite points on second ring
         const secondRingPoint1 = getPolarGridPoint(2, (i + 2) % 6);
         const secondRingPoint2 = getPolarGridPoint(2, (i + 4) % 6);
+
+        geometry.createLine(firstRingPoint, secondRingPoint1, { color: 0xff4400, animationDuration: 3 });
+
+        geometry.createLine(firstRingPoint, secondRingPoint2, { color: 0xff4400, animationDuration: 3 });
+      }
+
+      // Create diagonal connections between rings
+      for (let i = 0; i < 6; i++) {
+        const firstRingPoint = getPolarGridPoint(1, i);
+
+        // Connect to opposite points on second ring
+        const secondRingPoint1 = getPolarGridPoint(1, (i + 2) % 6);
+        const secondRingPoint2 = getPolarGridPoint(1, (i + 4) % 6);
 
         geometry.createLine(firstRingPoint, secondRingPoint1, { color: 0xff4400, animationDuration: 3 });
 
@@ -280,6 +543,26 @@ export const GeometrySteps: StepConfig[] = [
 
         geometry.createLine(firstRingPoint, secondRingPoint2, { color: 0xff4400, animationDuration: 3 });
       }
+
+      //connect hexagon
+      for (let i = 0; i < 6; i++) {
+        const firstRingPoint = getPolarGridPoint(1, i);
+
+        // Connect to opposite points on second ring
+        const secondRingPoint1 = getPolarGridPoint(1, (i + 1) % 6);
+
+        geometry.createLine(firstRingPoint, secondRingPoint1, { color: 0xff4400, animationDuration: 3 });
+      }
+
+      //connect hexagon
+      for (let i = 0; i < 6; i++) {
+        const firstRingPoint = getPolarGridPoint(2, i);
+
+        // Connect to opposite points on second ring
+        const secondRingPoint1 = getPolarGridPoint(2, (i + 1) % 6);
+
+        geometry.createLine(firstRingPoint, secondRingPoint1, { color: 0xff4400, animationDuration: 3 });
+      }
     }
   },
   {
@@ -288,7 +571,7 @@ export const GeometrySteps: StepConfig[] = [
       const radius = getPolarGridRadius(2.5);
 
       // Central circle
-      geometry.createCircle({ x: 0, y: 0, z: 0 }, radius, { strokeColor: 0xff4400, animationDuration: 3 });
+      geometry.createCircle({ x: 0, y: 0.1, z: 0 }, radius, { strokeColor: 0xff4400, animationDuration: 3 });
 
       // Calculate the intersection angle
       const intersectionAngle = -Math.PI / 6; // 60 degrees in radians
