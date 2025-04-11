@@ -17,7 +17,9 @@ const ThreeScene: React.FC = () => {
   const polarGridRef = useRef<PolarGrid | null>(null);
 
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [totalSteps, setTotalSteps] = useState<number>(0);
+  const [expandedSubCategories, setExpandedSubCategories] = useState<Record<string, boolean>>({});
+  const [allSteps, setAllSteps] = useState<{ index: number; name: string; parentCategory?: string }[]>([]);
+  const [parentCategories, setParentCategories] = useState<string[]>([]);
 
   // Animation loop with useCallback
   const animate = useCallback(() => {
@@ -55,6 +57,16 @@ const ThreeScene: React.FC = () => {
     }
   }, []);
 
+  // Navigate to a specific step
+  const goToStep = useCallback((stepIndex: number) => {
+    if (sceneStepsRef.current) {
+      const geometry = sceneStepsRef.current.goToStep(stepIndex);
+      if (geometry) {
+        setCurrentStep(sceneStepsRef.current.getCurrentStepIndex());
+      }
+    }
+  }, []);
+
   // Setup Three.js scene
   useEffect(() => {
     if (!containerRef.current) return;
@@ -82,7 +94,33 @@ const ThreeScene: React.FC = () => {
     const sceneSteps = new SceneSteps(scene.scene, GeometrySteps);
     sceneStepsRef.current = sceneSteps;
     setCurrentStep(sceneSteps.getCurrentStepIndex());
-    setTotalSteps(sceneSteps.getTotalSteps());
+
+    // Extract all steps and parent categories
+    if (sceneSteps) {
+      // Get all steps
+      const steps = GeometrySteps.map((step, index) => ({
+        index,
+        name: step.name,
+        parentCategory: step.parentCategory
+      }));
+      setAllSteps(steps);
+
+      // Get unique parent categories
+      const categories = new Set<string>();
+      GeometrySteps.forEach((step) => {
+        if (step.parentCategory) {
+          categories.add(step.parentCategory);
+        }
+      });
+      setParentCategories(Array.from(categories));
+
+      // Initialize expanded state for sub-categories
+      const initialExpandedState: Record<string, boolean> = {};
+      Array.from(categories).forEach((category) => {
+        initialExpandedState[category] = false; // All sub-categories collapsed by default
+      });
+      setExpandedSubCategories(initialExpandedState);
+    }
 
     scene.camera = new THREE.OrthographicCamera(-newWidth / 2, newWidth / 2, newHeight / 2, -newHeight / 2, 0.1, 1000);
     scene.camera.position.set(0, 20, 0);
@@ -129,20 +167,94 @@ const ThreeScene: React.FC = () => {
     true
   );
 
+  // Toggle sub-category expansion
+  const toggleSubCategory = useCallback((category: string) => {
+    setExpandedSubCategories((prev) => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  }, []);
+
+  // Group steps by parent category
+  const getStepsByParentCategory = useCallback(
+    (category: string) => {
+      return allSteps.filter((step) => step.parentCategory === category);
+    },
+    [allSteps]
+  );
+
+  // Get steps without a parent category
+  const getMainSteps = useCallback(() => {
+    return allSteps.filter((step) => !step.parentCategory);
+  }, [allSteps]);
+
   // ===== Render UI =====
   return (
     <div className="relative">
       <div ref={containerRef} className="fixed inset-0" />
 
-      {/* Step Navigation */}
-      <div className="absolute bottom-4 left-0 right-0 z-10 flex flex-col items-center">
-        <div className="rounded-lg bg-black bg-opacity-70 px-4 py-2 text-white">
-          <p>Use ← → arrow keys to navigate between steps</p>
-          <p className="text-center">
-            Step {currentStep + 1} of {totalSteps}
-          </p>
+      {/* Step List */}
+      {
+        <div className="absolute left-4 top-32 z-10 flex max-h-[70vh] w-64 flex-col items-center overflow-y-auto rounded-lg bg-black bg-opacity-70 p-4 text-white">
+          <h3 className="mb-2 text-lg font-bold">Available Steps</h3>
+
+          {/* Unified Menu with Nested Dropdowns */}
+          <div className="w-full">
+            <ul className="space-y-1">
+              {/* Main steps (without parent category) */}
+              {getMainSteps().map((step) => (
+                <li key={step.index}>
+                  <div>
+                    <div className="flex items-start justify-between">
+                      <button
+                        className={`w-full rounded px-3 py-1 text-left ${
+                          currentStep === step.index ? "bg-blue-600 font-bold" : "hover:bg-gray-700"
+                        }`}
+                        onClick={() => goToStep(step.index)}>
+                        <span>
+                          {step.index + 1}. {step.name}
+                        </span>
+                      </button>
+
+                      {/* If this step has sub-categories, show a dropdown */}
+                      {parentCategories.includes(step.name) && (
+                        <div className="">
+                          <button
+                            className={`flex transform items-center justify-center rounded px-3 py-1 text-sm transition-transform duration-200 ${
+                              expandedSubCategories[step.name] ? "rotate-180 bg-gray-700" : "rotate-0"
+                            }`}
+                            onClick={() => toggleSubCategory(step.name)}>
+                            <span>{expandedSubCategories[step.name] ? "▼" : "▶"}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Sub-categories */}
+                    {expandedSubCategories[step.name] && (
+                      <div className="ml-4 mt-1 space-y-1 border-l border-gray-600 pl-2">
+                        {getStepsByParentCategory(step.name).map((subStep) => (
+                          <button
+                            key={subStep.index}
+                            className={`w-full rounded px-3 py-1 text-left ${
+                              currentStep === subStep.index ? "bg-blue-600 font-bold" : "hover:bg-gray-700"
+                            }`}
+                            onClick={() => goToStep(subStep.index)}>
+                            {subStep.index + 1}. {subStep.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex flex-col items-center p-4">
+            <p>Use ← → arrow keys to navigate between steps</p>
+          </div>
         </div>
-      </div>
+      }
     </div>
   );
 };

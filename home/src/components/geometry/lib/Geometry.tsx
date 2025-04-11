@@ -54,7 +54,7 @@ export class Geometry {
     const opts = { ...DEFAULT_OPTIONS, ...options };
 
     const geometry = new THREE.SphereGeometry(0.1, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color: opts.color });
+    const material = new THREE.MeshBasicMaterial({ color: opts.strokeColor || opts.color });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(point.x, point.y + 0.1, point.z || 0);
     this.parent.add(mesh);
@@ -72,12 +72,12 @@ export class Geometry {
     // Create a line geometry with just the start point initially (for animation)
     const points = [
       new THREE.Vector3(start.x, start.y, start.z || 0),
-      new THREE.Vector3(start.x, start.y, start.z || 0) // Will be animated to end position
+      new THREE.Vector3(end.x, end.y, end.z || 0) // Will be animated to end position
     ];
 
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({
-      color: opts.color,
+      color: opts.strokeColor || opts.color,
       linewidth: opts.lineWidth,
       opacity: opts.opacity,
       transparent: opts.opacity !== undefined && opts.opacity < 1
@@ -148,7 +148,7 @@ export class Geometry {
 
     //I want a dot at the center of the circle if a flag is set
     if (options.dot) {
-      this.createPoint({ x: center.x, y: center.y, z: center.z || 0 }, { color: opts.strokeColor, dot: true });
+      this.createPoint({ x: center.x, y: center.y, z: center.z || 0 }, { strokeColor: opts.strokeColor, dot: true });
     }
 
     // Set up animation
