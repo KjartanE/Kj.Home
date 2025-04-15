@@ -7,6 +7,8 @@ import { useArrowKeys, ArrowKeyEvent } from "./lib/ArrowKeyControls";
 import { GeometrySteps } from "./lib/steps";
 import { PolarGrid } from "./lib/PolarGrid";
 import { Scene } from "@/lib/three/scene";
+import { StepMenu } from "./StepMenu";
+import { TouchControls, SwipeEvent } from "./lib/TouchControls";
 
 const ThreeScene: React.FC = () => {
   // ===== State and Refs =====
@@ -17,7 +19,9 @@ const ThreeScene: React.FC = () => {
   const polarGridRef = useRef<PolarGrid | null>(null);
 
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [totalSteps, setTotalSteps] = useState<number>(0);
+  const [expandedSubCategories, setExpandedSubCategories] = useState<Record<string, boolean>>({});
+  const [allSteps, setAllSteps] = useState<{ index: number; name: string; parentCategory?: string }[]>([]);
+  const [parentCategories, setParentCategories] = useState<string[]>([]);
 
   // Animation loop with useCallback
   const animate = useCallback(() => {
@@ -55,6 +59,33 @@ const ThreeScene: React.FC = () => {
     }
   }, []);
 
+  // Navigate to a specific step
+  const goToStep = useCallback((stepIndex: number) => {
+    if (sceneStepsRef.current) {
+      const geometry = sceneStepsRef.current.goToStep(stepIndex);
+      if (geometry) {
+        setCurrentStep(sceneStepsRef.current.getCurrentStepIndex());
+      }
+    }
+  }, []);
+
+  // Handle swipe navigation
+  const handleSwipe = useCallback((swipeEvent: SwipeEvent) => {
+    if (sceneStepsRef.current) {
+      if (swipeEvent.direction === "right") {
+        const geometry = sceneStepsRef.current.previous();
+        if (geometry) {
+          setCurrentStep(sceneStepsRef.current.getCurrentStepIndex());
+        }
+      } else if (swipeEvent.direction === "left") {
+        const geometry = sceneStepsRef.current.next();
+        if (geometry) {
+          setCurrentStep(sceneStepsRef.current.getCurrentStepIndex());
+        }
+      }
+    }
+  }, []);
+
   // Setup Three.js scene
   useEffect(() => {
     if (!containerRef.current) return;
@@ -67,8 +98,8 @@ const ThreeScene: React.FC = () => {
 
     const aspectRatio = width / height;
     const viewSize = 25;
-    const newWidth = aspectRatio * viewSize;
-    const newHeight = viewSize;
+    const newWidth = aspectRatio * viewSize * 1.5;
+    const newHeight = viewSize * 1.5;
 
     // Set fixed size for renderer
     scene.renderer.setSize(width, height);
@@ -82,7 +113,33 @@ const ThreeScene: React.FC = () => {
     const sceneSteps = new SceneSteps(scene.scene, GeometrySteps);
     sceneStepsRef.current = sceneSteps;
     setCurrentStep(sceneSteps.getCurrentStepIndex());
-    setTotalSteps(sceneSteps.getTotalSteps());
+
+    // Extract all steps and parent categories
+    if (sceneSteps) {
+      // Get all steps
+      const steps = GeometrySteps.map((step, index) => ({
+        index,
+        name: step.name,
+        parentCategory: step.parentCategory
+      }));
+      setAllSteps(steps);
+
+      // Get unique parent categories
+      const categories = new Set<string>();
+      GeometrySteps.forEach((step) => {
+        if (step.parentCategory) {
+          categories.add(step.parentCategory);
+        }
+      });
+      setParentCategories(Array.from(categories));
+
+      // Initialize expanded state for sub-categories
+      const initialExpandedState: Record<string, boolean> = {};
+      Array.from(categories).forEach((category) => {
+        initialExpandedState[category] = false; // All sub-categories collapsed by default
+      });
+      setExpandedSubCategories(initialExpandedState);
+    }
 
     scene.camera = new THREE.OrthographicCamera(-newWidth / 2, newWidth / 2, newHeight / 2, -newHeight / 2, 0.1, 1000);
     scene.camera.position.set(0, 20, 0);
@@ -129,20 +186,41 @@ const ThreeScene: React.FC = () => {
     true
   );
 
+  // Toggle sub-category expansion
+  const toggleSubCategory = useCallback((category: string) => {
+    setExpandedSubCategories((prev) => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  }, []);
+
+  // Group steps by parent category
+  const getStepsByParentCategory = useCallback(
+    (category: string) => {
+      return allSteps.filter((step) => step.parentCategory === category);
+    },
+    [allSteps]
+  );
+
+  // Get steps without a parent category
+  const getMainSteps = useCallback(() => {
+    return allSteps.filter((step) => !step.parentCategory);
+  }, [allSteps]);
+
   // ===== Render UI =====
   return (
-    <div className="relative">
-      <div ref={containerRef} className="fixed inset-0" />
-
-      {/* Step Navigation */}
-      <div className="absolute bottom-4 left-0 right-0 z-10 flex flex-col items-center">
-        <div className="rounded-lg bg-black bg-opacity-70 px-4 py-2 text-white">
-          <p>Use ← → arrow keys to navigate between steps</p>
-          <p className="text-center">
-            Step {currentStep + 1} of {totalSteps}
-          </p>
-        </div>
-      </div>
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
+      <StepMenu
+        currentStep={currentStep}
+        goToStep={goToStep}
+        parentCategories={parentCategories}
+        expandedSubCategories={expandedSubCategories}
+        toggleSubCategory={toggleSubCategory}
+        getMainSteps={getMainSteps}
+        getStepsByParentCategory={getStepsByParentCategory}
+      />
+      <TouchControls onSwipe={handleSwipe} />
     </div>
   );
 };

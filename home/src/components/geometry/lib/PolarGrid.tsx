@@ -1,5 +1,7 @@
 import * as THREE from "three";
 
+const sixthPi = Math.PI / 6;
+
 /**
  * PolarGrid class for creating a 2D polar coordinate grid with cardinal directions
  */
@@ -125,7 +127,7 @@ export class PolarGrid {
 
       // Calculate intersection points on this circle for each cardinal direction
       for (let j = 0; j < this.numDirections; j++) {
-        const theta = (j / this.numDirections) * Math.PI * 2 + Math.PI / 6;
+        const theta = (j / this.numDirections) * Math.PI * 2 + sixthPi;
         
         // Reuse position vector
         position.set(
@@ -213,7 +215,7 @@ export class PolarGrid {
     positions[2] = 0;
 
     for (let i = 0; i < this.numDirections; i++) {
-      const theta = (i / this.numDirections) * Math.PI * 2 + Math.PI / 6;
+      const theta = (i / this.numDirections) * Math.PI * 2 + sixthPi;
       
       // Set end point coordinates directly into the buffer
       positions[3] = this.maxRadius * Math.cos(theta);
@@ -252,7 +254,7 @@ export class PolarGrid {
       allIntersectionPoints.push(circlePoints);
 
       for (let j = 0; j < this.numDirections; j++) {
-        const theta = (j / this.numDirections) * Math.PI * 2 + Math.PI / 6;
+        const theta = (j / this.numDirections) * Math.PI * 2 + sixthPi;
         const x = radius * Math.cos(theta);
         const z = radius * Math.sin(theta);
         circlePoints.push(new THREE.Vector3(x, y, z));

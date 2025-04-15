@@ -5,6 +5,7 @@ import { Geometry } from "./Geometry";
 export interface StepConfig {
   name: string;
   setupGeometry: (geometry: Geometry) => void;
+  parentCategory?: string; // Optional parent category name
 }
 
 export class SceneSteps {
@@ -12,10 +13,14 @@ export class SceneSteps {
   private steps: StepConfig[];
   private currentStepIndex: number = -1;
   private currentGeometry: Geometry | null = null;
+  private categories: Map<string, number[]> = new Map(); // Maps category names to step indices
 
   constructor(scene: THREE.Scene, steps?: StepConfig[]) {
     this.scene = scene;
     this.steps = steps || [];
+    
+    // Organize steps by category
+    this.organizeStepsByCategory();
     
     // If steps are provided, initialize with the first step
     if (this.steps.length > 0) {
@@ -24,10 +29,31 @@ export class SceneSteps {
   }
 
   /**
+   * Organize steps by category
+   */
+  private organizeStepsByCategory(): void {
+    this.categories.clear();
+    
+    // Add all steps to the "All" category
+    this.categories.set("All", this.steps.map((_, index) => index));
+    
+    // Group steps by parent category
+    this.steps.forEach((step, index) => {
+      if (step.parentCategory) {
+        if (!this.categories.has(step.parentCategory)) {
+          this.categories.set(step.parentCategory, []);
+        }
+        this.categories.get(step.parentCategory)?.push(index);
+      }
+    });
+  }
+
+  /**
    * Add a new step to the steps collection
    */
   addStep(step: StepConfig): void {
     this.steps.push(step);
+    this.organizeStepsByCategory();
   }
 
   /**
@@ -35,9 +61,35 @@ export class SceneSteps {
    */
   setSteps(steps: StepConfig[]): void {
     this.steps = steps;
+    this.organizeStepsByCategory();
+    
     if (this.currentStepIndex === -1 && steps.length > 0) {
       this.goToStep(0);
     }
+  }
+
+  /**
+   * Get all available categories
+   */
+  getCategories(): string[] {
+    return Array.from(this.categories.keys());
+  }
+
+  /**
+   * Get steps for a specific category
+   */
+  getStepsForCategory(category: string): number[] {
+    return this.categories.get(category) || [];
+  }
+
+  /**
+   * Get the parent category for the current step
+   */
+  getCurrentStepCategory(): string | undefined {
+    if (this.currentStepIndex >= 0 && this.currentStepIndex < this.steps.length) {
+      return this.steps[this.currentStepIndex].parentCategory;
+    }
+    return undefined;
   }
 
   /**
