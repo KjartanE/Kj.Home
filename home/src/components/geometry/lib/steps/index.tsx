@@ -868,9 +868,9 @@ export const GeometrySteps: StepConfig[] = [
       geometry.createLine(points[2], points[4], { strokeColor: 0x87ceeb, animationDuration: 3 });
       geometry.createLine(points[4], points[0], { strokeColor: 0x87ceeb, animationDuration: 3 });
 
-      geometry.createLine(points[1], points[3], { strokeColor: 0x4682b4, animationDuration: 3 }); // Steel blue
-      geometry.createLine(points[3], points[5], { strokeColor: 0x4682b4, animationDuration: 3 });
-      geometry.createLine(points[5], points[1], { strokeColor: 0x4682b4, animationDuration: 3 });
+      geometry.createLine(points[1], points[3], { strokeColor: 0x000080, animationDuration: 3 }); // dark blue
+      geometry.createLine(points[3], points[5], { strokeColor: 0x0000ff, animationDuration: 3 });
+      geometry.createLine(points[5], points[1], { strokeColor: 0x0000ff, animationDuration: 3 });
 
       // Create lines between points with alternating shades
       for (let i = 0; i < 6; i++) {
@@ -881,14 +881,59 @@ export const GeometrySteps: StepConfig[] = [
     }
   },
   {
-    name: "Dodecahedron ~ Ether",
+    name: "Icosahedron ~ Water",
     parentCategory: "Platonic Solids",
     setupGeometry: (geometry: Geometry) => {
       const points = [
         getPolarGridPoint(2, 0),
+        getPolarGridPoint(2, 1),
         getPolarGridPoint(2, 2),
+        getPolarGridPoint(2, 3),
         getPolarGridPoint(2, 4),
+        getPolarGridPoint(2, 5)
       ];
+
+      const outerPoints = [
+        getPolarGridPoint(4, 0),
+        getPolarGridPoint(4, 1),
+        getPolarGridPoint(4, 2),
+        getPolarGridPoint(4, 3),
+        getPolarGridPoint(4, 4),
+        getPolarGridPoint(4, 5)
+      ];
+      // Create triangular faces with different shades
+      geometry.createLine(points[0], points[2], { strokeColor: 0x000080, animationDuration: 3 }); // dark blue
+      geometry.createLine(points[2], points[4], { strokeColor: 0x000080, animationDuration: 3 });
+      geometry.createLine(points[4], points[0], { strokeColor: 0x000080, animationDuration: 3 });
+
+      geometry.createLine(points[1], points[3], { strokeColor: 0x0000ff, animationDuration: 3 }); // blue
+      geometry.createLine(points[3], points[5], { strokeColor: 0x0000ff, animationDuration: 3 });
+      geometry.createLine(points[5], points[1], { strokeColor: 0x0000ff, animationDuration: 3 });
+
+      geometry.createLine(points[1], outerPoints[1], { strokeColor: 0x0000ff, animationDuration: 3 }); // blue
+      geometry.createLine(points[3], outerPoints[3], { strokeColor: 0x0000ff, animationDuration: 3 });
+      geometry.createLine(points[5], outerPoints[5], { strokeColor: 0x0000ff, animationDuration: 3 });
+
+      geometry.createLine(outerPoints[0], outerPoints[2], { strokeColor: 0x0000ff, animationDuration: 3 }); // blue
+      geometry.createLine(outerPoints[2], outerPoints[4], { strokeColor: 0x0000ff, animationDuration: 3 });
+      geometry.createLine(outerPoints[4], outerPoints[0], { strokeColor: 0x0000ff, animationDuration: 3 });
+
+      geometry.createLine(outerPoints[1], outerPoints[3], { strokeColor: 0x000080, animationDuration: 3 }); // dark blue
+      geometry.createLine(outerPoints[3], outerPoints[5], { strokeColor: 0x000080, animationDuration: 3 });
+      geometry.createLine(outerPoints[5], outerPoints[1], { strokeColor: 0x000080, animationDuration: 3 });
+
+      for (let i = 0; i < 6; i++) {
+        const nextIndex = (i + 1) % 6;
+        // Alternate between sky blue and steel blue for the outer edges
+        geometry.createLine(outerPoints[i], outerPoints[nextIndex], { strokeColor: 0x0000ff, animationDuration: 3 });
+      }
+    }
+  },
+  {
+    name: "Dodecahedron ~ Ether",
+    parentCategory: "Platonic Solids",
+    setupGeometry: (geometry: Geometry) => {
+      const points = [getPolarGridPoint(2, 0), getPolarGridPoint(2, 2), getPolarGridPoint(2, 4)];
 
       // Create lines from center to all circles
       // Lines to first ring
