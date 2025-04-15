@@ -7,6 +7,8 @@ import { useArrowKeys, ArrowKeyEvent } from "./lib/ArrowKeyControls";
 import { GeometrySteps } from "./lib/steps";
 import { PolarGrid } from "./lib/PolarGrid";
 import { Scene } from "@/lib/three/scene";
+import { StepMenu } from "./StepMenu";
+import { TouchControls, SwipeEvent } from "./lib/TouchControls";
 
 const ThreeScene: React.FC = () => {
   // ===== State and Refs =====
@@ -67,6 +69,23 @@ const ThreeScene: React.FC = () => {
     }
   }, []);
 
+  // Handle swipe navigation
+  const handleSwipe = useCallback((swipeEvent: SwipeEvent) => {
+    if (sceneStepsRef.current) {
+      if (swipeEvent.direction === "right") {
+        const geometry = sceneStepsRef.current.previous();
+        if (geometry) {
+          setCurrentStep(sceneStepsRef.current.getCurrentStepIndex());
+        }
+      } else if (swipeEvent.direction === "left") {
+        const geometry = sceneStepsRef.current.next();
+        if (geometry) {
+          setCurrentStep(sceneStepsRef.current.getCurrentStepIndex());
+        }
+      }
+    }
+  }, []);
+
   // Setup Three.js scene
   useEffect(() => {
     if (!containerRef.current) return;
@@ -79,8 +98,8 @@ const ThreeScene: React.FC = () => {
 
     const aspectRatio = width / height;
     const viewSize = 25;
-    const newWidth = aspectRatio * viewSize;
-    const newHeight = viewSize;
+    const newWidth = aspectRatio * viewSize * 1.5;
+    const newHeight = viewSize * 1.5;
 
     // Set fixed size for renderer
     scene.renderer.setSize(width, height);
@@ -190,71 +209,18 @@ const ThreeScene: React.FC = () => {
 
   // ===== Render UI =====
   return (
-    <div className="relative">
-      <div ref={containerRef} className="fixed inset-0" />
-
-      {/* Step List */}
-      {
-        <div className="absolute left-4 top-32 z-10 flex max-h-[70vh] w-64 flex-col items-center overflow-y-auto rounded-lg bg-black bg-opacity-70 p-4 text-white">
-          <h3 className="mb-2 text-lg font-bold">Available Steps</h3>
-
-          {/* Unified Menu with Nested Dropdowns */}
-          <div className="w-full">
-            <ul className="space-y-1">
-              {/* Main steps (without parent category) */}
-              {getMainSteps().map((step) => (
-                <li key={step.index}>
-                  <div>
-                    <div className="flex items-start justify-between">
-                      <button
-                        className={`w-full rounded px-3 py-1 text-left ${
-                          currentStep === step.index ? "bg-blue-600 font-bold" : "hover:bg-gray-700"
-                        }`}
-                        onClick={() => goToStep(step.index)}>
-                        <span>
-                          {step.index + 1}. {step.name}
-                        </span>
-                      </button>
-
-                      {/* If this step has sub-categories, show a dropdown */}
-                      {parentCategories.includes(step.name) && (
-                        <div className="">
-                          <button
-                            className={`flex transform items-center justify-center rounded px-3 py-1 text-sm transition-transform duration-200 ${
-                              expandedSubCategories[step.name] ? "rotate-180 bg-gray-700" : "rotate-0"
-                            }`}
-                            onClick={() => toggleSubCategory(step.name)}>
-                            <span>{expandedSubCategories[step.name] ? "▼" : "▶"}</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Sub-categories */}
-                    {expandedSubCategories[step.name] && (
-                      <div className="ml-4 mt-1 space-y-1 border-l border-gray-600 pl-2">
-                        {getStepsByParentCategory(step.name).map((subStep) => (
-                          <button
-                            key={subStep.index}
-                            className={`w-full rounded px-3 py-1 text-left ${
-                              currentStep === subStep.index ? "bg-blue-600 font-bold" : "hover:bg-gray-700"
-                            }`}
-                            onClick={() => goToStep(subStep.index)}>
-                            {subStep.index + 1}. {subStep.name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="flex flex-col items-center p-4">
-            <p>Use ← → arrow keys to navigate between steps</p>
-          </div>
-        </div>
-      }
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
+      <StepMenu
+        currentStep={currentStep}
+        goToStep={goToStep}
+        parentCategories={parentCategories}
+        expandedSubCategories={expandedSubCategories}
+        toggleSubCategory={toggleSubCategory}
+        getMainSteps={getMainSteps}
+        getStepsByParentCategory={getStepsByParentCategory}
+      />
+      <TouchControls onSwipe={handleSwipe} />
     </div>
   );
 };

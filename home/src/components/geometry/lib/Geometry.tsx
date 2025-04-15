@@ -20,7 +20,7 @@ export interface Point {
 
 const DEFAULT_OPTIONS: GeometryOptions = {
   color: 0x00ff00,
-  lineWidth: 2,
+  lineWidth: 4,
   animationDuration: 1.5,
   strokeColor: 0x00ff00,
   fillColor: 0x00ff00,
