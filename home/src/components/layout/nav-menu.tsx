@@ -30,9 +30,9 @@ export function NavMenu({ mobile, onSelect }: NavMenuProps) {
         <Link href="/blog" className={linkClasses} onClick={onSelect}>
           Blog
         </Link>
-        <Link href="/contact" className={linkClasses} onClick={onSelect}>
+        {/* <Link href="/contact" className={linkClasses} onClick={onSelect}>
           Contact
-        </Link>
+        </Link> */}
       </nav>
     );
   }
@@ -151,11 +151,11 @@ export function NavMenu({ mobile, onSelect }: NavMenuProps) {
             Blog
           </Link>
         </li>
-        <li>
+        {/* <li>
           <Link href="/contact" className={linkClasses}>
             Contact
           </Link>
-        </li>
+        </li> */}
       </ul>
     </nav>
   );
