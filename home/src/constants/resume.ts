@@ -5,7 +5,7 @@ export const resume: IResume = {
     name: "Kjartan Einarsson",
     email: "kjartanreinarsson@gmail.com",
     phone: "250-507-0444",
-    description: "I like coding.",
+    description: "Full-stack software engineer based in Victoria, BC. Passionate about creative coding, interactive visualizations, and building useful software.",
     location: "Victoria, BC",
     linkedin: "https://www.linkedin.com/in/kjartan-einarsson-05184719a/",
     github: "https://github.com/KjartanE",

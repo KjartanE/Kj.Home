@@ -1,7 +1,7 @@
 import { getBlogPost, getBlogPosts } from "@/lib/mdx";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import { Metadata } from "next";
 
@@ -40,6 +40,11 @@ export default async function BlogPostPage({ params }: { params: Params }) {
   const { blogId } = await params;
   const { frontmatter, content: MDXContent, readingTime } = await getBlogPost(blogId);
 
+  const posts = await getBlogPosts();
+  const currentIndex = posts.findIndex((p) => p.slug === blogId);
+  const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+  const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+
   return (
     <div className="container mx-auto mt-14 max-w-7xl px-4 py-8">
       <div className="mx-auto max-w-3xl space-y-6">
@@ -59,12 +64,40 @@ export default async function BlogPostPage({ params }: { params: Params }) {
         <Card>
           <CardContent className="prose prose-zinc pt-6 dark:prose-invert"><MDXContent /></CardContent>
         </Card>
-        <Link
-          href="/blog"
-          className="mb-4 inline-flex items-center text-muted-foreground transition-colors hover:text-foreground">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to posts
-        </Link>
+
+        <div className="flex flex-col gap-4">
+          <Link
+            href="/blog"
+            className="inline-flex items-center text-muted-foreground transition-colors hover:text-foreground">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to posts
+          </Link>
+
+          {(prevPost || nextPost) && (
+            <div className="flex justify-between gap-4 border-t pt-4">
+              <div className="flex-1">
+                {prevPost && (
+                  <Link
+                    href={`/blog/${prevPost.slug}`}
+                    className="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground">
+                    <ArrowLeft className="h-4 w-4 shrink-0" />
+                    <span className="line-clamp-1">{prevPost.frontmatter.title}</span>
+                  </Link>
+                )}
+              </div>
+              <div className="flex-1 text-right">
+                {nextPost && (
+                  <Link
+                    href={`/blog/${nextPost.slug}`}
+                    className="inline-flex items-center justify-end gap-2 text-muted-foreground transition-colors hover:text-foreground">
+                    <span className="line-clamp-1">{nextPost.frontmatter.title}</span>
+                    <ArrowRight className="h-4 w-4 shrink-0" />
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
