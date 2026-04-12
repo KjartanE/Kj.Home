@@ -2,6 +2,7 @@ import { getBlogPosts } from "@/lib/mdx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import PersistentPenroseBackground from "@/components/penrose/background/PersistentPenroseBackground";
+import { format } from "date-fns";
 
 export default async function BlogPage() {
   const posts = await getBlogPosts();
@@ -19,7 +20,11 @@ export default async function BlogPage() {
             <Card className="h-full bg-background/80 backdrop-blur-sm transition-colors hover:bg-muted/50">
               <CardHeader>
                 <CardTitle>{post.frontmatter.title}</CardTitle>
-                <CardDescription>{post.frontmatter.publishedAt}</CardDescription>
+                <CardDescription className="flex items-center gap-2">
+                  <span>{format(new Date(post.frontmatter.publishedAt), "MMM d, yyyy")}</span>
+                  <span>&middot;</span>
+                  <span>{post.readingTime} min read</span>
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">{post.frontmatter.summary}</p>

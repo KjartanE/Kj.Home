@@ -48,7 +48,7 @@ export const cameraGenerator = () => {
   return { scene, camera, renderer };
 };
 
-export const handleResize = (camera, renderer) => {
+export const handleResize = (camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer) => {
   const width = window.innerWidth;
   const height = window.innerHeight;
 

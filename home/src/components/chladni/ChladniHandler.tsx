@@ -39,7 +39,7 @@ export default class ChladniHandler {
     });
   }
 
-  createInterfaces(plane) {
+  createInterfaces(plane: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>) {
     const menu = document.body.appendChild(document.createElement("div"));
 
     menu.style.position = "absolute";

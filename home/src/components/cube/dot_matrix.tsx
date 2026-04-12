@@ -88,12 +88,16 @@ class DotMatrix {
 
   update_density(new_density: number) {
     this.density = new_density;
-    this.matrix_x_size = this.x_upper_bound / this.density;
-    this.matrix_y_size = this.y_upper_bound / this.density;
-    this.matrix_z_size = this.z_upper_bound / this.density;
+    this.matrix_x_size = Math.floor(this.x_upper_bound / this.density);
+    this.matrix_y_size = Math.floor(this.y_upper_bound / this.density);
+    this.matrix_z_size = Math.floor(this.z_upper_bound / this.density);
 
     this.prev_matrix = this.matrix;
-    this.matrix = new MatrixVertex[this.matrix_x_size][this.matrix_y_size][this.matrix_z_size]();
+    this.matrix = Array.from({ length: this.matrix_x_size }, () =>
+      Array.from({ length: this.matrix_y_size }, () =>
+        Array.from({ length: this.matrix_z_size }, () => new MatrixVertex(0, 0, 0))
+      )
+    );
 
     return this.update_matrix();
   }

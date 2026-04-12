@@ -16,7 +16,7 @@ export class Particle {
     this.speed = speed;
   }
 
-  update(n, m) {
+  update(n: number, m: number) {
     const vibrationmax = 0.003;
     const vibrationX = Math.random() * (vibrationmax - -vibrationmax) + -vibrationmax;
     const vibrationY = Math.random() * (vibrationmax - -vibrationmax) + -vibrationmax;
@@ -49,11 +49,11 @@ export class Particle {
     }
   }
 
-  constrain(n, low, high) {
+  constrain(n: number, low: number, high: number) {
     return Math.max(Math.min(n, high), low);
   }
 
-  chladni(x, y, n, m) {
+  chladni(x: number, y: number, n: number, m: number) {
     const L = 2;
 
     return (
@@ -82,7 +82,7 @@ export class ParticleHandler {
   public m = 3;
   public randNM = 20;
 
-  constructor(scene) {
+  constructor(scene: THREE.Scene) {
     let i = 0;
 
     for (let y = 0; y < this.yCount; y++) {
@@ -94,7 +94,7 @@ export class ParticleHandler {
     }
   }
 
-  update(scene) {
+  update(scene: THREE.Scene) {
     for (let i = 0; i < this.particles.length; i++) {
       this.particles[i].update(this.n, this.m);
       // scene.remove(scene.children[0])

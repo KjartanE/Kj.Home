@@ -12,10 +12,11 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
     "noEmit": true,
     "incremental": true,
     "esModuleInterop": true,
+    "ignoreDeprecations": "6.0",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -25,7 +26,6 @@
         "name": "next"
       }
     ],
-    "strictNullChecks": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [

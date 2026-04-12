@@ -22,7 +22,7 @@ export default class PenroseManager {
   public steps: number;
   public drawLine: (start: THREE.Vector3, end: THREE.Vector3, width: number) => void;
   public renderLines: (notFade?: boolean) => THREE.LineSegments;
-  public generateLines: (location: RefObject<IPosition | null>, penroseLSystem: PenroseLSystem) => void;
+  public generateLines!: (location: RefObject<IPosition | null>, penroseLSystem: PenroseLSystem) => void;
   public generateIncrementalLines: (
     location: RefObject<IPosition | null>,
     penroseLSystem: PenroseLSystem
