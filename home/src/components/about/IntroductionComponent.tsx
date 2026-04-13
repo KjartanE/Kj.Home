@@ -20,7 +20,7 @@ const IntroductionComponent: React.FC = () => {
           </div>
           <div className="space-y-2 text-center sm:text-left">
             <h2 className="text-3xl font-bold tracking-tight">Kjartan Robert Einarsson</h2>
-            <p className="text-lg text-muted-foreground">Software Engineer with a passion for building things</p>
+            <p className="text-lg text-muted-foreground">Senior Full Stack Software Engineer</p>
           </div>
         </div>
       </CardHeader>

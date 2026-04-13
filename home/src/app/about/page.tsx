@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import PersonalStickyComponent from "@/components/about/PersonalStickyComponent";
 import { resume } from "@/constants/resume";

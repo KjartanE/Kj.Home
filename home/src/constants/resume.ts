@@ -5,9 +5,10 @@ export const resume: IResume = {
     name: "Kjartan Einarsson",
     email: "kjartanreinarsson@gmail.com",
     phone: "250-507-0444",
-    description: "Full-stack software engineer based in Victoria, BC. Passionate about creative coding, interactive visualizations, and building useful software.",
+    description:
+      "Senior Full Stack Engineer and DevOps specialist. Stack spans React, Vue 3, TypeScript, Node.js, Python, and PostgreSQL. Hands-on with OpenShift, GitOps/IaC, containerization, and CI/CD pipelines.",
     location: "Victoria, BC",
-    linkedin: "https://www.linkedin.com/in/kjartan-einarsson-05184719a/",
+    linkedin: "https://www.linkedin.com/in/kjartane",
     github: "https://github.com/KjartanE",
     youtube: "https://www.youtube.com/@kjartan-e"
   },
@@ -19,9 +20,10 @@ export const resume: IResume = {
     "Database Management",
     "Network Management",
     "Agile Development",
+    "Team Mentoring and Development",
+    "Code Review and PR Processes",
+    "Cross-functional Team Collaboration",
     "Soldering and Wiring Hardware",
-    "Communication",
-    "Raspberry Pi Development",
     "Home Server Automation",
     "Personal DevOps Solutions"
   ],
@@ -46,7 +48,6 @@ export const resume: IResume = {
     "FastAPI",
     "Django",
     "Material-UI",
-    "Next-UI",
     "TailwindCSS",
     "MongoDB",
     "DynamoDB",
@@ -100,7 +101,7 @@ export const resume: IResume = {
       school: "B.C. Government",
       degree: "OpenShift 101-201",
       major: "Container Orchestration",
-      graduation: "June 2024-August 2024",
+      graduation: "June 2024 – August 2024",
       logo: "./openshift.png"
     }
   ],
@@ -130,71 +131,87 @@ export const resume: IResume = {
   work_experience: [
     {
       company: "Quartech Systems Ltd",
-      title: "Intermediate Technical Architect",
-      date: "2021-Present",
+      title: "Senior Full Stack Software Engineer",
+      date: "September 2020 – Present",
       contract: [
         {
-          id: "QTS",
-          label: "QTS",
-          title: "Quartech Trust Services",
-          date: "2021-Present",
-          position: "Intermediate Technical Architect",
-          description: "Developed and maintained Quartech Trust Services' web applications.",
+          id: "BCWALLET",
+          label: "BC Wallet",
+          title: "BCGOV – BC Wallet Mobile (BCSC)",
+          date: "Oct 2025 – Present",
+          position: "Senior Full Stack Developer",
+          description:
+            "Working with the CDT (Credential and Digital Trust) team on the Integrated Identity Services initiative, developing the BCSC app and integrating BC Wallet into the BC Services Card experience for Android and iOS.",
           notes: [
-            "Architected and developed digital wallet solutions for credential management",
-            "Implemented secure authentication using Keycloak integration",
-            "Built mobile-responsive web applications with React Native",
-            "Designed and implemented RESTful APIs for wallet management",
-            "Integrated with Hyperledger Aries and Traction for credential issuance",
-            "Set up containerized development environments using Docker and Kubernetes",
-            "Managed deployments across Azure and OpenShift platforms",
-            "Implemented CI/CD pipelines using GitHub Actions",
-            "Created comprehensive documentation for onboarding and setup processes"
+            "Designed and implemented ScreenWrapper, a common Bifold component for consistent screen sizing and layout across bc-wallet",
+            "Implemented BCSC account nickname (create, edit, selection) and persistence to the IAS backend",
+            "Built verification and onboarding flows: setup steps, resume verification, approval notifications, and device invalidation",
+            "Added security method selector with PIN create/update and device permission handling; fixed permission race conditions",
+            "Introduced global error handling and consistent alert styling; improved safe area, scroll behavior, and WebView scaling",
+            "Added i18n support for all BCSC v4 screens",
+            "Improved CI with GitHub Actions for ledgers on PR and SonarCloud integration"
           ],
           technologies: [
-            "React",
             "React Native",
-            "NodeJS",
             "TypeScript",
-            "Caddy",
-            "Yarn",
-            "Keycloak",
-            "MariaDB",
-            "MongoDB",
-            "Docker",
-            "Kubernetes",
-            "Helm",
-            "Azure",
             "GitHub Actions",
-            "GitHub/Git",
+            "Jest",
+            "Yarn",
+            "GitHub/Git"
+          ]
+        },
+        {
+          id: "QDTS",
+          label: "QDTS",
+          title: "Digital Trust Services (QDTS)",
+          date: "Oct 2024 – Oct 2025",
+          position: "Senior Full Stack Developer",
+          description:
+            "Internal SaaS development for Quartech: blockchain-based solutions enabling organizations to establish self-sovereign identities and manage digitally verifiable credentials.",
+          notes: [
+            "Led development of enterprise-scale web applications using React, Node.js, TypeScript, and Kubernetes",
+            "Designed and implemented Helm charts and GitHub Actions workflows for five applications in Azure Kubernetes Cluster",
+            "Organized the repository by restructuring front-end and back-end components",
+            "Created Docker files for development and production environments for all applications",
+            "Migrated the API database from AWS DynamoDB to a self-hosted Bitnami MongoDB via Helm chart dependency",
+            "Developed full Issuer Demo admin panel for tenant invitations and credential management with Keycloak OIDC",
+            "Automated CI/CD pipelines for three repositories and five containers with full CI/CD support"
+          ],
+          technologies: [
+            "Helm",
             "OpenShift",
-            "Hyperledger Aries",
-            "ACA-Py",
-            "Traction"
+            "Kubernetes",
+            "Azure",
+            "TypeScript",
+            "Node.js",
+            "Docker",
+            "GitHub Actions",
+            "MongoDB",
+            "Keycloak",
+            "OAuth2"
           ]
         },
         {
           id: "NERT",
           label: "NERT",
           title: "Northeastern Restoration Tracker (NERT)",
-          date: "May 2024 - September 2024",
-          position: "QA Tester / Full Stack Developer",
-          description: "Developed testing frameworks and assisted in deployment.",
+          date: "May 2024 – September 2024",
+          position: "Senior Full Stack Developer / QA Specialist",
+          description:
+            "GIS-based web application supporting restoration efforts across BC's natural resource regions with interactive map features for visualizing and tracking projects.",
           notes: [
-            "Wrote unit test cases (Mocha, Jest, Cypress).",
-            "Redesigned API systems for streamlined structure.",
-            "Wrote database migrations.",
-            "Modified scripts and ENV variables for DevOps.",
-            "Integrated authentication (OAuth).",
-            "Used token validation for user authentication.",
-            "Created DB seed files and backup scripts.",
-            "Handled error control and form validation (Formik).",
-            "Managed development and migration stages."
+            "Provided pivotal support deploying NERT to OpenShift-native environments (DEV/TEST/PROD) using GitOps/IaC practices",
+            "Implemented test automation frameworks (unit, integration, end-to-end) using Mocha, Jest, and Cypress",
+            "Led development of enterprise-scale web applications using React, Node.js, TypeScript, and OpenShift 4.x",
+            "Redesigned RESTful API systems following OpenAPI conventions with layered architecture",
+            "Wrote initial database migrations at DEV, TEST, and PROD stages",
+            "Designed and optimized PostgreSQL for performance, indexing, query optimization, and schema design",
+            "Integrated authentication and verification throughout the project (OAuth)"
           ],
           technologies: [
             "React",
             "Material-UI",
-            "NodeJS",
+            "Node.js",
             "TypeScript",
             "Git",
             "PostgreSQL",
@@ -203,34 +220,30 @@ export const resume: IResume = {
             "Mocha",
             "Jest",
             "Cypress",
-            "OAuth",
-            "Formik"
+            "OAuth2"
           ]
         },
         {
           id: "SIMS/BIOHUB",
           label: "SIMS/BIOHUB",
           title: "Species Inventory Management System / BioHub (SIMS/BIOHUB)",
-          date: "Dec 2021 - April 2024",
-          position: "Full Stack Developer",
-          description: "Developed SIMS and BIOHUB functionalities.",
+          date: "Dec 2021 – April 2024",
+          position: "Senior Full Stack Developer",
+          description:
+            "Digital transformation initiative centralizing BC's aquatic and terrestrial species and habitat data, integrating multiple legacy systems into a unified platform.",
           notes: [
-            "Redesigned API systems.",
-            "Wrote database migrations.",
-            "Modified scripts and ENV variables for DevOps.",
-            "Wrote unit test cases (Mocha, Jest).",
-            "Handled CSV, XML, and XLS file parsing.",
-            "Integrated authentication (OAuth).",
-            "Used token validation for user authentication.",
-            "Implemented email and phone notifications (GCNotify).",
-            "Created DB seed files and backup scripts.",
-            "Handled error control and form validation (Formik).",
-            "Managed development and migration stages.",
-            "Implemented front-end map (Leaflet)."
+            "Led development of enterprise-scale web applications using React, Node.js, TypeScript, and OpenShift",
+            "Redesigned RESTful API systems following OpenAPI conventions with layered architecture",
+            "Wrote database migrations at DEV, TEST, and PROD stages",
+            "Developed savers and parsers for CSV, XML, and XLS files",
+            "Implemented email and phone notification service (GC Notify)",
+            "Created a front-end map using Leaflet",
+            "Integrated authentication and verification throughout the project (OAuth)"
           ],
           technologies: [
             "React",
             "Material-UI",
+            "Node.js",
             "TypeScript",
             "Git",
             "PostgreSQL",
@@ -238,27 +251,27 @@ export const resume: IResume = {
             "OpenShift",
             "Mocha",
             "Jest",
-            "OAuth",
-            "Formik"
+            "OAuth2"
           ]
         },
         {
           id: "HRT",
           label: "HRT",
           title: "Habitat Restoration Tracker (HRT)",
-          date: "Jan 2023 - April 2023",
-          position: "Junior Full Stack Developer",
-          description: "Contributed to foundational development of HRT.",
+          date: "Jan 2023 – April 2023",
+          position: "Senior Full Stack Developer",
+          description:
+            "Platform managing restoration efforts across BC during the foundational development phase.",
           notes: [
-            "Redesigned and integrated RESTful API system.",
-            "Formulated testing frameworks.",
-            "Contributed to project setup and lifecycle.",
-            "Integrated scientific data for restoration activities."
+            "Assisted in the redesign and integration of the RESTful API system",
+            "Implemented test automation frameworks (unit, integration, end-to-end)",
+            "Established the initial project setup and development lifecycle",
+            "Integrated scientific data for a comprehensive overview of restoration activities"
           ],
           technologies: [
             "React",
             "Material-UI",
-            "NodeJS",
+            "Node.js",
             "TypeScript",
             "Git",
             "PostgreSQL",
@@ -272,30 +285,37 @@ export const resume: IResume = {
           id: "BuyBC",
           label: "BuyBC",
           title: "Investment Agriculture Foundation (BuyBC)",
-          date: "Sept 2021 - Dec 2021",
-          position: "Junior Web Developer",
-          description: "Developed front-end updates for BuyBC applications.",
-          technologies: ["Vue.JS", "NodeJS", "TypeScript", "Docker", "Git"],
-          notes: ["Implemented user feedback form.", "Optimized search bar.", "Improved user interface."]
+          date: "Sept 2021 – Dec 2021",
+          position: "Full Stack Developer",
+          description:
+            "Verifiable credential issuance for organizations in OrgBook BC, using the OrgBook DEV API to link BuyBC credentials to BC registration IDs.",
+          technologies: ["Vue.js", "Node.js", "TypeScript", "Docker", "Git"],
+          notes: [
+            "Built and iterated on Vue.js front-end features applying component-based architecture and TypeScript",
+            "Implemented a user feedback form and optimized search bar interactions",
+            "Assisted in migration to IAF servers, updating Docker configurations and environment variables"
+          ]
         }
       ]
     },
     {
       company: "SYNQ Tech",
-      title: "Software/ Web Developer",
-      date: "Jun 2020 - Dec 2020",
+      title: "Software / Web Developer",
+      date: "Jun 2020 – Dec 2020",
       contract: [
         {
-          id: "NERT",
-          label: "NERT",
-          title: "Northeastern Restoration Tracker (NERT)",
-          date: "May 2024 - September 2024",
-          position: "QA Tester / Full Stack Developer",
-          description: "",
+          id: "SYNQ",
+          label: "SYNQ",
+          title: "SYNQ Tech",
+          date: "Jun 2020 – Dec 2020",
+          position: "Software / Web Developer",
+          description:
+            "Technology company specializing in real-time integration and analytics solutions for seamless data synchronization across sources.",
           notes: [
-            "Developed network check-in software.",
-            "Prototyped remote access locker system.",
-            "Provided tech support to clients."
+            "Designed and updated the company website",
+            "Developed and installed network check-in software for company assets and devices",
+            "Built a prototype for a remote access locker system — wiring, soldering, and programming the device",
+            "Provided technology resolution and in-person tech support for client devices"
           ],
           technologies: [
             "Python",
