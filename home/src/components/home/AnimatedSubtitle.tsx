@@ -23,15 +23,14 @@ export default function AnimatedSubtitle({ phrases }: AnimatedSubtitleProps) {
       }, 400);
     };
 
-    const id = setInterval(cyclePhrase, 3000);
+    const id = setInterval(cyclePhrase, 12000);
     return () => clearInterval(id);
   }, [phrases]);
 
   return (
     <p
-      className="mt-4 max-w-[42rem] text-center text-muted-foreground sm:text-xl transition-opacity duration-400"
-      style={{ opacity: visible ? 1 : 0 }}
-    >
+      className="duration-800 mt-4 max-w-[48rem] text-center text-muted-foreground transition-opacity sm:text-xl"
+      style={{ opacity: visible ? 1 : 0 }}>
       {phrases[index]}
     </p>
   );
