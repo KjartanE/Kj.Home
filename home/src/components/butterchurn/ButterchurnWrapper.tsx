@@ -9,7 +9,7 @@ const ButterchurnScene = dynamic(
 
 export default function ButterchurnWrapper() {
   return (
-    <div className="fixed inset-0">
+    <div className="absolute inset-0">
       <ButterchurnScene />
     </div>
   );

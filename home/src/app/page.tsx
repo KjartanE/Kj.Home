@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ArrowRight } from "lucide-react";
+import { PROJECTS } from "@/constants/projects";
 
 const SUBTITLE_PHRASES = [
   "I like to code. Welcome to my collection of projects and experiments.",
@@ -16,37 +17,8 @@ const SUBTITLE_PHRASES = [
   "Exploring math, physics, and audio through the browser."
 ];
 
-type FeaturedProject = {
-  title: string;
-  description: string;
-  image: string;
-  link: string;
-  tech: string[];
-};
-
-const FEATURED_PROJECTS: FeaturedProject[] = [
-  {
-    title: "Penrose Tiling",
-    description: "Interactive aperiodic tiling pattern generator built with Three.js and WebGL.",
-    image: "/projects/penrose-preview.png",
-    link: "/projects/penrose",
-    tech: ["Three.js", "WebGL", "TypeScript"]
-  },
-  {
-    title: "Mandelbrot Set",
-    description: "GPU-accelerated Mandelbrot set explorer with smooth zooming.",
-    image: "/projects/mandelbrot-preview.png",
-    link: "/projects/mandelbrot",
-    tech: ["Three.js", "GLSL", "TypeScript"]
-  },
-  {
-    title: "Double Pendulum",
-    description: "Chaotic double pendulum simulation with cursor control and trail rendering.",
-    image: "/projects/pendulum-preview.png",
-    link: "/projects/pendulum",
-    tech: ["Three.js", "Physics", "TypeScript"]
-  }
-];
+const FEATURED_SLUGS = ["penrose", "mandelbrot", "pendulum"];
+const FEATURED_PROJECTS = FEATURED_SLUGS.map((slug) => PROJECTS.find((p) => p.slug === slug)!).filter(Boolean);
 
 export default async function Home() {
   const posts = await getBlogPosts();
@@ -103,7 +75,7 @@ export default async function Home() {
             </div>
             <div className="grid gap-6 md:grid-cols-3">
               {FEATURED_PROJECTS.map((project) => (
-                <Link href={project.link} key={project.title}>
+                <Link href={`/projects/${project.slug}`} key={project.slug}>
                   <Card className="h-full bg-background/80 backdrop-blur-sm transition-colors hover:bg-muted/50">
                     <CardHeader className="pb-3">
                       <div className="relative mb-3 aspect-video overflow-hidden rounded-lg">
