@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -139,6 +139,8 @@ export default function SolarBackground() {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
+  const speedRef = useRef(1.0);
+  const [speed, setSpeed] = useState(1.0);
 
   const planets = useMemo<Planet[]>(
     () => [
@@ -496,7 +498,7 @@ export default function SolarBackground() {
       // Update planet positions and lighting
       planets.forEach((planet) => {
         if (planet.mesh) {
-          const time = Date.now() * planet.speed;
+          const time = Date.now() * planet.speed * speedRef.current;
           planet.mesh.position.x = Math.cos(time) * planet.distance;
           planet.mesh.position.z = Math.sin(time) * planet.distance;
 
@@ -507,7 +509,7 @@ export default function SolarBackground() {
         // Update moons
         planet.moons.forEach((moon) => {
           if (moon.mesh && planet.mesh) {
-            const time = Date.now() * moon.speed;
+            const time = Date.now() * moon.speed * speedRef.current;
 
             // Calculate moon position relative to its planet
             const moonX = Math.cos(time) * moon.distance;
@@ -600,5 +602,28 @@ export default function SolarBackground() {
     };
   }, [containerRef, cameraRef, rendererRef, controlsRef, planets]);
 
-  return <div ref={containerRef} />;
+  const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseFloat(e.target.value);
+    setSpeed(v);
+    speedRef.current = v;
+  };
+
+  return (
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="absolute inset-0" />
+      <div className="absolute bottom-20 right-4 z-10 flex items-center gap-3 rounded-xl border border-border/40 bg-background/70 px-4 py-2 backdrop-blur-md">
+        <span className="text-xs text-muted-foreground">Speed</span>
+        <input
+          type="range"
+          min="0"
+          max="5"
+          step="0.1"
+          value={speed}
+          onChange={handleSpeedChange}
+          className="w-28 accent-primary"
+        />
+        <span className="w-6 text-right text-xs tabular-nums text-muted-foreground">{speed.toFixed(1)}×</span>
+      </div>
+    </div>
+  );
 }

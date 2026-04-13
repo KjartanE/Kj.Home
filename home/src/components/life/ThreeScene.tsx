@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GameOfLife, createGridGeometry, getGridSize } from "./main";
+import { Button } from "@/components/ui/button";
 
 export default function ThreeScene() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -281,6 +282,11 @@ export default function ThreeScene() {
     setIsRunning(!isRunning);
   };
 
+  const stepGrid = () => {
+    if (!gameRef.current || isRunning) return;
+    gameRef.current.update();
+  };
+
   const randomizeGrid = () => {
     if (!gameRef.current) return;
     gameRef.current.randomize();
@@ -294,16 +300,19 @@ export default function ThreeScene() {
   return (
     <div className="relative h-full w-full">
       <div className="absolute inset-0" ref={containerRef}></div>
-      <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 space-x-4 rounded-lg bg-black/50 p-4 backdrop-blur-md">
-        <button onClick={toggleSimulation} className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+      <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-xl border border-border/40 bg-background/70 p-3 backdrop-blur-md">
+        <Button size="sm" variant={isRunning ? "secondary" : "default"} onClick={toggleSimulation}>
           {isRunning ? "Pause" : "Start"}
-        </button>
-        <button onClick={clearGrid} className="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+        </Button>
+        <Button size="sm" variant="outline" onClick={stepGrid} disabled={isRunning}>
+          Step
+        </Button>
+        <Button size="sm" variant="outline" onClick={clearGrid}>
           Clear
-        </button>
-        <button onClick={randomizeGrid} className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+        </Button>
+        <Button size="sm" variant="outline" onClick={randomizeGrid}>
           Randomize
-        </button>
+        </Button>
       </div>
     </div>
   );

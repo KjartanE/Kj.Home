@@ -145,6 +145,7 @@ export default function MandelbrotBackground() {
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.domElement.style.cursor = "crosshair";
     container.appendChild(renderer.domElement);
 
     const geometry = new THREE.PlaneGeometry(2, 2 / aspect);
@@ -220,6 +221,7 @@ export default function MandelbrotBackground() {
         onZoomIn={() => controlsRef.current?.zoomIn()}
         onZoomOut={() => controlsRef.current?.zoomOut()}
         onMove={(direction) => controlsRef.current?.move(direction)}
+        onReset={() => controlsRef.current?.reset()}
       />
       <ZoomIndicator zoom={currentZoom} />
     </>
