@@ -7,6 +7,7 @@ import * as jsxDevRuntime from "react/jsx-dev-runtime";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import Slugger from "github-slugger";
 
 const rootDirectory = path.join(process.cwd(), "src/assets/blog");
 
@@ -18,10 +19,36 @@ export interface BlogFrontmatter {
   draft?: boolean;
 }
 
+export interface TocEntry {
+  id: string;
+  text: string;
+  level: 2 | 3;
+}
+
 export interface BlogPostMeta {
   slug: string;
   frontmatter: BlogFrontmatter;
   readingTime: number;
+}
+
+export function extractToc(content: string): TocEntry[] {
+  const slugger = new Slugger();
+  const lines = content.split("\n");
+  const entries: TocEntry[] = [];
+
+  for (const line of lines) {
+    const h2 = line.match(/^##\s+(.+)/);
+    const h3 = line.match(/^###\s+(.+)/);
+    if (h2) {
+      const text = h2[1].trim();
+      entries.push({ id: slugger.slug(text), text, level: 2 });
+    } else if (h3) {
+      const text = h3[1].trim();
+      entries.push({ id: slugger.slug(text), text, level: 3 });
+    }
+  }
+
+  return entries;
 }
 
 function calculateReadingTime(content: string): number {
@@ -72,6 +99,7 @@ export async function getBlogPost(slug: string) {
   return {
     frontmatter,
     content: MDXContent,
-    readingTime: calculateReadingTime(content)
+    readingTime: calculateReadingTime(content),
+    toc: extractToc(content)
   };
 }

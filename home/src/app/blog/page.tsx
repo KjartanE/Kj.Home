@@ -1,5 +1,4 @@
 import { getBlogPosts } from "@/lib/mdx";
-import Link from "next/link";
 import PersistentPenroseBackground from "@/components/penrose/background/PersistentPenroseBackground";
 import BlogPostGrid from "@/components/blog/BlogPostGrid";
 
