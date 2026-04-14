@@ -1,9 +1,14 @@
 import * as THREE from "three";
+import { type DD, ddAdd, ddSub, ddMulFloat, ddFrom, ddToQS, toDS } from "./computeOrbit";
 
 export class MandelbrotControls {
   private currentZoom: number;
   private targetZoom: number;
-  private targetCenter: THREE.Vector2;
+  private centerX: DD;
+  private centerY: DD;
+  private targetCenterX: DD;
+  private targetCenterY: DD;
+
   private material: THREE.ShaderMaterial;
   private container: HTMLElement;
   private aspect: number;
@@ -11,12 +16,24 @@ export class MandelbrotControls {
   private isAnimating: boolean;
   private isDragging: boolean;
   private lastMousePos: { x: number; y: number };
+
+  private orbitCenterX: DD;
+  private orbitCenterY: DD;
+  private orbitZoom: number;
+
   public onZoomChange?: (zoom: number) => void;
+  public onOrbitUpdate?: (cx: DD, cy: DD) => void;
 
   constructor(material: THREE.ShaderMaterial, container: HTMLElement, aspect: number) {
     this.currentZoom = 1.0;
     this.targetZoom = 1.0;
-    this.targetCenter = new THREE.Vector2(0.0, 0.0);
+    this.centerX = ddFrom(0);
+    this.centerY = ddFrom(0);
+    this.targetCenterX = ddFrom(0);
+    this.targetCenterY = ddFrom(0);
+    this.orbitCenterX = ddFrom(0);
+    this.orbitCenterY = ddFrom(0);
+    this.orbitZoom = 1.0;
     this.material = material;
     this.container = container;
     this.aspect = aspect;
@@ -33,38 +50,86 @@ export class MandelbrotControls {
     this.animate = this.animate.bind(this);
   }
 
+  private updateUniforms() {
+    const cxQS = ddToQS(this.centerX);
+    const cyQS = ddToQS(this.centerY);
+    this.material.uniforms.center0.value.set(cxQS[0], cyQS[0]);
+    this.material.uniforms.center1.value.set(cxQS[1], cyQS[1]);
+    this.material.uniforms.center2.value.set(cxQS[2], cyQS[2]);
+    this.material.uniforms.center3.value.set(cxQS[3], cyQS[3]);
+
+    const scale = 2.0 / this.currentZoom;
+    const [sHi, sLo] = toDS(scale);
+    this.material.uniforms.scaleHi.value = sHi;
+    this.material.uniforms.scaleLo.value = sLo;
+    this.material.uniforms.zoom.value = this.currentZoom;
+  }
+
+  private isOrbitStale(): boolean {
+    const pixelSize = 2.0 / this.currentZoom;
+    const dx = Math.abs(this.centerX[0] - this.orbitCenterX[0]) + Math.abs(this.centerX[1] - this.orbitCenterX[1]);
+    const dy = Math.abs(this.centerY[0] - this.orbitCenterY[0]) + Math.abs(this.centerY[1] - this.orbitCenterY[1]);
+    const zoomRatio = Math.max(this.currentZoom / this.orbitZoom, this.orbitZoom / this.currentZoom);
+    return dx > pixelSize * 200 || dy > pixelSize * 200 || zoomRatio > 4.0;
+  }
+
+  public triggerOrbitUpdate() {
+    this.orbitCenterX = [...this.centerX];
+    this.orbitCenterY = [...this.centerY];
+    this.orbitZoom = this.currentZoom;
+    this.onOrbitUpdate?.(this.orbitCenterX, this.orbitCenterY);
+  }
+
   private animate() {
     if (!this.isAnimating) {
       this.animationFrameId = null;
       return;
     }
 
-    const zoomDiff = this.targetZoom - this.currentZoom;
-    const centerDiff = new THREE.Vector2().subVectors(this.targetCenter, this.material.uniforms.center.value);
+    const factor = 0.15;
+    const logCurrent = Math.log(this.currentZoom);
+    const logTarget = Math.log(this.targetZoom);
+    const logDiff = logTarget - logCurrent;
 
-    const zoomFactor = 0.15;
-    const centerFactor = 0.15;
+    const dCX = ddSub(this.targetCenterX, this.centerX);
+    const dCY = ddSub(this.targetCenterY, this.centerY);
 
-    if (Math.abs(zoomDiff) > 1e-10 || centerDiff.length() > 1e-10) {
-      this.currentZoom += zoomDiff * zoomFactor;
-      this.material.uniforms.zoom.value = this.currentZoom;
+    // Converge when within ~0.1 pixel of target
+    const pixelThreshold = 2.0 / (this.currentZoom * 1000);
+    const converged =
+      Math.abs(logDiff) < 1e-8 &&
+      Math.abs(dCX[0]) + Math.abs(dCX[1]) < pixelThreshold &&
+      Math.abs(dCY[0]) + Math.abs(dCY[1]) < pixelThreshold;
+
+    if (!converged) {
+      this.currentZoom = Math.exp(logCurrent + logDiff * factor);
+      this.centerX = ddAdd(this.centerX, ddMulFloat(dCX, factor));
+      this.centerY = ddAdd(this.centerY, ddMulFloat(dCY, factor));
+      this.updateUniforms();
       this.onZoomChange?.(this.currentZoom);
-
-      this.material.uniforms.center.value.add(centerDiff.multiplyScalar(centerFactor));
-
       this.animationFrameId = requestAnimationFrame(this.animate);
     } else {
+      this.currentZoom = this.targetZoom;
+      this.centerX = [...this.targetCenterX];
+      this.centerY = [...this.targetCenterY];
+      this.updateUniforms();
+      this.onZoomChange?.(this.currentZoom);
       this.isAnimating = false;
       this.animationFrameId = null;
+      // Only recompute orbit after animation settles to avoid mid-zoom pops
+      if (this.isOrbitStale()) {
+        this.triggerOrbitUpdate();
+      }
     }
   }
 
   init() {
-    this.container.addEventListener("wheel", this.handleWheel);
+    this.container.addEventListener("wheel", this.handleWheel, { passive: false });
     this.container.addEventListener("mousedown", this.handleMouseDown);
     window.addEventListener("mousemove", this.handleMouseMove);
     window.addEventListener("mouseup", this.handleMouseUp);
     window.addEventListener("keydown", this.handleKeyDown);
+    this.updateUniforms();
   }
 
   cleanup() {
@@ -73,10 +138,7 @@ export class MandelbrotControls {
     window.removeEventListener("mousemove", this.handleMouseMove);
     window.removeEventListener("mouseup", this.handleMouseUp);
     window.removeEventListener("keydown", this.handleKeyDown);
-
-    if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId);
-    }
+    if (this.animationFrameId !== null) cancelAnimationFrame(this.animationFrameId);
   }
 
   private handleWheel(event: WheelEvent) {
@@ -86,24 +148,20 @@ export class MandelbrotControls {
     const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-    const mandelbrotX = (x * 2.0) / this.currentZoom + this.material.uniforms.center.value.x;
-    const mandelbrotY = (y * 2.0) / this.aspect / this.currentZoom + this.material.uniforms.center.value.y;
+    const baseZoom = this.targetZoom;
 
-    const baseZoomFactor = 0.15;
-    const zoomFactor = event.deltaY > 0 ? 1.0 / (1.0 + baseZoomFactor) : 1.0 + baseZoomFactor;
-    const newZoom = this.currentZoom * zoomFactor;
+    // Cursor position in Mandelbrot space using DD center
+    const mandelbrotX = ddAdd(this.targetCenterX, ddFrom((x * 2.0) / baseZoom));
+    const mandelbrotY = ddAdd(this.targetCenterY, ddFrom((y * 2.0) / this.aspect / baseZoom));
 
-    if (newZoom >= Number.EPSILON && newZoom <= 1e14) {
-      const newCenterX = mandelbrotX - (x * 2.0) / newZoom;
-      const newCenterY = mandelbrotY - (y * 2.0) / this.aspect / newZoom;
+    const zoomFactor = event.deltaY > 0 ? 1.0 / 1.15 : 1.15;
+    const newZoom = baseZoom * zoomFactor;
 
+    if (newZoom >= Number.EPSILON && newZoom <= 1e28) {
       this.targetZoom = newZoom;
-      this.targetCenter.set(newCenterX, newCenterY);
-
-      if (!this.isAnimating) {
-        this.isAnimating = true;
-        this.animationFrameId = requestAnimationFrame(this.animate);
-      }
+      this.targetCenterX = ddSub(mandelbrotX, ddFrom((x * 2.0) / newZoom));
+      this.targetCenterY = ddSub(mandelbrotY, ddFrom((y * 2.0) / this.aspect / newZoom));
+      this.startAnimation();
     }
   }
 
@@ -121,25 +179,25 @@ export class MandelbrotControls {
     const dy = event.clientY - this.lastMousePos.y;
     this.lastMousePos = { x: event.clientX, y: event.clientY };
 
-    // Convert pixel delta to Mandelbrot coordinate delta
     const scale = 4.0 / (this.currentZoom * this.container.clientWidth);
-    const center = this.material.uniforms.center.value as THREE.Vector2;
-    center.x -= dx * scale;
-    center.y += dy * scale;
-    this.targetCenter.copy(center);
+    this.centerX = ddSub(this.centerX, ddFrom(dx * scale));
+    this.centerY = ddAdd(this.centerY, ddFrom(dy * scale));
+    this.targetCenterX = [...this.centerX];
+    this.targetCenterY = [...this.centerY];
+    this.updateUniforms();
   }
 
   private handleMouseUp() {
-    if (this.isDragging) {
-      this.isDragging = false;
-      this.container.style.cursor = "crosshair";
+    if (!this.isDragging) return;
+    this.isDragging = false;
+    this.container.style.cursor = "crosshair";
+    if (this.isOrbitStale()) {
+      this.triggerOrbitUpdate();
     }
   }
 
   private handleKeyDown(event: KeyboardEvent) {
-    // Don't fire when user is typing in an input
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
-
     switch (event.key) {
       case "=":
       case "+":
@@ -172,40 +230,37 @@ export class MandelbrotControls {
   }
 
   public zoomIn() {
-    this.targetZoom = this.currentZoom * 1.2;
+    this.targetZoom = Math.min(this.targetZoom * 1.2, 1e28);
     this.startAnimation();
   }
-
   public zoomOut() {
-    this.targetZoom = this.currentZoom / 1.2;
+    this.targetZoom = Math.max(this.targetZoom / 1.2, Number.EPSILON);
     this.startAnimation();
   }
 
   public move(direction: "up" | "down" | "left" | "right") {
-    const moveAmount = 0.5 / this.currentZoom;
-    const currentCenter = this.material.uniforms.center.value;
-
+    const amt = 0.5 / this.currentZoom;
     switch (direction) {
       case "up":
-        this.targetCenter.set(currentCenter.x, currentCenter.y + moveAmount);
+        this.targetCenterY = ddAdd(this.centerY, ddFrom(amt));
         break;
       case "down":
-        this.targetCenter.set(currentCenter.x, currentCenter.y - moveAmount);
+        this.targetCenterY = ddSub(this.centerY, ddFrom(amt));
         break;
       case "left":
-        this.targetCenter.set(currentCenter.x - moveAmount, currentCenter.y);
+        this.targetCenterX = ddSub(this.centerX, ddFrom(amt));
         break;
       case "right":
-        this.targetCenter.set(currentCenter.x + moveAmount, currentCenter.y);
+        this.targetCenterX = ddAdd(this.centerX, ddFrom(amt));
         break;
     }
-
     this.startAnimation();
   }
 
   public reset() {
     this.targetZoom = 1.0;
-    this.targetCenter.set(0.0, 0.0);
+    this.targetCenterX = ddFrom(0);
+    this.targetCenterY = ddFrom(0);
     this.startAnimation();
   }
 
