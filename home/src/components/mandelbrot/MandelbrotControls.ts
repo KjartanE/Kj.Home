@@ -1,8 +1,18 @@
 import * as THREE from "three";
-import { type DD, ddAdd, ddSub, ddMulFloat, ddFrom, ddToQS, toDS, findNearbyMinibrot } from "./computeOrbit";
+import {
+  type DD,
+  ddAdd,
+  ddSub,
+  ddMulFloat,
+  ddFrom,
+  ddToQS,
+  toDS,
+  findNearbyMinibrot,
+  MAX_ITER
+} from "./computeOrbit";
 
-export const MAX_ITER = 65536;
-export const ITER_SCALE = 300;
+export { MAX_ITER };
+export const ITER_SCALE = 2000;
 export const ITER_FLOOR = 512;
 
 /** Iteration budget for a given zoom level. */
@@ -40,7 +50,14 @@ export class MandelbrotControls {
    * "please redraw" — the render loop is pull-based.
    */
   public onRenderRequest?: () => void;
-  public get animating(): boolean { return this.isAnimating; }
+  /**
+   * Fires when the user presses D — owner is expected to flip the shader's
+   * debugMode uniform and issue a render.
+   */
+  public onDebugToggle?: () => void;
+  public get animating(): boolean {
+    return this.isAnimating;
+  }
 
   constructor(material: THREE.ShaderMaterial, container: HTMLElement, aspect: number) {
     this.currentZoom = 1.0;
@@ -268,6 +285,10 @@ export class MandelbrotControls {
       case "r":
       case "R":
         this.reset();
+        break;
+      case "d":
+      case "D":
+        this.onDebugToggle?.();
         break;
     }
   }

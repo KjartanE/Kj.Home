@@ -91,10 +91,15 @@ export function ddToQS(a: DD): [number, number, number, number] {
 
 // ── Reference orbit computation ────────────────────────────────────────
 
-// Shared orbit-texture geometry. Keep these in sync with the shader
-// constants in MandelbrotBackground.tsx.
+// Canonical orbit-capacity constant. All texture geometry below derives
+// from this; callers who want more iteration headroom only need to bump
+// MAX_ITER (and keep it a multiple of ORBIT_TEX_W so texture rows align
+// exactly). MandelbrotControls re-exports this for backward compatibility.
+export const MAX_ITER = 131072;
+
+// Orbit texture is a 2D RGBA32F array of MAX_ITER entries, 4096 per row.
 export const ORBIT_TEX_W = 4096;
-export const ORBIT_TEX_H = 16;
+export const ORBIT_TEX_H = Math.ceil(MAX_ITER / ORBIT_TEX_W);
 
 // ── BLA (Bivariate Linear Approximation) layout ────────────────────────
 //
@@ -105,14 +110,30 @@ export const ORBIT_TEX_H = 16;
 //
 // with a validity radius r (so the approximation only fires while
 // |ε_n|² < r²). Entries are densely packed per level into a 2D
-// RGBA32F texture. Row layout is level-major with fixed row budgets
-// per level — not space-optimal but easy to index from both sides.
+// RGBA32F texture. Row layout is level-major: level l sits at rows
+// [offsets[l], offsets[l+1]), indexed from (row, col) = (offsets[l] +
+// floor(e / BLA_TEX_W), e mod BLA_TEX_W).
 
 export const BLA_TEX_W = 4096;
 export const BLA_MAX_LEVELS = 8;
-// Rows per level at MAX_ITER = 65536: 16, 8, 4, 2, 1, 1, 1, 1 → 34 total.
-export const BLA_ROW_OFFSETS: readonly number[] = [0, 16, 24, 28, 30, 31, 32, 33];
-export const BLA_TEX_H = 34;
+
+// Derive row offsets and total texture height from MAX_ITER. Level l has
+// up to floor(MAX_ITER / 2^l) entries, packed 4096 per row, ceiling rounded.
+function computeBLAGeometry(maxIter: number): { offsets: readonly number[]; height: number } {
+  const offsets: number[] = [];
+  let cursor = 0;
+  for (let level = 0; level < BLA_MAX_LEVELS; level++) {
+    offsets.push(cursor);
+    const entries = Math.floor(maxIter / (1 << level));
+    const rows = Math.max(1, Math.ceil(entries / BLA_TEX_W));
+    cursor += rows;
+  }
+  return { offsets, height: cursor };
+}
+
+const _blaGeom = computeBLAGeometry(MAX_ITER);
+export const BLA_ROW_OFFSETS: readonly number[] = _blaGeom.offsets;
+export const BLA_TEX_H = _blaGeom.height;
 // Same tolerance as the shader's glitch criterion. The linearisation
 // breaks down under the same condition perturbation does: γ ≈ 10⁻³.
 const BLA_GAMMA_SQ = 1e-6;
@@ -121,9 +142,12 @@ const BLA_GAMMA_SQ = 1e-6;
 const BLA_A_MAX_SQ = 1e30;
 
 export interface BLABuffers {
-  /** Packed (A.re, A.im, B.re, B.im) per entry. Length = BLA_TEX_W·BLA_TEX_H·4. */
+  /** High float32 limb of (A.re, A.im, B.re, B.im) per entry. */
   ab: Float32Array;
-  /** rSq per entry packed in .r; other channels unused. Same length as ab. */
+  /** Low float32 limb — together with ab forms a DS (2× float32) pair,
+   *  roughly doubling effective precision of the BLA coefficients. */
+  abLo: Float32Array;
+  /** rSq per entry packed in .r; other channels unused. */
   r: Float32Array;
   /** Valid entry count per level (≤ orbitLength / 2^level). */
   numEntries: number[];
@@ -147,9 +171,18 @@ function blaTexelIndex(level: number, e: number): number {
  * error, not the orbit precision, so plain f64 is more than enough.
  */
 export function buildBLA(orbitLength: number, orbitReQS: Float32Array, orbitImQS: Float32Array, out: BLABuffers): void {
-  const { ab, r, numEntries } = out;
+  const { ab, abLo, r, numEntries } = out;
 
-  // Level 0 — one entry per orbit step.
+  // Split a float64 into (hi, lo) float32s. hi = f32(x), lo = f32(x − hi).
+  // Together hi + lo reproduce x to ~14 decimal digits when round-tripped
+  // through two float32 texture samples.
+  const writePair = (idx: number, val: number) => {
+    const hi = Math.fround(val);
+    ab[idx] = hi;
+    abLo[idx] = Math.fround(val - hi);
+  };
+
+  // Level 0 — one entry per orbit step. A = 2Z, B = 1 + 0i.
   for (let n = 0; n < orbitLength; n++) {
     const base = n * 4;
     const Zre = orbitReQS[base] + orbitReQS[base + 1] + orbitReQS[base + 2] + orbitReQS[base + 3];
@@ -157,15 +190,17 @@ export function buildBLA(orbitLength: number, orbitReQS: Float32Array, orbitImQS
     const ZabsSq = Zre * Zre + Zim * Zim;
 
     const idx = blaTexelIndex(0, n) * 4;
-    ab[idx + 0] = 2 * Zre; // A.re
-    ab[idx + 1] = 2 * Zim; // A.im
-    ab[idx + 2] = 1; // B.re
-    ab[idx + 3] = 0; // B.im
-    r[idx + 0] = BLA_GAMMA_SQ * ZabsSq; // rSq
+    writePair(idx + 0, 2 * Zre);
+    writePair(idx + 1, 2 * Zim);
+    writePair(idx + 2, 1);
+    writePair(idx + 3, 0);
+    r[idx + 0] = BLA_GAMMA_SQ * ZabsSq;
   }
   numEntries[0] = orbitLength;
 
-  // Higher levels — merge pairs of adjacent lower-level entries.
+  // Higher levels — merge pairs. Critical: reconstruct the full float64 value
+  // (hi + lo) from the DS pair before arithmetic, so merges run at f64
+  // precision and only the final round-trip back to hi/lo is lossy.
   for (let level = 1; level < BLA_MAX_LEVELS; level++) {
     const step = 1 << level;
     const count = Math.floor(orbitLength / step);
@@ -175,14 +210,14 @@ export function buildBLA(orbitLength: number, orbitReQS: Float32Array, orbitImQS
       const li = blaTexelIndex(level - 1, 2 * e) * 4;
       const ri = blaTexelIndex(level - 1, 2 * e + 1) * 4;
 
-      const lA_re = ab[li + 0],
-        lA_im = ab[li + 1],
-        lB_re = ab[li + 2],
-        lB_im = ab[li + 3];
-      const rA_re = ab[ri + 0],
-        rA_im = ab[ri + 1],
-        rB_re = ab[ri + 2],
-        rB_im = ab[ri + 3];
+      const lA_re = ab[li + 0] + abLo[li + 0];
+      const lA_im = ab[li + 1] + abLo[li + 1];
+      const lB_re = ab[li + 2] + abLo[li + 2];
+      const lB_im = ab[li + 3] + abLo[li + 3];
+      const rA_re = ab[ri + 0] + abLo[ri + 0];
+      const rA_im = ab[ri + 1] + abLo[ri + 1];
+      const rB_re = ab[ri + 2] + abLo[ri + 2];
+      const rB_im = ab[ri + 3] + abLo[ri + 3];
       const lRSq = r[li + 0],
         rRSq = r[ri + 0];
 
@@ -193,9 +228,8 @@ export function buildBLA(orbitLength: number, orbitReQS: Float32Array, orbitImQS
       const B_re = rA_re * lB_re - rA_im * lB_im + rB_re;
       const B_im = rA_re * lB_im + rA_im * lB_re + rB_im;
 
-      // r²_merged = min(lRSq, rRSq / |lA|²). |lA|² could be 0 near minibrot
-      // centers — treat that as "no restriction from second half", so fall
-      // back to lRSq alone.
+      // r²_merged = min(lRSq, rRSq / |lA|²). |lA|² can be 0 near a minibrot
+      // centre; treat that as "no restriction from second half".
       const lAabsSq = lA_re * lA_re + lA_im * lA_im;
       let rSq = lRSq;
       if (lAabsSq > 0) {
@@ -203,18 +237,18 @@ export function buildBLA(orbitLength: number, orbitReQS: Float32Array, orbitImQS
         if (scaled < rSq) rSq = scaled;
       }
 
-      // Overflow guard: float32 tops out around 3.4×10³⁸; any A beyond
-      // BLA_A_MAX_SQ gets its validity radius zeroed so the shader skips it.
+      // Overflow guard — a blown-up |A|² can't round-trip through float32,
+      // so zero the radius and the shader will skip the entry.
       const mergedAabsSq = A_re * A_re + A_im * A_im;
       if (!Number.isFinite(mergedAabsSq) || mergedAabsSq > BLA_A_MAX_SQ) {
         rSq = 0;
       }
 
       const oi = blaTexelIndex(level, e) * 4;
-      ab[oi + 0] = A_re;
-      ab[oi + 1] = A_im;
-      ab[oi + 2] = B_re;
-      ab[oi + 3] = B_im;
+      writePair(oi + 0, A_re);
+      writePair(oi + 1, A_im);
+      writePair(oi + 2, B_re);
+      writePair(oi + 3, B_im);
       r[oi + 0] = rSq;
     }
   }
@@ -354,10 +388,7 @@ function newtonMinibrot(cx0: DD, cy0: DD, period: number, maxRadius: number): Mi
     // Forward sweep: z and dz/dc together for `period` steps.
     for (let i = 0; i < period; i++) {
       // dz_new = 2·z·dz + 1    (complex)
-      const ndZre = ddAdd(
-        ddSub(ddMulFloat(ddMul(Zre, dZre), 2), ddMulFloat(ddMul(Zim, dZim), 2)),
-        ddFrom(1)
-      );
+      const ndZre = ddAdd(ddSub(ddMulFloat(ddMul(Zre, dZre), 2), ddMulFloat(ddMul(Zim, dZim), 2)), ddFrom(1));
       const ndZim = ddAdd(ddMulFloat(ddMul(Zre, dZim), 2), ddMulFloat(ddMul(Zim, dZre), 2));
 
       // z_new = z² + c
@@ -394,6 +425,21 @@ function newtonMinibrot(cx0: DD, cy0: DD, period: number, maxRadius: number): Mi
 
     const deltaAbsSq = delta_re[0] * delta_re[0] + delta_im[0] * delta_im[0];
     if (deltaAbsSq < MINIBROT_NEWTON_TOL_SQ) {
+      // |delta|² small is necessary but not sufficient — an ill-conditioned
+      // |dZ| can make any Z look like a root. Re-sweep at the converged c
+      // and reject if |z_period(c)|² isn't itself tiny.
+      let vZre: DD = [0, 0];
+      let vZim: DD = [0, 0];
+      for (let i = 0; i < period; i++) {
+        const re2 = ddMul(vZre, vZre);
+        const im2 = ddMul(vZim, vZim);
+        const reim = ddMul(vZre, vZim);
+        vZre = ddAdd(ddSub(re2, im2), cx);
+        vZim = ddAdd(ddAdd(reim, reim), cy);
+      }
+      const verifySq = vZre[0] * vZre[0] + vZim[0] * vZim[0];
+      if (verifySq > 1e-20) return null; // not actually at a root
+
       return { cx, cy, period };
     }
   }
@@ -408,12 +454,7 @@ function newtonMinibrot(cx0: DD, cy0: DD, period: number, maxRadius: number): Mi
  * fails (no nearby minibrot, Newton rejects). Callers should then use the
  * view centre directly as the reference.
  */
-export function findNearbyMinibrot(
-  viewCx: DD,
-  viewCy: DD,
-  zoom: number,
-  maxIter: number
-): MinibrotResult | null {
+export function findNearbyMinibrot(viewCx: DD, viewCy: DD, zoom: number, maxIter: number): MinibrotResult | null {
   if (zoom < MINIBROT_ZOOM_GATE) return null;
   const period = detectPeriod(viewCx, viewCy, maxIter);
   if (period < 1) return null;

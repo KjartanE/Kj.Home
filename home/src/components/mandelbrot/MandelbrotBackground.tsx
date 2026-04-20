@@ -64,6 +64,9 @@ const mandelbrotFragmentShader = `
   uniform float iterationFloor;
   uniform float isDarkTheme;
   uniform vec3  backgroundColor;
+  // Debug: when > 0.5, output per-branch diagnostic colours instead of the
+  // normal Mandelbrot palette. Toggle from controls with the D key.
+  uniform float debugMode;
 
   // Orbit data
   uniform sampler2D orbitRe;
@@ -74,28 +77,30 @@ const mandelbrotFragmentShader = `
   uniform vec2  orbitCenter3;
   uniform float orbitLength;
 
-  // BLA tables: (A.re, A.im, B.re, B.im) in blaAB, rSq in blaR.r.
-  // Per-level row offsets (in texels) and entry counts are pushed from JS.
+  // BLA tables: DS coefficients — blaAB carries the hi float32 limb of
+  // (A.re, A.im, B.re, B.im), blaABLo carries the lo limb. rSq lives in
+  // blaR.r. Per-level row offsets / entry counts come from uniforms.
   uniform sampler2D blaAB;
+  uniform sampler2D blaABLo;
   uniform sampler2D blaR;
   uniform float     blaRowOffsets[8];
   uniform float     blaNumEntries[8];
 
   // Pauldelbrot glitch tolerance, squared. γ² = 1e-6 → γ = 1e-3.
   const float GLITCH_TOL_SQ = 1e-6;
-  // Orbit texture geometry — must match ORBIT_TEX_W/H in MandelbrotBackground.
-  const float ORBIT_TEX_W = 4096.0;
-  const float ORBIT_TEX_H = 16.0;
-  // BLA texture geometry — must match BLA_TEX_W/H in computeOrbit.ts.
-  const float BLA_TEX_W = 4096.0;
-  const float BLA_TEX_H = 34.0;
+  // Orbit / BLA texture geometry — constants inlined from JS via template
+  // literal so they stay in sync with the DataTexture dimensions.
+  const float ORBIT_TEX_W = ${ORBIT_TEX_W}.0;
+  const float ORBIT_TEX_H = ${ORBIT_TEX_H}.0;
+  const float BLA_TEX_W = ${BLA_TEX_W}.0;
+  const float BLA_TEX_H = ${BLA_TEX_H}.0;
   const int   BLA_MAX_LEVELS = 8;
   // Shader-level ceiling for dynamic loops. Matches MAX_ITER.
-  const float MAX_ITER_CONST = 65536.0;
+  const float MAX_ITER_CONST = ${MAX_ITER}.0;
   // Outer loop cap for the BLA-driven iteration: in the worst case (all
   // BLAs reject) it degenerates to one step per pass, so we still need
   // the full MAX_ITER ceiling. In practice average step size is large.
-  const int   BLA_OUTER_MAX = 65536;
+  const int   BLA_OUTER_MAX = ${MAX_ITER};
 
   // ── Float32 error-free transforms ───────────────────────────────────
   vec2 two_sum(float a, float b) {
@@ -262,6 +267,9 @@ const mandelbrotFragmentShader = `
     float esc_im = 0.0;
     bool escaped = false;
     bool glitched = false;
+    // Debug counters: shader-side view of which paths the pixel took.
+    bool tookDirectQS = false;
+    float blaIters = 0.0;
 
     for (int k = 0; k < BLA_OUTER_MAX; k++) {
       if (iter >= perturbIterations) { lastIter = iter; break; }
@@ -292,34 +300,58 @@ const mandelbrotFragmentShader = `
         break;
       }
 
+      // |δc|² at this pixel — constant across the level search, so
+      // compute once. Used by the BLA validity check below to account for
+      // the B·δc contribution, not just A·ε.
+      float dc_re_f = dcr.x + dcr.y;
+      float dc_im_f = dci.x + dci.y;
+      float dc_r2  = dc_re_f * dc_re_f + dc_im_f * dc_im_f;
+      float eps_mag = sqrt(eps_r2);
+      float dc_mag  = sqrt(dc_r2);
+
       // BLA search: highest level whose alignment, range, entry existence,
-      // and validity radius all admit the current state.
+      // and validity radius all admit the current state. Validity now
+      // enforces (|ε| + (|B|/|A|)·|δc|)² < rSq — AM/triangle bound on the
+      // magnitude of the linear skip result.
       float chosenStep = 0.0;
-      vec4  chosenAB = vec4(0.0);
+      vec4  chosenABHi = vec4(0.0);
+      vec4  chosenABLo = vec4(0.0);
       for (int l = BLA_MAX_LEVELS - 1; l >= 1; l--) {
         float stepL = exp2(float(l));
         if (mod(iter, stepL) > 0.5) continue;
         if (iter + stepL > perturbIterations + 0.5) continue;
         float e = iter / stepL;
         if (e >= blaNumEntries[l]) continue;
-        float rSq = texture2D(blaR, blaTexCoord(blaRowOffsets[l], e)).r;
-        if (rSq > 0.0 && eps_r2 < rSq) {
+
+        vec2 tcl = blaTexCoord(blaRowOffsets[l], e);
+        vec4 ABhi = texture2D(blaAB, tcl);
+        float rSq = texture2D(blaR, tcl).r;
+        if (rSq <= 0.0) continue;
+
+        float A_hi_sq = ABhi.x * ABhi.x + ABhi.y * ABhi.y;
+        float B_hi_sq = ABhi.z * ABhi.z + ABhi.w * ABhi.w;
+        float ba_mag = (A_hi_sq > 0.0) ? sqrt(B_hi_sq / A_hi_sq) : 1e30;
+        float effective = eps_mag + ba_mag * dc_mag;
+
+        if (effective * effective < rSq) {
           chosenStep = stepL;
-          chosenAB = texture2D(blaAB, blaTexCoord(blaRowOffsets[l], e));
+          chosenABHi = ABhi;
+          chosenABLo = texture2D(blaABLo, tcl);
           break;
         }
       }
 
       if (chosenStep > 0.5) {
-        // Speculative BLA skip: ε ← A·ε + B·δc.  A and B are stored as
-        // single float32s; promote to QS with zeros in the lower limbs.
+        // Speculative BLA skip: ε ← A·ε + B·δc. Coefficients are stored as
+        // DS pairs (hi, lo); promote to QS with zeros in the upper limbs
+        // so the existing qs_mul gives full DS-precision arithmetic.
         vec4 eps_re_save = eps_re;
         vec4 eps_im_save = eps_im;
 
-        vec4 A_re = vec4(chosenAB.x, 0.0, 0.0, 0.0);
-        vec4 A_im = vec4(chosenAB.y, 0.0, 0.0, 0.0);
-        vec4 B_re = vec4(chosenAB.z, 0.0, 0.0, 0.0);
-        vec4 B_im = vec4(chosenAB.w, 0.0, 0.0, 0.0);
+        vec4 A_re = vec4(chosenABHi.x, chosenABLo.x, 0.0, 0.0);
+        vec4 A_im = vec4(chosenABHi.y, chosenABLo.y, 0.0, 0.0);
+        vec4 B_re = vec4(chosenABHi.z, chosenABLo.z, 0.0, 0.0);
+        vec4 B_im = vec4(chosenABHi.w, chosenABLo.w, 0.0, 0.0);
 
         vec4 Ae_re = qs_sub(qs_mul(A_re, eps_re), qs_mul(A_im, eps_im));
         vec4 Ae_im = qs_add(qs_mul(A_re, eps_im), qs_mul(A_im, eps_re));
@@ -343,6 +375,7 @@ const mandelbrotFragmentShader = `
           eps_re = eps_re_save;
           eps_im = eps_im_save;
         } else {
+          blaIters += chosenStep;
           iter = post_iter;
           continue;
         }
@@ -364,6 +397,7 @@ const mandelbrotFragmentShader = `
     // full QS precision. Slower per-step but correct where perturbation
     // broke down.
     if (!escaped && lastIter < dynamicIterations) {
+      tookDirectQS = true;
       vec2 tc = orbitTexCoord(lastIter);
       vec4 Zlast_re = texture2D(orbitRe, tc);
       vec4 Zlast_im = texture2D(orbitIm, tc);
@@ -393,9 +427,31 @@ const mandelbrotFragmentShader = `
       }
     }
 
-    // Suppress "unused var" warning on drivers that elide it; glitched is
-    // diagnostic only, reserved for future per-pixel visualization.
-    if (glitched) { /* no-op, reserved */ }
+    if (debugMode > 0.5) {
+      // Per-branch diagnostic palette:
+      //   RED      = hit iteration ceiling (treated as interior)
+      //   GREEN    = escaped via pure perturbation + BLA (clean path)
+      //   BLUE     = escaped via direct-QS fallback (glitch recovery)
+      //   MAGENTA  = glitched and never escaped even in fallback
+      //   CYAN     = BLA-dominated clean escape (most iters came from skips)
+      // Value is modulated by iter fraction so depth is visible.
+      float depth = clamp(lastIter / max(dynamicIterations, 1.0), 0.0, 1.0);
+      float v = 0.25 + 0.75 * depth;
+      vec3 dbg;
+      if (!escaped && glitched) {
+        dbg = vec3(1.0, 0.0, 1.0) * v; // magenta: glitched, no resolution
+      } else if (!escaped) {
+        dbg = vec3(1.0, 0.0, 0.0) * v; // red: iter ceiling
+      } else if (tookDirectQS) {
+        dbg = vec3(0.0, 0.0, 1.0) * v; // blue: direct-QS fallback resolved
+      } else {
+        // Clean escape. If BLA did most of the work, shift toward cyan.
+        float blaFraction = clamp(blaIters / max(lastIter, 1.0), 0.0, 1.0);
+        dbg = mix(vec3(0.0, 1.0, 0.0), vec3(0.0, 1.0, 1.0), blaFraction) * v;
+      }
+      gl_FragColor = vec4(dbg, 1.0);
+      return;
+    }
 
     if (!escaped) {
       gl_FragColor = vec4(backgroundColor, 1.0);
@@ -457,9 +513,12 @@ export default function MandelbrotBackground() {
     orbitImTex.magFilter = THREE.NearestFilter;
     orbitImTex.needsUpdate = true;
 
-    // BLA textures: (A.re, A.im, B.re, B.im) in blaAB and rSq in blaR's .r
-    // channel. 4096 × 34 × RGBA32F ≈ 2.1 MB each, ~4.2 MB total.
+    // BLA textures: (A.re, A.im, B.re, B.im) as a DS pair in blaAB (high
+    // limbs) and blaABLo (low limbs) for ~14 digits of coefficient
+    // precision, then rSq in blaR's .r channel. 4096 × 34 × RGBA32F ≈
+    // 2.1 MB each → ~6.3 MB total.
     const blaAB = new Float32Array(BLA_TEX_W * BLA_TEX_H * 4);
+    const blaABLo = new Float32Array(BLA_TEX_W * BLA_TEX_H * 4);
     const blaR = new Float32Array(BLA_TEX_W * BLA_TEX_H * 4);
     const blaNumEntries = new Array<number>(BLA_MAX_LEVELS).fill(0);
 
@@ -467,6 +526,11 @@ export default function MandelbrotBackground() {
     blaABTex.minFilter = THREE.NearestFilter;
     blaABTex.magFilter = THREE.NearestFilter;
     blaABTex.needsUpdate = true;
+
+    const blaABLoTex = new THREE.DataTexture(blaABLo, BLA_TEX_W, BLA_TEX_H, THREE.RGBAFormat, THREE.FloatType);
+    blaABLoTex.minFilter = THREE.NearestFilter;
+    blaABLoTex.magFilter = THREE.NearestFilter;
+    blaABLoTex.needsUpdate = true;
 
     const blaRTex = new THREE.DataTexture(blaR, BLA_TEX_W, BLA_TEX_H, THREE.RGBAFormat, THREE.FloatType);
     blaRTex.minFilter = THREE.NearestFilter;
@@ -487,6 +551,7 @@ export default function MandelbrotBackground() {
         maxIterations: { value: MAX_ITER },
         iterationScale: { value: ITER_SCALE },
         iterationFloor: { value: ITER_FLOOR },
+        debugMode: { value: 0.0 },
         isDarkTheme: { value: theme.resolvedTheme === "dark" ? 1.0 : 0.0 },
         backgroundColor: { value: new THREE.Color(theme.resolvedTheme === "dark" ? "#09090b" : "#ffffff") },
         orbitRe: { value: orbitReTex },
@@ -497,6 +562,7 @@ export default function MandelbrotBackground() {
         orbitCenter3: { value: new THREE.Vector2(0, 0) },
         orbitLength: { value: MAX_ITER },
         blaAB: { value: blaABTex },
+        blaABLo: { value: blaABLoTex },
         blaR: { value: blaRTex },
         blaRowOffsets: { value: new Float32Array(BLA_ROW_OFFSETS) },
         blaNumEntries: { value: new Float32Array(BLA_MAX_LEVELS) }
@@ -520,8 +586,9 @@ export default function MandelbrotBackground() {
       orbitReTex.needsUpdate = true;
       orbitImTex.needsUpdate = true;
 
-      buildBLA(length, orbitReData, orbitImData, { ab: blaAB, r: blaR, numEntries: blaNumEntries });
+      buildBLA(length, orbitReData, orbitImData, { ab: blaAB, abLo: blaABLo, r: blaR, numEntries: blaNumEntries });
       blaABTex.needsUpdate = true;
+      blaABLoTex.needsUpdate = true;
       blaRTex.needsUpdate = true;
 
       const numEntriesUniform = material.uniforms.blaNumEntries.value as Float32Array;
@@ -589,6 +656,11 @@ export default function MandelbrotBackground() {
     };
 
     controls.onRenderRequest = markActive;
+    controls.onDebugToggle = () => {
+      const u = material.uniforms.debugMode;
+      u.value = u.value > 0.5 ? 0.0 : 1.0;
+      markActive();
+    };
 
     // Wrap the synchronous orbit+BLA compute so the loading overlay has a
     // chance to paint before we block the main thread. Two RAFs: the first
@@ -599,7 +671,7 @@ export default function MandelbrotBackground() {
     //
     // Below this iteration count the compute is fast enough (~tens of ms)
     // that the overlay would just flicker in and out — skip it entirely.
-    const LOADING_OVERLAY_ITER_GATE = 8000;
+    const LOADING_OVERLAY_ITER_GATE = 12000;
     let schedulePending = false;
     let latestParams: { cx: DD; cy: DD; targetIter: number } | null = null;
 
@@ -671,6 +743,7 @@ export default function MandelbrotBackground() {
       orbitReTex.dispose();
       orbitImTex.dispose();
       blaABTex.dispose();
+      blaABLoTex.dispose();
       blaRTex.dispose();
       renderer.dispose();
       if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
@@ -688,7 +761,7 @@ export default function MandelbrotBackground() {
       />
       <ZoomIndicator zoom={currentZoom} />
       {isComputingOrbit && (
-        <div className="fixed top-4 left-4 flex items-center gap-2 rounded-md bg-black/60 px-3 py-2 text-sm text-white backdrop-blur-sm">
+        <div className="fixed left-4 top-4 flex items-center gap-2 rounded-md bg-black/60 px-3 py-2 text-sm text-white backdrop-blur-sm">
           <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
           Computing reference orbit…
         </div>
