@@ -1,63 +1,109 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SpirographScene from "@/components/spirograph/SpirographScene";
 import { Controls } from "@/components/spirograph/Controls";
+import ProjectPageLayout from "@/components/projects/ProjectPageLayout";
+import { DEFAULT_PARAMS, type SpirographParams } from "@/components/spirograph/types";
+import { BUILT_IN_PRESETS } from "@/components/spirograph/presets";
+import {
+  getSaveable,
+  loadSavedPresets,
+  saveSavedPresets,
+  type SavedPresets
+} from "@/components/spirograph/storage";
+import { downloadGCode } from "@/components/spirograph/gcode";
 
 export default function Page() {
-  const [params, setParams] = useState({
-    R: 5,
-    r: 3,
-    d: 2,
-    speed: 2,
-    b: 1,
-    thirdCircle: false,
-    thirdRadius: 1
-  });
+  const [params, setParams] = useState<SpirographParams>(DEFAULT_PARAMS);
+  const [savedPresets, setSavedPresets] = useState<SavedPresets>({});
 
-  const [key, setKey] = useState(0);
+  // Load saved presets after mount (localStorage is client-only).
+  useEffect(() => {
+    setSavedPresets(loadSavedPresets());
+  }, []);
 
-  const handleRChange = (value: number) => {
-    // When R changes, ensure r stays smaller than R
-    setParams((prev) => ({
-      ...prev,
-      R: value,
-      r: Math.min(prev.r, value)
-    }));
-  };
+  const onChange = useCallback(<K extends keyof SpirographParams>(key: K, value: SpirographParams[K]) => {
+    setParams((prev) => ({ ...prev, [key]: value }));
+  }, []);
 
-  const handlerChange = (value: number) => {
-    // Ensure r is not larger than R
-    const newR = Math.min(value, params.R);
-    setParams((prev) => ({ ...prev, r: newR }));
-  };
+  const onLoadPreset = useCallback(
+    (name: string) => {
+      const preset = BUILT_IN_PRESETS[name] ?? savedPresets[name];
+      if (!preset) return;
+      setParams((prev) => ({ ...prev, ...preset }));
+    },
+    [savedPresets]
+  );
 
-  const handleDChange = (value: number) => setParams((prev) => ({ ...prev, d: value }));
-  const handleSpeedChange = (value: number) => setParams((prev) => ({ ...prev, speed: value }));
-  const handleBChange = (value: number) => setParams((prev) => ({ ...prev, b: value }));
-  const handleThirdCircleToggle = (value: boolean) => setParams((prev) => ({ ...prev, thirdCircle: value }));
-  const handleThirdRadiusChange = (value: number) => {
-    // Ensure third circle radius is not larger than second circle
-    const maxRadius = params.r / params.R; // Normalize to the second circle's size
-    const constrainedValue = Math.min(value, maxRadius);
-    setParams((prev) => ({ ...prev, thirdRadius: constrainedValue }));
-  };
-  const handleRender = () => setKey((prev) => prev + 1);
+  const onSavePreset = useCallback(() => {
+    const name = typeof window !== "undefined" ? window.prompt("Preset name:") : null;
+    if (!name) return;
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const next = { ...savedPresets, [trimmed]: getSaveable(params) };
+    setSavedPresets(next);
+    saveSavedPresets(next);
+  }, [params, savedPresets]);
+
+  const onDeletePreset = useCallback(() => {
+    const names = Object.keys(savedPresets);
+    if (names.length === 0) {
+      window.alert("No saved presets.");
+      return;
+    }
+    const name = window.prompt(`Delete which preset?\n\n${names.join("\n")}`);
+    if (!name) return;
+    if (!(name in savedPresets)) {
+      window.alert("Preset not found.");
+      return;
+    }
+    const next = { ...savedPresets };
+    delete next[name];
+    setSavedPresets(next);
+    saveSavedPresets(next);
+  }, [savedPresets]);
+
+  const onExportJSON = useCallback(() => {
+    const json = JSON.stringify(getSaveable(params), null, 2);
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(json).catch(() => {
+        window.prompt("Copy settings JSON:", json);
+      });
+    } else {
+      window.prompt("Copy settings JSON:", json);
+    }
+  }, [params]);
+
+  const onImportJSON = useCallback(() => {
+    const input = window.prompt("Paste settings JSON:");
+    if (!input) return;
+    try {
+      const parsed = JSON.parse(input) as Partial<SpirographParams>;
+      setParams((prev) => ({ ...prev, ...parsed }));
+    } catch {
+      window.alert("Invalid JSON.");
+    }
+  }, []);
+
+  const onExportGCode = useCallback(() => {
+    downloadGCode(params);
+  }, [params]);
 
   return (
-    <div className="fixed inset-0">
-      <SpirographScene key={key} params={params} />
+    <ProjectPageLayout slug="spirograph">
+      <SpirographScene params={params} />
       <Controls
-        onRChange={handleRChange}
-        onrChange={handlerChange}
-        onDChange={handleDChange}
-        onSpeedChange={handleSpeedChange}
-        onBChange={handleBChange}
-        onThirdCircleToggle={handleThirdCircleToggle}
-        onThirdRadiusChange={handleThirdRadiusChange}
-        onRender={handleRender}
-        initialValues={params}
+        params={params}
+        onChange={onChange}
+        savedPresets={savedPresets}
+        onLoadPreset={onLoadPreset}
+        onSavePreset={onSavePreset}
+        onDeletePreset={onDeletePreset}
+        onExportJSON={onExportJSON}
+        onImportJSON={onImportJSON}
+        onExportGCode={onExportGCode}
       />
-    </div>
+    </ProjectPageLayout>
   );
 }
