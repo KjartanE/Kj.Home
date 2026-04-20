@@ -1,177 +1,201 @@
 "use client";
 
 import * as THREE from "three";
-import { useEffect, useRef, useMemo } from "react";
-import { useTheme } from "next-themes";
-import PenroseScene, { IPosition } from "../PenroseScene";
-import PenroseManager from "../PenroseManager";
-import PlaygroundController from "./PlaygroundController";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { Controls } from "./Controls";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { buildKaleidoscopePenrose } from "../lib/buildKaleidoscopePenrose";
+import { createKaleidoscopeMaterial } from "../shaders/kaleidoscopeMaterial";
+import { Controls, type KaleidoscopeParams } from "./Controls";
 
-const initialControlValues = {
-  rotation: 0,
-  rotationSpeed: 0
+const PHI = (1 + Math.sqrt(5)) / 2;
+const MAX_LAYERS = 10;
+
+const DEFAULT_PARAMS: KaleidoscopeParams = {
+  layerCount: 5,
+  rotationSpeed: 0.05,
+  hueSpread: 0.65,
+  baseHue: 0.55,
+  saturation: 0.85,
+  lightness: 0.55,
+  deflation: 5,
+  paused: false
 };
+
+// Golden-ratio harmonic rotation per layer; signs alternate so layers
+// counter-rotate against each other. Layer 0 is stationary so the overall
+// composition has an anchor.
+function rotationFactor(i: number): number {
+  if (i === 0) return 0;
+  const sign = i % 2 === 0 ? 1 : -1;
+  return sign * Math.pow(PHI, (i - 1) / 2);
+}
+
+function hueForLayer(i: number, layerCount: number, baseHue: number, hueSpread: number): number {
+  if (layerCount <= 1) return baseHue;
+  const t = i / (layerCount - 1) - 0.5;
+  return (((baseHue + t * hueSpread) % 1) + 1) % 1;
+}
 
 const PenrosePlayground: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const theme = useTheme();
-  const sceneRef = useRef<{
-    scene: THREE.Scene;
-    camera: THREE.Camera;
-    renderer: THREE.WebGLRenderer;
-  } | null>(null);
+  const [params, setParams] = useState<KaleidoscopeParams>(DEFAULT_PARAMS);
+  const [pulseKey, setPulseKey] = useState(0);
 
-  // Memoize all dependencies
-  const playgroundController = useMemo(() => {
-    const controller = new PlaygroundController();
-    controller.rotation = initialControlValues.rotation;
-    controller.rotationSpeed = initialControlValues.rotationSpeed;
-    controller.simulate();
-    return controller;
+  const paramsRef = useRef(params);
+  useEffect(() => {
+    paramsRef.current = params;
+  }, [params]);
+
+  const onChange = useCallback(<K extends keyof KaleidoscopeParams>(key: K, value: KaleidoscopeParams[K]) => {
+    setParams((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const penroseManager = useMemo(() => new PenroseManager(theme.resolvedTheme || "dark"), [theme.resolvedTheme]);
+  const onReset = useCallback(() => {
+    setParams(DEFAULT_PARAMS);
+    setPulseKey((k) => k + 1);
+  }, []);
 
-  const penroseManager2 = useMemo(() => new PenroseManager(theme.resolvedTheme || "dark"), [theme.resolvedTheme]);
-
-  const location = useRef<IPosition | null>({
-    position: new THREE.Vector3(0, 0, 0),
-    rotation: 0
-  });
-
-  const location2 = useRef<IPosition | null>({
-    position: new THREE.Vector3(0, 0, 0),
-    rotation: 0
-  });
-
-  // Add a reference to track the second penrose line
-  const secondPenroseLineRef = useRef<THREE.Line | null>(null);
-
-  const handleRotationChange = (value: number) => {
-    playgroundController.rotation = value;
-    if (location.current) {
-      location.current.rotation = value;
-    }
-
-    playgroundController.rotateFlag = true;
-  };
-
-  const handleRotationSpeedChange = (value: number) => {
-    playgroundController.rotationSpeed = value;
-    playgroundController.rotateFlag = true;
-  };
+  // Build geometry once per deflation change.
+  const { geometry, maxRadius } = useMemo(() => buildKaleidoscopePenrose(params.deflation), [params.deflation]);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    const { scene, camera, renderer } = new PenroseScene();
-    sceneRef.current = { scene, camera, renderer }; // Store scene reference
     const container = containerRef.current;
+    if (!container) return;
+
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050505);
+
+    const camera = new THREE.PerspectiveCamera(60, width / height, 1, 20000);
+    const fit = (maxRadius * 1.25) / Math.tan(((60 / 2) * Math.PI) / 180);
+    camera.position.set(0, 0, fit);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(width, height);
     container.appendChild(renderer.domElement);
 
-    // Adjust camera and controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    camera.position.set(0, 0, 100);
-    camera.lookAt(0, 0, 0);
-    controls.update();
+    const distanceScale = 1.0 / Math.max(width, height);
 
-    scene.background = new THREE.Color(0xff0000);
-
-    function animate() {
-      if (playgroundController.resetFlag) {
-        playgroundController.resetFlag = false;
-        scene.clear();
-        penroseManager.reset();
-        penroseManager.steps = 0;
-
-        // Immediately render full pattern if in instant mode
-        if (playgroundController.instantFlag) {
-          penroseManager.steps = playgroundController.penroseLSystem.production.length;
-          penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
-          const line = penroseManager.renderLines(true);
-          scene.add(line);
-
-          penroseManager2.steps = playgroundController.penroseLSystem.production.length;
-          penroseManager2.generateIncrementalLines(location2, playgroundController.penroseLSystem);
-          const line2 = penroseManager2.renderLines(true);
-          secondPenroseLineRef.current = line2;
-          scene.add(line2);
-        }
-      }
-
-      if (playgroundController.rotateFlag && location2.current) {
-        if (playgroundController.rotationSpeed > 0) {
-          location2.current.rotation += playgroundController.rotationSpeed;
-
-          if (secondPenroseLineRef.current) {
-            secondPenroseLineRef.current.rotation.z = location2.current.rotation;
-          }
-        } else {
-          location2.current.rotation = playgroundController.rotation;
-          penroseManager2.reset();
-          penroseManager2.steps = 0;
-          penroseManager2.steps = playgroundController.penroseLSystem.production.length;
-          penroseManager2.generateIncrementalLines(location2, playgroundController.penroseLSystem);
-
-          // Remove the previous second penrose line if it exists
-          if (secondPenroseLineRef.current) {
-            scene.remove(secondPenroseLineRef.current);
-          }
-
-          playgroundController.rotateFlag = false;
-          const line2 = penroseManager2.renderLines(true);
-          // Store the reference to the new line
-          secondPenroseLineRef.current = line2;
-          scene.add(line2);
-        }
-      }
-
-      controls.update();
-      renderer.render(scene, camera);
-      animationFrameRef.current = requestAnimationFrame(animate);
+    // Build up to MAX_LAYERS meshes all sharing the geometry; swap visibility
+    // when layerCount changes so we never rebuild meshes during param updates.
+    const layers: { mesh: THREE.LineSegments; material: THREE.ShaderMaterial }[] = [];
+    for (let i = 0; i < MAX_LAYERS; i++) {
+      const material = createKaleidoscopeMaterial(new THREE.Color(), distanceScale, 1.0);
+      const mesh = new THREE.LineSegments(geometry, material);
+      mesh.visible = false;
+      scene.add(mesh);
+      layers.push({ mesh, material });
     }
 
-    // Initial render
-    penroseManager.generateIncrementalLines(location, playgroundController.penroseLSystem);
-    const initialLine = penroseManager.renderLines(true);
-    scene.add(initialLine);
+    const applyParams = () => {
+      const p = paramsRef.current;
+      for (let i = 0; i < MAX_LAYERS; i++) {
+        const active = i < p.layerCount;
+        layers[i].mesh.visible = active;
+        if (active) {
+          const hue = hueForLayer(i, p.layerCount, p.baseHue, p.hueSpread);
+          layers[i].material.uniforms.layerColor.value.setHSL(hue, p.saturation, p.lightness);
+          // Dim outer layers slightly so center layer reads as the "anchor".
+          const alpha = 1.0 - (i / MAX_LAYERS) * 0.35;
+          layers[i].material.uniforms.layerAlpha.value = alpha;
+        }
+      }
+    };
+    applyParams();
 
-    penroseManager2.generateIncrementalLines(location2, playgroundController.penroseLSystem);
-    const initialLine2 = penroseManager2.renderLines(true);
-    // Store the reference to the initial second line
-    secondPenroseLineRef.current = initialLine2;
-    scene.add(initialLine2);
+    const clock = new THREE.Clock();
 
-    renderer.render(scene, camera);
+    // Raycast clicks onto the z=0 plane and fire a pulse on all materials.
+    const raycaster = new THREE.Raycaster();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const hit = new THREE.Vector3();
+    const ndc = new THREE.Vector2();
 
-    animate();
+    const onPointerDown = (e: PointerEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(ndc, camera);
+      if (!raycaster.ray.intersectPlane(plane, hit)) return;
+      const t = clock.getElapsedTime();
+      for (const { material } of layers) {
+        material.uniforms.pulse.value.set(hit.x, hit.y, t);
+      }
+    };
+    renderer.domElement.addEventListener("pointerdown", onPointerDown);
+
+    const onResize = () => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      const ds = 1.0 / Math.max(w, h);
+      for (const { material } of layers) {
+        material.uniforms.distanceScale.value = ds;
+      }
+    };
+    window.addEventListener("resize", onResize);
+
+    let lastTime = clock.getElapsedTime();
+    const rotations = new Array(MAX_LAYERS).fill(0);
+    let rafId = 0;
+
+    const tick = () => {
+      const now = clock.getElapsedTime();
+      const dt = now - lastTime;
+      lastTime = now;
+
+      const p = paramsRef.current;
+      const activeCount = p.layerCount;
+      if (!p.paused) {
+        for (let i = 0; i < activeCount; i++) {
+          rotations[i] += dt * p.rotationSpeed * rotationFactor(i);
+          layers[i].mesh.rotation.z = rotations[i];
+        }
+      }
+
+      applyParams();
+      for (const { material } of layers) {
+        material.uniforms.time.value = now;
+      }
+
+      renderer.render(scene, camera);
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
 
     return () => {
-      controls.dispose();
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", onResize);
+      renderer.domElement.removeEventListener("pointerdown", onPointerDown);
+      for (const { material } of layers) {
+        material.dispose();
       }
-      scene.clear();
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
     };
-  }, [theme.resolvedTheme, penroseManager, penroseManager2, playgroundController]);
+  }, [geometry, maxRadius, pulseKey]);
+
+  // Dispose the shared geometry on unmount / rebuild.
+  useEffect(() => {
+    return () => {
+      geometry.dispose();
+    };
+  }, [geometry]);
 
   return (
     <div className="relative h-full w-full">
-      <div ref={containerRef} className="h-full w-full" />
-      <Controls
-        onRotationChange={handleRotationChange}
-        onRotationSpeedChange={handleRotationSpeedChange}
-        initialValues={initialControlValues}
-      />
+      <div ref={containerRef} className="h-full w-full cursor-crosshair" />
+      <Controls params={params} onChange={onChange} onReset={onReset} />
+      <div className="pointer-events-none absolute bottom-4 right-4 z-10 rounded-lg border border-border/40 bg-background/60 px-3 py-1.5 font-mono text-[10px] text-muted-foreground backdrop-blur-md">
+        click · pulse ripple
+      </div>
     </div>
   );
 };

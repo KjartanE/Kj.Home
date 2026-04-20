@@ -1,10 +1,10 @@
-import React from "react";
 import PenrosePlayground from "@/components/penrose/playground/PenrosePlayground";
+import ProjectPageLayout from "@/components/projects/ProjectPageLayout";
 
 export default function Page() {
   return (
-    <div className="visualization-container">
+    <ProjectPageLayout slug="penrose">
       <PenrosePlayground />
-    </div>
+    </ProjectPageLayout>
   );
 }
