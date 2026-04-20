@@ -79,6 +79,135 @@ export function ddToQS(a: DD): [number, number, number, number] {
 
 // ── Reference orbit computation ────────────────────────────────────────
 
+// Shared orbit-texture geometry. Keep these in sync with the shader
+// constants in MandelbrotBackground.tsx.
+export const ORBIT_TEX_W = 4096;
+export const ORBIT_TEX_H = 16;
+
+// ── BLA (Bivariate Linear Approximation) layout ────────────────────────
+//
+// A BLA entry at (level l, index e) summarises 2^l perturbation steps
+// starting from orbit iteration e * 2^l as a pair of complex coefficients:
+//
+//   ε_{n + step} ≈ A · ε_n + B · δc        (linearisation)
+//
+// with a validity radius r (so the approximation only fires while
+// |ε_n|² < r²). Entries are densely packed per level into a 2D
+// RGBA32F texture. Row layout is level-major with fixed row budgets
+// per level — not space-optimal but easy to index from both sides.
+
+export const BLA_TEX_W = 4096;
+export const BLA_MAX_LEVELS = 8;
+// Rows per level at MAX_ITER = 65536: 16, 8, 4, 2, 1, 1, 1, 1 → 34 total.
+export const BLA_ROW_OFFSETS: readonly number[] = [0, 16, 24, 28, 30, 31, 32, 33];
+export const BLA_TEX_H = 34;
+// Same tolerance as the shader's glitch criterion. The linearisation
+// breaks down under the same condition perturbation does: γ ≈ 10⁻³.
+const BLA_GAMMA_SQ = 1e-6;
+// Clamp |A|² to something representable. Entries above this magnitude
+// would blow up float32 anyway; we mark them invalid via rSq = 0.
+const BLA_A_MAX_SQ = 1e30;
+
+export interface BLABuffers {
+  /** Packed (A.re, A.im, B.re, B.im) per entry. Length = BLA_TEX_W·BLA_TEX_H·4. */
+  ab: Float32Array;
+  /** rSq per entry packed in .r; other channels unused. Same length as ab. */
+  r: Float32Array;
+  /** Valid entry count per level (≤ orbitLength / 2^level). */
+  numEntries: number[];
+}
+
+/** Linear texel index for BLA entry (level, e). */
+function blaTexelIndex(level: number, e: number): number {
+  const col = e & (BLA_TEX_W - 1); // e % BLA_TEX_W
+  const rowInLevel = (e - col) / BLA_TEX_W; // Math.floor(e / BLA_TEX_W)
+  const row = BLA_ROW_OFFSETS[level] + rowInLevel;
+  return row * BLA_TEX_W + col;
+}
+
+/**
+ * Build BLA tables from a reference orbit. Level 0 stores the single-step
+ * perturbation coefficients (A = 2Z_n, B = 1); higher levels merge pairs
+ * of entries bottom-up. Writes into caller-supplied buffers.
+ *
+ * The QS-stored orbit is collapsed to float64 (sum of four float32) for
+ * BLA coefficient math — BLA accuracy is bounded by the linearisation
+ * error, not the orbit precision, so plain f64 is more than enough.
+ */
+export function buildBLA(orbitLength: number, orbitReQS: Float32Array, orbitImQS: Float32Array, out: BLABuffers): void {
+  const { ab, r, numEntries } = out;
+
+  // Level 0 — one entry per orbit step.
+  for (let n = 0; n < orbitLength; n++) {
+    const base = n * 4;
+    const Zre = orbitReQS[base] + orbitReQS[base + 1] + orbitReQS[base + 2] + orbitReQS[base + 3];
+    const Zim = orbitImQS[base] + orbitImQS[base + 1] + orbitImQS[base + 2] + orbitImQS[base + 3];
+    const ZabsSq = Zre * Zre + Zim * Zim;
+
+    const idx = blaTexelIndex(0, n) * 4;
+    ab[idx + 0] = 2 * Zre; // A.re
+    ab[idx + 1] = 2 * Zim; // A.im
+    ab[idx + 2] = 1; // B.re
+    ab[idx + 3] = 0; // B.im
+    r[idx + 0] = BLA_GAMMA_SQ * ZabsSq; // rSq
+  }
+  numEntries[0] = orbitLength;
+
+  // Higher levels — merge pairs of adjacent lower-level entries.
+  for (let level = 1; level < BLA_MAX_LEVELS; level++) {
+    const step = 1 << level;
+    const count = Math.floor(orbitLength / step);
+    numEntries[level] = count;
+
+    for (let e = 0; e < count; e++) {
+      const li = blaTexelIndex(level - 1, 2 * e) * 4;
+      const ri = blaTexelIndex(level - 1, 2 * e + 1) * 4;
+
+      const lA_re = ab[li + 0],
+        lA_im = ab[li + 1],
+        lB_re = ab[li + 2],
+        lB_im = ab[li + 3];
+      const rA_re = ab[ri + 0],
+        rA_im = ab[ri + 1],
+        rB_re = ab[ri + 2],
+        rB_im = ab[ri + 3];
+      const lRSq = r[li + 0],
+        rRSq = r[ri + 0];
+
+      // A_merged = rA · lA   (complex multiply)
+      const A_re = rA_re * lA_re - rA_im * lA_im;
+      const A_im = rA_re * lA_im + rA_im * lA_re;
+      // B_merged = rA · lB + rB
+      const B_re = rA_re * lB_re - rA_im * lB_im + rB_re;
+      const B_im = rA_re * lB_im + rA_im * lB_re + rB_im;
+
+      // r²_merged = min(lRSq, rRSq / |lA|²). |lA|² could be 0 near minibrot
+      // centers — treat that as "no restriction from second half", so fall
+      // back to lRSq alone.
+      const lAabsSq = lA_re * lA_re + lA_im * lA_im;
+      let rSq = lRSq;
+      if (lAabsSq > 0) {
+        const scaled = rRSq / lAabsSq;
+        if (scaled < rSq) rSq = scaled;
+      }
+
+      // Overflow guard: float32 tops out around 3.4×10³⁸; any A beyond
+      // BLA_A_MAX_SQ gets its validity radius zeroed so the shader skips it.
+      const mergedAabsSq = A_re * A_re + A_im * A_im;
+      if (!Number.isFinite(mergedAabsSq) || mergedAabsSq > BLA_A_MAX_SQ) {
+        rSq = 0;
+      }
+
+      const oi = blaTexelIndex(level, e) * 4;
+      ab[oi + 0] = A_re;
+      ab[oi + 1] = A_im;
+      ab[oi + 2] = B_re;
+      ab[oi + 3] = B_im;
+      r[oi + 0] = rSq;
+    }
+  }
+}
+
 /**
  * Compute the Mandelbrot reference orbit at DD center (cx, cy).
  * Writes up to `targetIter` iterations into reOut/imOut as QS (4× float32).

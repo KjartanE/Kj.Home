@@ -6,12 +6,18 @@ import { useTheme } from "next-themes";
 import { MandelbrotControls, MAX_ITER, ITER_SCALE, ITER_FLOOR } from "./MandelbrotControls";
 import { ZoomIndicator } from "./ZoomIndicator";
 import { NavigationControls } from "./NavigationControls";
-import { type DD, ddToQS, computeReferenceOrbitQS } from "./computeOrbit";
-
-// Orbit texture geometry: 4096 × 16 = 65536 iterations.
-// Must match MAX_ITER and the shader's orbitTexCoord() function.
-const ORBIT_TEX_W = 4096;
-const ORBIT_TEX_H = 16;
+import {
+  type DD,
+  ddToQS,
+  computeReferenceOrbitQS,
+  buildBLA,
+  BLA_TEX_W,
+  BLA_TEX_H,
+  BLA_MAX_LEVELS,
+  BLA_ROW_OFFSETS,
+  ORBIT_TEX_W,
+  ORBIT_TEX_H
+} from "./computeOrbit";
 
 const mandelbrotVertexShader = `
   varying vec2 vUv;
@@ -68,13 +74,28 @@ const mandelbrotFragmentShader = `
   uniform vec2  orbitCenter3;
   uniform float orbitLength;
 
+  // BLA tables: (A.re, A.im, B.re, B.im) in blaAB, rSq in blaR.r.
+  // Per-level row offsets (in texels) and entry counts are pushed from JS.
+  uniform sampler2D blaAB;
+  uniform sampler2D blaR;
+  uniform float     blaRowOffsets[8];
+  uniform float     blaNumEntries[8];
+
   // Pauldelbrot glitch tolerance, squared. γ² = 1e-6 → γ = 1e-3.
   const float GLITCH_TOL_SQ = 1e-6;
   // Orbit texture geometry — must match ORBIT_TEX_W/H in MandelbrotBackground.
   const float ORBIT_TEX_W = 4096.0;
   const float ORBIT_TEX_H = 16.0;
+  // BLA texture geometry — must match BLA_TEX_W/H in computeOrbit.ts.
+  const float BLA_TEX_W = 4096.0;
+  const float BLA_TEX_H = 34.0;
+  const int   BLA_MAX_LEVELS = 8;
   // Shader-level ceiling for dynamic loops. Matches MAX_ITER.
   const float MAX_ITER_CONST = 65536.0;
+  // Outer loop cap for the BLA-driven iteration: in the worst case (all
+  // BLAs reject) it degenerates to one step per pass, so we still need
+  // the full MAX_ITER ceiling. In practice average step size is large.
+  const int   BLA_OUTER_MAX = 65536;
 
   // ── Float32 error-free transforms ───────────────────────────────────
   vec2 two_sum(float a, float b) {
@@ -92,7 +113,7 @@ const mandelbrotFragmentShader = `
     return vec2(p, ((sa.x*sb.x - p) + sa.x*sb.y + sa.y*sb.x) + sa.y*sb.y);
   }
 
-  // ── DS multiply (for ndc × scale) ──────────────────────────────────
+  // ── DS multiply (for ndc x scale) ──────────────────────────────────
   vec2 ds_mul(vec2 a, vec2 b) {
     vec2 p = two_product(a.x, b.x);
     return two_sum(p.x, p.y + a.x*b.y + a.y*b.x);
@@ -166,6 +187,14 @@ const mandelbrotFragmentShader = `
     return vec2((col + 0.5) / ORBIT_TEX_W, (row + 0.5) / ORBIT_TEX_H);
   }
 
+  // BLA entry lookup. rowOffset is the starting row for this level (from
+  // uniform blaRowOffsets), e is the entry index within the level.
+  vec2 blaTexCoord(float rowOffset, float e) {
+    float col = mod(e, BLA_TEX_W);
+    float row = rowOffset + floor(e / BLA_TEX_W);
+    return vec2((col + 0.5) / BLA_TEX_W, (row + 0.5) / BLA_TEX_H);
+  }
+
   // ── Color ──────────────────────────────────────────────────────────
   vec3 hsv2rgb(vec3 c) {
     vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
@@ -218,57 +247,115 @@ const mandelbrotFragmentShader = `
     vec4 dcr = qs_sub(cr, ocr);
     vec4 dci = qs_sub(ci, oci);
 
-    // ── Phase 1: Perturbation ─────────────────────────────────────────
-    // Invariant entering iteration i: ε holds ε_i (state after i steps).
-    // We read Z_i, combine to z_i = Z_i + ε_i, check escape/glitch BEFORE
-    // updating ε. On escape/glitch break we keep (Z_i, ε_i) aligned so
-    // Phase 2 can reconstruct z = Z_i + ε_i and continue directly.
+    // ── Phase 1: BLA-accelerated perturbation ────────────────────────
+    // Outer loop runs over "actions" (either a BLA skip of 2^level steps
+    // or a single perturbation step), not raw iterations. At each action
+    // we first test escape / glitch at (Z_iter, ε_iter), then look for
+    // the highest-level BLA whose validity radius admits the current ε.
+    // If BLA's post-skip state would be past escape, we revert and fall
+    // back to a single step so the escape iteration count stays accurate.
     vec4 eps_re = vec4(0.0);
     vec4 eps_im = vec4(0.0);
+    float iter = 0.0;
     float lastIter = perturbIterations;
     float esc_re = 0.0;
     float esc_im = 0.0;
     bool escaped = false;
     bool glitched = false;
 
-    for (float i = 0.0; i < MAX_ITER_CONST; i++) {
-      if (i >= perturbIterations) { lastIter = i; break; }
+    for (int k = 0; k < BLA_OUTER_MAX; k++) {
+      if (iter >= perturbIterations) { lastIter = iter; break; }
 
-      vec2 tc = orbitTexCoord(i);
+      vec2 tc = orbitTexCoord(iter);
       vec4 Zn_re = texture2D(orbitRe, tc);
       vec4 Zn_im = texture2D(orbitIm, tc);
+
+      float eps_re_f = eps_re.x + eps_re.y;
+      float eps_im_f = eps_im.x + eps_im.y;
+      float eps_r2 = eps_re_f * eps_re_f + eps_im_f * eps_im_f;
 
       float full_re = Zn_re.x + Zn_re.y + eps_re.x + eps_re.y;
       float full_im = Zn_im.x + Zn_im.y + eps_im.x + eps_im.y;
       float r2 = full_re * full_re + full_im * full_im;
 
       if (r2 > 4.0) {
-        lastIter = i;
+        lastIter = iter;
         esc_re = full_re;
         esc_im = full_im;
         escaped = true;
         break;
       }
 
-      // Pauldelbrot glitch: |z|² < γ²·|ε|². The guard i > 4 keeps the
-      // early iterations (where both sides are near zero) from spuriously
-      // triggering; ε is still tiny there, and the criterion is noisy.
-      float eps_re_f = eps_re.x + eps_re.y;
-      float eps_im_f = eps_im.x + eps_im.y;
-      float eps_r2 = eps_re_f * eps_re_f + eps_im_f * eps_im_f;
-      if (i > 4.0 && r2 < GLITCH_TOL_SQ * eps_r2) {
-        lastIter = i;
+      if (iter > 4.0 && r2 < GLITCH_TOL_SQ * eps_r2) {
+        lastIter = iter;
         glitched = true;
         break;
       }
 
-      // ε_{n+1} = (2·Z_n + ε_n)·ε_n + δc
+      // BLA search: highest level whose alignment, range, entry existence,
+      // and validity radius all admit the current state.
+      float chosenStep = 0.0;
+      vec4  chosenAB = vec4(0.0);
+      for (int l = BLA_MAX_LEVELS - 1; l >= 1; l--) {
+        float stepL = exp2(float(l));
+        if (mod(iter, stepL) > 0.5) continue;
+        if (iter + stepL > perturbIterations + 0.5) continue;
+        float e = iter / stepL;
+        if (e >= blaNumEntries[l]) continue;
+        float rSq = texture2D(blaR, blaTexCoord(blaRowOffsets[l], e)).r;
+        if (rSq > 0.0 && eps_r2 < rSq) {
+          chosenStep = stepL;
+          chosenAB = texture2D(blaAB, blaTexCoord(blaRowOffsets[l], e));
+          break;
+        }
+      }
+
+      if (chosenStep > 0.5) {
+        // Speculative BLA skip: ε ← A·ε + B·δc.  A and B are stored as
+        // single float32s; promote to QS with zeros in the lower limbs.
+        vec4 eps_re_save = eps_re;
+        vec4 eps_im_save = eps_im;
+
+        vec4 A_re = vec4(chosenAB.x, 0.0, 0.0, 0.0);
+        vec4 A_im = vec4(chosenAB.y, 0.0, 0.0, 0.0);
+        vec4 B_re = vec4(chosenAB.z, 0.0, 0.0, 0.0);
+        vec4 B_im = vec4(chosenAB.w, 0.0, 0.0, 0.0);
+
+        vec4 Ae_re = qs_sub(qs_mul(A_re, eps_re), qs_mul(A_im, eps_im));
+        vec4 Ae_im = qs_add(qs_mul(A_re, eps_im), qs_mul(A_im, eps_re));
+        vec4 Bdc_re = qs_sub(qs_mul(B_re, dcr), qs_mul(B_im, dci));
+        vec4 Bdc_im = qs_add(qs_mul(B_re, dci), qs_mul(B_im, dcr));
+        eps_re = qs_add(Ae_re, Bdc_re);
+        eps_im = qs_add(Ae_im, Bdc_im);
+
+        float post_iter = iter + chosenStep;
+        vec2 post_tc = orbitTexCoord(post_iter);
+        vec4 pZ_re = texture2D(orbitRe, post_tc);
+        vec4 pZ_im = texture2D(orbitIm, post_tc);
+        float pf_re = pZ_re.x + pZ_re.y + eps_re.x + eps_re.y;
+        float pf_im = pZ_im.x + pZ_im.y + eps_im.x + eps_im.y;
+        float pr2 = pf_re * pf_re + pf_im * pf_im;
+
+        if (pr2 > 4.0) {
+          // Escape happened somewhere inside the skip — revert and let
+          // the single-step path below advance one iteration at a time
+          // until the escape lands on a specific iter for smooth coloring.
+          eps_re = eps_re_save;
+          eps_im = eps_im_save;
+        } else {
+          iter = post_iter;
+          continue;
+        }
+      }
+
+      // Single-step perturbation: ε_{n+1} = (2·Z_n + ε_n)·ε_n + δc.
       vec4 a_re = qs_add(Zn_re + Zn_re, eps_re);
       vec4 a_im = qs_add(Zn_im + Zn_im, eps_im);
       vec4 new_re = qs_add(qs_sub(qs_mul(a_re, eps_re), qs_mul(a_im, eps_im)), dcr);
       vec4 new_im = qs_add(qs_add(qs_mul(a_re, eps_im), qs_mul(a_im, eps_re)), dci);
       eps_re = new_re;
       eps_im = new_im;
+      iter += 1.0;
     }
 
     // ── Phase 2: Direct QS fallback for glitched or orbit-exhausted pixels ──
@@ -369,6 +456,22 @@ export default function MandelbrotBackground() {
     orbitImTex.magFilter = THREE.NearestFilter;
     orbitImTex.needsUpdate = true;
 
+    // BLA textures: (A.re, A.im, B.re, B.im) in blaAB and rSq in blaR's .r
+    // channel. 4096 × 34 × RGBA32F ≈ 2.1 MB each, ~4.2 MB total.
+    const blaAB = new Float32Array(BLA_TEX_W * BLA_TEX_H * 4);
+    const blaR = new Float32Array(BLA_TEX_W * BLA_TEX_H * 4);
+    const blaNumEntries = new Array<number>(BLA_MAX_LEVELS).fill(0);
+
+    const blaABTex = new THREE.DataTexture(blaAB, BLA_TEX_W, BLA_TEX_H, THREE.RGBAFormat, THREE.FloatType);
+    blaABTex.minFilter = THREE.NearestFilter;
+    blaABTex.magFilter = THREE.NearestFilter;
+    blaABTex.needsUpdate = true;
+
+    const blaRTex = new THREE.DataTexture(blaR, BLA_TEX_W, BLA_TEX_H, THREE.RGBAFormat, THREE.FloatType);
+    blaRTex.minFilter = THREE.NearestFilter;
+    blaRTex.magFilter = THREE.NearestFilter;
+    blaRTex.needsUpdate = true;
+
     const geometry = new THREE.PlaneGeometry(2, 2 / aspect);
     const material = new THREE.ShaderMaterial({
       uniforms: {
@@ -391,7 +494,11 @@ export default function MandelbrotBackground() {
         orbitCenter1: { value: new THREE.Vector2(0, 0) },
         orbitCenter2: { value: new THREE.Vector2(0, 0) },
         orbitCenter3: { value: new THREE.Vector2(0, 0) },
-        orbitLength: { value: MAX_ITER }
+        orbitLength: { value: MAX_ITER },
+        blaAB: { value: blaABTex },
+        blaR: { value: blaRTex },
+        blaRowOffsets: { value: new Float32Array(BLA_ROW_OFFSETS) },
+        blaNumEntries: { value: new Float32Array(BLA_MAX_LEVELS) }
       },
       vertexShader: mandelbrotVertexShader,
       fragmentShader: mandelbrotFragmentShader
@@ -404,12 +511,20 @@ export default function MandelbrotBackground() {
     controlsRef.current = controls;
     controls.onZoomChange = (zoom) => setCurrentZoom(zoom);
 
-    // Orbit update callback — writes directly into the pre-allocated
-    // texture buffers; computeReferenceOrbitQS returns the valid length.
+    // Orbit update callback — computes the reference orbit, then the BLA
+    // table derived from it. Both go through pre-allocated buffers so this
+    // can be called repeatedly (pan / zoom transitions) without GC churn.
     const updateOrbit = (cx: DD, cy: DD, targetIter: number) => {
       const length = computeReferenceOrbitQS(cx, cy, targetIter, orbitReData, orbitImData);
       orbitReTex.needsUpdate = true;
       orbitImTex.needsUpdate = true;
+
+      buildBLA(length, orbitReData, orbitImData, { ab: blaAB, r: blaR, numEntries: blaNumEntries });
+      blaABTex.needsUpdate = true;
+      blaRTex.needsUpdate = true;
+
+      const numEntriesUniform = material.uniforms.blaNumEntries.value as Float32Array;
+      for (let i = 0; i < BLA_MAX_LEVELS; i++) numEntriesUniform[i] = blaNumEntries[i];
 
       const cxQS = ddToQS(cx);
       const cyQS = ddToQS(cy);
@@ -457,6 +572,8 @@ export default function MandelbrotBackground() {
       material.dispose();
       orbitReTex.dispose();
       orbitImTex.dispose();
+      blaABTex.dispose();
+      blaRTex.dispose();
       renderer.dispose();
       if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
     };
