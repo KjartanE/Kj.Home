@@ -1,10 +1,10 @@
-import ThreeScene from "@/components/life/ThreeScene";
+import LifeCanvas from "@/components/life/LifeCanvas";
 import ProjectPageLayout from "@/components/projects/ProjectPageLayout";
 
 export default function Page() {
   return (
     <ProjectPageLayout slug="life">
-      <ThreeScene />
+      <LifeCanvas />
     </ProjectPageLayout>
   );
 }

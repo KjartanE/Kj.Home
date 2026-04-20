@@ -67,10 +67,10 @@ export const PROJECTS: Project[] = [
     title: "Game of Life",
     description: "Conway's Game of Life simulation",
     longDescription:
-      "Conway's cellular automaton running on an infinite grid. Watch emergent structures form from simple rules.",
+      "Conway's cellular automaton on a near-infinite sparse grid. Pan, zoom, stamp classic patterns, and watch emergent structures form.",
     image: "/projects/life-preview.png",
     category: "Math",
-    tech: ["Three.js", "TypeScript"]
+    tech: ["Canvas 2D", "TypeScript"]
   },
   // 3D Visualizations
   {
