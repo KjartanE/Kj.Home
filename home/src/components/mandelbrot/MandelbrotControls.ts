@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { type DD, ddAdd, ddSub, ddMulFloat, ddFrom, ddToQS, toDS } from "./computeOrbit";
+import { type DD, ddAdd, ddSub, ddMulFloat, ddFrom, ddToQS, toDS, findNearbyMinibrot } from "./computeOrbit";
 
 export const MAX_ITER = 65536;
 export const ITER_SCALE = 300;
@@ -90,10 +90,25 @@ export class MandelbrotControls {
   }
 
   public triggerOrbitUpdate() {
-    this.orbitCenterX = [...this.centerX];
-    this.orbitCenterY = [...this.centerY];
+    const targetIter = iterationBudget(this.currentZoom);
+
+    // Try to snap the orbit centre to a nearby minibrot. This never moves
+    // the view, only the perturbation reference — so the user's vantage
+    // stays put while the orbit gets a non-escaping anchor and BLA picks
+    // up larger validity radii. If no suitable minibrot is found (shallow
+    // zoom, orbit escapes, Newton diverges) the seek returns null and we
+    // fall back to the view centre. Costs only a few DD iterations more
+    // than the orbit itself.
+    const seek = findNearbyMinibrot(this.centerX, this.centerY, this.currentZoom, targetIter);
+    if (seek !== null) {
+      this.orbitCenterX = seek.cx;
+      this.orbitCenterY = seek.cy;
+    } else {
+      this.orbitCenterX = [...this.centerX];
+      this.orbitCenterY = [...this.centerY];
+    }
     this.orbitZoom = this.currentZoom;
-    this.orbitIter = iterationBudget(this.currentZoom);
+    this.orbitIter = targetIter;
     this.onOrbitUpdate?.(this.orbitCenterX, this.orbitCenterY, this.orbitIter);
   }
 

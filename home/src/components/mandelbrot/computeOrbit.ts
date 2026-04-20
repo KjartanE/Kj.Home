@@ -52,6 +52,18 @@ export function ddMulFloat(a: DD, b: number): DD {
   return twoSum(p, e + a[1] * b);
 }
 
+/**
+ * Bailey-style DD division. Good to ~30 decimal digits, which is enough
+ * for Newton corrections at the zoom levels this code targets.
+ */
+export function ddDiv(a: DD, b: DD): DD {
+  const q1 = a[0] / b[0];
+  const p = ddMulFloat(b, q1);
+  const r = ddSub(a, p);
+  const q2 = (r[0] + r[1]) / b[0];
+  return twoSum(q1, q2);
+}
+
 export function ddFrom(x: number): DD {
   return [x, 0];
 }
@@ -255,4 +267,157 @@ export function computeReferenceOrbitQS(
   }
 
   return length;
+}
+
+// ── Minibrot-seeking reference orbit ──────────────────────────────────
+//
+// At deep zoom the best reference is a periodic point (a minibrot centre):
+// its orbit returns to 0 and never escapes, so we get the full iteration
+// budget AND a favourable |Z_n| profile for BLA. We find one in two steps:
+//
+//   1. Atom-period detection — along the orbit of (cx, cy), the index
+//      k minimising |z_k| is the period of the nearest minibrot (assuming
+//      the orbit doesn't escape first).
+//   2. Newton iteration on F(c) = z_period(c) — converges to a nearby c
+//      where z_period(c) = 0 exactly. Uses DD throughout so the solution
+//      is accurate at 10¹⁵+ zoom.
+//
+// Both steps are cheap compared with the full orbit + BLA build, and either
+// can reject ("no nearby minibrot" / "Newton didn't converge"), in which
+// case callers should fall back to the view centre.
+
+// Below this zoom the view centre is already a fine reference; skip the
+// seek to avoid wasted work and unnecessary Newton drift.
+const MINIBROT_ZOOM_GATE = 1000;
+const MINIBROT_NEWTON_MAX_ITER = 40;
+// Converged when |delta|² dips below this. 1e-60 ≈ 10⁻³⁰ in magnitude,
+// which is well inside the precision of DD.
+const MINIBROT_NEWTON_TOL_SQ = 1e-60;
+// If the minimum |z_k| along the orbit isn't at least this close to 0,
+// there's no periodic point nearby worth converging to.
+const MINIBROT_MIN_DEPTH = 0.5;
+
+export interface MinibrotResult {
+  cx: DD;
+  cy: DD;
+  period: number;
+}
+
+/**
+ * Atom-period detection: iterate z←z²+c in DD and record argmin |z_k|.
+ * Returns -1 if the orbit escapes (no minibrot to seek) or if the min
+ * depth is too shallow.
+ */
+function detectPeriod(cx: DD, cy: DD, maxIter: number): number {
+  let Zre: DD = [0, 0];
+  let Zim: DD = [0, 0];
+  let minAbsSq = Infinity;
+  let bestK = -1;
+
+  for (let i = 1; i <= maxIter; i++) {
+    const re2 = ddMul(Zre, Zre);
+    const im2 = ddMul(Zim, Zim);
+    const reim = ddMul(Zre, Zim);
+    Zre = ddAdd(ddSub(re2, im2), cx);
+    Zim = ddAdd(ddAdd(reim, reim), cy);
+
+    const absSq = Zre[0] * Zre[0] + Zim[0] * Zim[0];
+    if (absSq > 4.0) return -1;
+    if (absSq < minAbsSq) {
+      minAbsSq = absSq;
+      bestK = i;
+    }
+  }
+
+  if (minAbsSq > MINIBROT_MIN_DEPTH * MINIBROT_MIN_DEPTH) return -1;
+  return bestK;
+}
+
+/**
+ * Newton iteration on F(c) = z_period(c). Computes z_period and its
+ * derivative dz_period/dc jointly in DD, applies c ← c − F/F′ until the
+ * update is negligible. Returns null on singular derivative, failure
+ * to converge within MINIBROT_NEWTON_MAX_ITER steps, or runaway drift
+ * past maxRadius from the starting point.
+ */
+function newtonMinibrot(cx0: DD, cy0: DD, period: number, maxRadius: number): MinibrotResult | null {
+  let cx = cx0;
+  let cy = cy0;
+  const maxDriftSq = maxRadius * maxRadius * 4; // 2× the viewport radius, squared
+
+  for (let step = 0; step < MINIBROT_NEWTON_MAX_ITER; step++) {
+    let Zre: DD = [0, 0];
+    let Zim: DD = [0, 0];
+    let dZre: DD = [0, 0];
+    let dZim: DD = [0, 0];
+
+    // Forward sweep: z and dz/dc together for `period` steps.
+    for (let i = 0; i < period; i++) {
+      // dz_new = 2·z·dz + 1    (complex)
+      const ndZre = ddAdd(
+        ddSub(ddMulFloat(ddMul(Zre, dZre), 2), ddMulFloat(ddMul(Zim, dZim), 2)),
+        ddFrom(1)
+      );
+      const ndZim = ddAdd(ddMulFloat(ddMul(Zre, dZim), 2), ddMulFloat(ddMul(Zim, dZre), 2));
+
+      // z_new = z² + c
+      const re2 = ddMul(Zre, Zre);
+      const im2 = ddMul(Zim, Zim);
+      const reim = ddMul(Zre, Zim);
+      const nZre = ddAdd(ddSub(re2, im2), cx);
+      const nZim = ddAdd(ddAdd(reim, reim), cy);
+
+      Zre = nZre;
+      Zim = nZim;
+      dZre = ndZre;
+      dZim = ndZim;
+    }
+
+    // Newton step: delta = Z / dZ  (complex division)
+    const dZabsSq = ddAdd(ddMul(dZre, dZre), ddMul(dZim, dZim));
+    if (dZabsSq[0] < 1e-300) return null; // derivative too small to invert safely
+
+    const num_re = ddAdd(ddMul(Zre, dZre), ddMul(Zim, dZim));
+    const num_im = ddSub(ddMul(Zim, dZre), ddMul(Zre, dZim));
+    const delta_re = ddDiv(num_re, dZabsSq);
+    const delta_im = ddDiv(num_im, dZabsSq);
+
+    cx = ddSub(cx, delta_re);
+    cy = ddSub(cy, delta_im);
+
+    // Drift check — if we've wandered too far from the view, it's either a
+    // Newton divergence or we're chasing a minibrot that's outside the user's
+    // viewport. Either way: bail.
+    const dx = cx[0] - cx0[0];
+    const dy = cy[0] - cy0[0];
+    if (dx * dx + dy * dy > maxDriftSq) return null;
+
+    const deltaAbsSq = delta_re[0] * delta_re[0] + delta_im[0] * delta_im[0];
+    if (deltaAbsSq < MINIBROT_NEWTON_TOL_SQ) {
+      return { cx, cy, period };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Try to replace the view centre with a nearby minibrot centre so the
+ * perturbation reference never escapes and has a favourable |Z_n| profile.
+ * Returns null when the seek isn't worth attempting (zoom too shallow) or
+ * fails (no nearby minibrot, Newton rejects). Callers should then use the
+ * view centre directly as the reference.
+ */
+export function findNearbyMinibrot(
+  viewCx: DD,
+  viewCy: DD,
+  zoom: number,
+  maxIter: number
+): MinibrotResult | null {
+  if (zoom < MINIBROT_ZOOM_GATE) return null;
+  const period = detectPeriod(viewCx, viewCy, maxIter);
+  if (period < 1) return null;
+
+  const viewRadius = 2 / zoom;
+  return newtonMinibrot(viewCx, viewCy, period, viewRadius);
 }
