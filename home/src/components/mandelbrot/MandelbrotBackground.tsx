@@ -421,6 +421,7 @@ export default function MandelbrotBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
   const [currentZoom, setCurrentZoom] = useState(1.0);
+  const [isComputingOrbit, setIsComputingOrbit] = useState(false);
   const controlsRef = useRef<MandelbrotControls | null>(null);
 
   useEffect(() => {
@@ -535,17 +536,109 @@ export default function MandelbrotBackground() {
       material.uniforms.orbitLength.value = length;
     };
 
-    controls.onOrbitUpdate = updateOrbit;
+    // ── Pull-based render loop ─────────────────────────────────────────
+    // We keep the canvas stale until someone explicitly requests a frame.
+    // Coalesces multiple requests per tick into a single renderer.render().
+    // Idle tab settles to 0% GPU instead of burning 60 Hz on a static image.
+    const BASELINE_DPR = Math.min(window.devicePixelRatio, 2);
+    const SUPERSAMPLE_DPR = Math.min(BASELINE_DPR * 2, 4);
+    const IDLE_SUPERSAMPLE_MS = 300;
+
+    let needsRender = false;
+    let rafScheduled = false;
+    let isSupersampled = false;
+    let idleTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const applyPixelRatio = (ratio: number) => {
+      renderer.setPixelRatio(ratio);
+      // Pass `false` so three.js only resizes the drawing buffer, not the
+      // canvas CSS box — we manage that ourselves via innerWidth/innerHeight.
+      renderer.setSize(window.innerWidth, window.innerHeight, false);
+    };
+
+    const requestRender = () => {
+      needsRender = true;
+      if (rafScheduled) return;
+      rafScheduled = true;
+      requestAnimationFrame(() => {
+        rafScheduled = false;
+        if (!needsRender) return;
+        needsRender = false;
+        renderer.render(scene, camera);
+      });
+    };
+
+    // Any real activity cancels supersample, resets the idle timer, and
+    // queues a render. Smooth-zoom ticks funnel through here via the
+    // controls' onRenderRequest hook.
+    const markActive = () => {
+      if (isSupersampled) {
+        isSupersampled = false;
+        applyPixelRatio(BASELINE_DPR);
+      }
+      if (idleTimer !== null) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        // Only supersample once idle animation is fully settled. The
+        // controls.animating check catches mid-transition pauses.
+        if (controls.animating) return;
+        isSupersampled = true;
+        applyPixelRatio(SUPERSAMPLE_DPR);
+        requestRender();
+      }, IDLE_SUPERSAMPLE_MS);
+      requestRender();
+    };
+
+    controls.onRenderRequest = markActive;
+
+    // Wrap the synchronous orbit+BLA compute so the loading overlay has a
+    // chance to paint before we block the main thread. Two RAFs: the first
+    // lets React flush the isComputingOrbit=true state; the second runs
+    // after the browser has painted it. Multiple requests during the wait
+    // coalesce via latestParams — only the most-recent (cx, cy, targetIter)
+    // actually runs.
+    //
+    // Below this iteration count the compute is fast enough (~tens of ms)
+    // that the overlay would just flicker in and out — skip it entirely.
+    const LOADING_OVERLAY_ITER_GATE = 8000;
+    let schedulePending = false;
+    let latestParams: { cx: DD; cy: DD; targetIter: number } | null = null;
+
+    const runPendingCompute = () => {
+      const params = latestParams;
+      latestParams = null;
+      schedulePending = false;
+      if (params) {
+        updateOrbit(params.cx, params.cy, params.targetIter);
+        markActive();
+      }
+    };
+
+    const scheduleOrbitCompute = (cx: DD, cy: DD, targetIter: number) => {
+      latestParams = { cx, cy, targetIter };
+      if (schedulePending) return;
+      schedulePending = true;
+
+      if (targetIter < LOADING_OVERLAY_ITER_GATE) {
+        runPendingCompute();
+        return;
+      }
+
+      setIsComputingOrbit(true);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          runPendingCompute();
+          setIsComputingOrbit(false);
+        });
+      });
+    };
+
+    controls.onOrbitUpdate = scheduleOrbitCompute;
     controls.init();
 
-    // Compute initial orbit at origin
+    // Compute initial orbit at origin (through the scheduler so the overlay
+    // shows if the first compute is slow on cold cache).
     controls.triggerOrbitUpdate();
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-      renderer.render(scene, camera);
-    };
-    animate();
+    markActive();
 
     const handleResize = () => {
       const width = window.innerWidth;
@@ -556,10 +649,14 @@ export default function MandelbrotBackground() {
       camera.top = 1 / newAspect;
       camera.bottom = -1 / newAspect;
       camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
+      // Reset to baseline ratio on resize — the supersample pass will
+      // re-fire from markActive() after the idle window.
+      isSupersampled = false;
+      applyPixelRatio(BASELINE_DPR);
       plane.geometry.dispose();
       plane.geometry = new THREE.PlaneGeometry(2, 2 / newAspect);
       material.uniforms.aspect.value = newAspect;
+      markActive();
     };
 
     handleResize();
@@ -567,6 +664,7 @@ export default function MandelbrotBackground() {
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      if (idleTimer !== null) clearTimeout(idleTimer);
       controls.cleanup();
       geometry.dispose();
       material.dispose();
@@ -589,6 +687,12 @@ export default function MandelbrotBackground() {
         onReset={() => controlsRef.current?.reset()}
       />
       <ZoomIndicator zoom={currentZoom} />
+      {isComputingOrbit && (
+        <div className="fixed top-4 left-4 flex items-center gap-2 rounded-md bg-black/60 px-3 py-2 text-sm text-white backdrop-blur-sm">
+          <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          Computing reference orbit…
+        </div>
+      )}
     </>
   );
 }

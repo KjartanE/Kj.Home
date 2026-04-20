@@ -34,6 +34,13 @@ export class MandelbrotControls {
 
   public onZoomChange?: (zoom: number) => void;
   public onOrbitUpdate?: (cx: DD, cy: DD, targetIter: number) => void;
+  /**
+   * Fires whenever state that the shader depends on has changed (uniform
+   * update, smooth-zoom step, pan drag). The owner should treat this as
+   * "please redraw" — the render loop is pull-based.
+   */
+  public onRenderRequest?: () => void;
+  public get animating(): boolean { return this.isAnimating; }
 
   constructor(material: THREE.ShaderMaterial, container: HTMLElement, aspect: number) {
     this.currentZoom = 1.0;
@@ -75,6 +82,10 @@ export class MandelbrotControls {
     this.material.uniforms.scaleHi.value = sHi;
     this.material.uniforms.scaleLo.value = sLo;
     this.material.uniforms.zoom.value = this.currentZoom;
+
+    // Every uniform mutation needs a frame — pan drags, smooth-zoom steps,
+    // keyboard moves, resets all flow through here.
+    this.onRenderRequest?.();
   }
 
   private isOrbitStale(): boolean {
