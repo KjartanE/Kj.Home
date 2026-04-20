@@ -42,16 +42,63 @@ function mkPattern(name: string, category: PatternCategory, rows: string[], desc
   return { name, category, description, ...parsePattern(rows) };
 }
 
+// Apply rotation (0/90/180/270 CW) and optional horizontal flip to a pattern.
+export function transformPattern(pattern: Pattern, rotation: number, flipped: boolean): Pattern {
+  let cells: Array<[number, number]> = pattern.cells.map(([x, y]) => [x, y]);
+  let w = pattern.width;
+  let h = pattern.height;
+
+  if (flipped) {
+    cells = cells.map(([x, y]) => [w - 1 - x, y]);
+  }
+
+  const steps = (((rotation / 90) % 4) + 4) % 4;
+  for (let i = 0; i < steps; i++) {
+    cells = cells.map(([x, y]) => [h - 1 - y, x]);
+    [w, h] = [h, w];
+  }
+
+  return { ...pattern, cells, width: w, height: h };
+}
+
 export const PATTERNS: Pattern[] = [
   // Still lifes
   mkPattern("Block", "Still life", ["##", "##"]),
   mkPattern("Beehive", "Still life", [".##.", "#..#", ".##."]),
   mkPattern("Loaf", "Still life", [".##.", "#..#", ".#.#", "..#."]),
+  mkPattern("Boat", "Still life", ["##.", "#.#", ".#."]),
+  mkPattern("Tub", "Still life", [".#.", "#.#", ".#."]),
+  mkPattern("Ship", "Still life", ["##.", "#.#", ".##"]),
+  mkPattern("Pond", "Still life", [".##.", "#..#", "#..#", ".##."]),
+  mkPattern("Eater 1", "Still life", ["##..", ".#..", ".#.#", "..##"], "Fishhook — eats gliders"),
+  mkPattern("Snake", "Still life", ["##.#", "#.##"]),
+  mkPattern("Aircraft carrier", "Still life", ["##..", "#..#", "..##"]),
+  mkPattern("Long boat", "Still life", [".##.", "#..#", ".#.#", "..#."]),
+  mkPattern("Long barge", "Still life", [".#..", "#.#.", ".#.#", "..#."]),
+  mkPattern("Mango", "Still life", [".##..", "#..#.", ".#..#", "..##."]),
 
   // Oscillators
   mkPattern("Blinker", "Oscillator", ["###"], "Period 2"),
   mkPattern("Toad", "Oscillator", [".###", "###."], "Period 2"),
   mkPattern("Beacon", "Oscillator", ["##..", "##..", "..##", "..##"], "Period 2"),
+  mkPattern("Figure eight", "Oscillator", ["###...", "###...", "###...", "...###", "...###", "...###"], "Period 8"),
+  mkPattern(
+    "Kok's galaxy",
+    "Oscillator",
+    [
+      "######.##",
+      "######.##",
+      ".......##",
+      "##.....##",
+      "##.....##",
+      "##.....##",
+      "##.......",
+      "##.######",
+      "##.######"
+    ],
+    "Period 8"
+  ),
+  mkPattern("Pentadecathlon", "Oscillator", ["##.####.##"], "Period 15"),
   mkPattern(
     "Pulsar",
     "Oscillator",
@@ -75,7 +122,14 @@ export const PATTERNS: Pattern[] = [
 
   // Spaceships
   mkPattern("Glider", "Spaceship", [".#.", "..#", "###"], "Travels diagonally at c/4"),
-  mkPattern("LWSS", "Spaceship", [".#..#", "#....", "#...#", "####."], "Lightweight spaceship"),
+  mkPattern("LWSS", "Spaceship", [".#..#", "#....", "#...#", "####."], "Lightweight spaceship (c/2)"),
+  mkPattern("MWSS", "Spaceship", ["...#..", "#...#.", ".....#", "#....#", ".#####"], "Middleweight spaceship (c/2)"),
+  mkPattern(
+    "HWSS",
+    "Spaceship",
+    ["...##..", "#....#.", "......#", "#.....#", ".######"],
+    "Heavyweight spaceship (c/2)"
+  ),
 
   // Guns
   mkPattern(
@@ -97,6 +151,7 @@ export const PATTERNS: Pattern[] = [
 
   // Methuselahs
   mkPattern("R-pentomino", "Methuselah", [".##", "##.", ".#."], "Stabilizes after 1103 generations"),
+  mkPattern("Pi-heptomino", "Methuselah", ["###", "#.#", "#.#"], "Stabilizes after 173 generations"),
   mkPattern("Acorn", "Methuselah", [".#.....", "...#...", "##..###"], "Stabilizes after 5206 generations"),
   mkPattern("Diehard", "Methuselah", ["......#.", "##......", ".#...###"], "Dies after 130 generations")
 ];

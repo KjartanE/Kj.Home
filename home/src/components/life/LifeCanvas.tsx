@@ -3,16 +3,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Life, PATTERNS, type Pattern, transformPattern, unpackKey } from "./engine";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Life, PATTERNS, type Pattern, unpackKey } from "./engine";
-import { ChevronDown, Pause, Play, RotateCcw, SkipForward, Shuffle, Trash2, X } from "lucide-react";
+  ChevronDown,
+  ChevronUp,
+  FlipHorizontal,
+  Home,
+  Pause,
+  Play,
+  RotateCcw,
+  RotateCw,
+  Shuffle,
+  SkipForward,
+  Trash2,
+  X
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const MIN_PPC = 1; // min pixels per cell
 const MAX_PPC = 60;
@@ -37,18 +43,33 @@ export default function LifeCanvas() {
   const lifeRef = useRef<Life>(new Life());
   const camRef = useRef<Camera>({ cx: 0, cy: 0, ppc: DEFAULT_PPC });
   const cursorRef = useRef<{ x: number; y: number } | null>(null);
-  const armedPatternRef = useRef<Pattern | null>(null);
+  const displayPatternRef = useRef<Pattern | null>(null);
 
   const [isRunning, setIsRunning] = useState(false);
   const [speed, setSpeed] = useState(10); // updates per second
   const [armedPattern, setArmedPattern] = useState<Pattern | null>(null);
+  const [rotation, setRotation] = useState(0); // 0, 90, 180, 270 (CW degrees)
+  const [flipped, setFlipped] = useState(false);
   const [generation, setGeneration] = useState(0);
   const [population, setPopulation] = useState(0);
   const [zoom, setZoom] = useState(DEFAULT_PPC);
+  const [patternsOpen, setPatternsOpen] = useState(false);
 
-  // Keep refs in sync with state
+  // Apply rotation/flip to the armed pattern; this is what ghost + stamp use.
+  const displayPattern = useMemo(() => {
+    if (!armedPattern) return null;
+    return transformPattern(armedPattern, rotation, flipped);
+  }, [armedPattern, rotation, flipped]);
+
+  // Keep a ref in sync so the render loop sees it without re-running the effect.
   useEffect(() => {
-    armedPatternRef.current = armedPattern;
+    displayPatternRef.current = displayPattern;
+  }, [displayPattern]);
+
+  // Reset orientation when a new pattern is armed.
+  useEffect(() => {
+    setRotation(0);
+    setFlipped(false);
   }, [armedPattern]);
 
   const isRunningRef = useRef(isRunning);
@@ -242,7 +263,7 @@ export default function LifeCanvas() {
 
       if (dragMode === "none") {
         const { gx, gy } = screenToGrid(x, y);
-        const pat = armedPatternRef.current;
+        const pat = displayPatternRef.current;
         if (pat && e.button === 0) {
           stampPatternAt(gx, gy, pat);
         } else if (e.button === 0) {
@@ -373,7 +394,7 @@ export default function LifeCanvas() {
       }
 
       // Ghost preview for armed pattern
-      const pat = armedPatternRef.current;
+      const pat = displayPatternRef.current;
       const cursor = cursorRef.current;
       if (pat && cursor) {
         ctx.fillStyle = COLOR_GHOST;
@@ -484,7 +505,14 @@ export default function LifeCanvas() {
       } else if (e.key === "c" || e.key === "C") {
         clear();
       } else if (e.key === "r" || e.key === "R") {
-        randomizeViewport();
+        if (armedPattern) {
+          if (e.shiftKey) setRotation((r) => (r + 270) % 360);
+          else setRotation((r) => (r + 90) % 360);
+        } else {
+          randomizeViewport();
+        }
+      } else if (e.key === "f" || e.key === "F") {
+        if (armedPattern) setFlipped((f) => !f);
       } else if (e.key === "Escape") {
         setArmedPattern(null);
       } else if (e.key === "Home") {
@@ -493,7 +521,7 @@ export default function LifeCanvas() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [toggleRun, step, clear, randomizeViewport, recenter]);
+  }, [toggleRun, step, clear, randomizeViewport, recenter, armedPattern]);
 
   return (
     <div ref={containerRef} className="relative h-full w-full overflow-hidden">
@@ -510,44 +538,91 @@ export default function LifeCanvas() {
       </div>
 
       {/* Pattern picker — top-right */}
-      <div className="absolute right-4 top-20 z-10 flex items-center gap-2">
+      <div className="absolute right-4 top-20 z-10 flex flex-col items-end gap-2">
         {armedPattern && (
-          <div className="flex items-center gap-1 rounded-xl border border-primary/40 bg-background/70 px-3 py-1.5 text-xs backdrop-blur-md">
-            <span className="font-mono">{armedPattern.name}</span>
+          <div className="flex items-center gap-1 rounded-xl border border-primary/40 bg-background/80 px-2 py-1 text-xs shadow-lg backdrop-blur-md">
+            <span className="px-1 font-mono font-medium">{armedPattern.name}</span>
+            <span className="px-1 font-mono text-muted-foreground">
+              {rotation}°{flipped ? " ⇄" : ""}
+            </span>
+            <button
+              onClick={() => setRotation((r) => (r + 270) % 360)}
+              className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              aria-label="Rotate counter-clockwise"
+              title="Rotate CCW (Shift+R)">
+              <RotateCcw className="h-3 w-3" />
+            </button>
+            <button
+              onClick={() => setRotation((r) => (r + 90) % 360)}
+              className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              aria-label="Rotate clockwise"
+              title="Rotate CW (R)">
+              <RotateCw className="h-3 w-3" />
+            </button>
+            <button
+              onClick={() => setFlipped((f) => !f)}
+              className={cn(
+                "rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground",
+                flipped && "bg-primary/20 text-foreground"
+              )}
+              aria-label="Flip horizontally"
+              title="Flip (F)">
+              <FlipHorizontal className="h-3 w-3" />
+            </button>
             <button
               onClick={() => setArmedPattern(null)}
-              className="ml-1 rounded p-0.5 text-muted-foreground hover:text-foreground"
-              aria-label="Cancel pattern">
+              className="ml-0.5 rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              aria-label="Cancel pattern"
+              title="Cancel (Esc)">
               <X className="h-3 w-3" />
             </button>
           </div>
         )}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="sm" variant="outline" className="bg-background/70 backdrop-blur-md">
-              Patterns <ChevronDown className="ml-1 h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="max-h-96 overflow-y-auto">
-            {patternGroups.map(([category, patterns], i) => (
-              <div key={category}>
-                {i > 0 && <DropdownMenuSeparator />}
-                <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
-                  {category}
-                </DropdownMenuLabel>
-                {patterns.map((p) => (
-                  <DropdownMenuItem
-                    key={p.name}
-                    onSelect={() => setArmedPattern(p)}
-                    className="flex flex-col items-start gap-0.5">
-                    <span className="font-medium">{p.name}</span>
-                    {p.description && <span className="text-xs text-muted-foreground">{p.description}</span>}
-                  </DropdownMenuItem>
-                ))}
-              </div>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          size="sm"
+          variant="outline"
+          className="bg-background/70 backdrop-blur-md"
+          onClick={() => setPatternsOpen((v) => !v)}>
+          Patterns
+          {patternsOpen ? <ChevronUp className="ml-1 h-3 w-3" /> : <ChevronDown className="ml-1 h-3 w-3" />}
+        </Button>
+        {patternsOpen && (
+          <div className="flex max-h-[min(720px,calc(100vh-9rem))] w-80 flex-col overflow-hidden rounded-xl border border-border/40 bg-background/85 shadow-lg backdrop-blur-md">
+            <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Patterns ({PATTERNS.length})
+              </span>
+              <button
+                onClick={() => setPatternsOpen(false)}
+                className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                aria-label="Close">
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto py-1">
+              {patternGroups.map(([category, patterns], i) => (
+                <div key={category}>
+                  {i > 0 && <div className="my-1 border-t border-border/40" />}
+                  <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {category}
+                  </div>
+                  {patterns.map((p) => (
+                    <button
+                      key={p.name}
+                      onClick={() => setArmedPattern(p)}
+                      className={cn(
+                        "flex w-full flex-col items-start gap-0.5 px-3 py-1.5 text-left text-sm hover:bg-accent",
+                        armedPattern?.name === p.name && "bg-accent"
+                      )}>
+                      <span className="font-medium">{p.name}</span>
+                      {p.description && <span className="text-xs text-muted-foreground">{p.description}</span>}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Controls — bottom-center */}
@@ -568,8 +643,8 @@ export default function LifeCanvas() {
         <Button size="sm" variant="outline" onClick={randomizeViewport} aria-label="Randomize">
           <Shuffle className="h-4 w-4" />
         </Button>
-        <Button size="sm" variant="outline" onClick={recenter} aria-label="Recenter">
-          <RotateCcw className="h-4 w-4" />
+        <Button size="sm" variant="outline" onClick={recenter} aria-label="Recenter" title="Recenter (Home)">
+          <Home className="h-4 w-4" />
         </Button>
         <div className="ml-2 flex items-center gap-2 text-xs text-muted-foreground">
           <span className="font-mono">{speed} gen/s</span>
@@ -577,9 +652,11 @@ export default function LifeCanvas() {
         </div>
       </div>
 
-      {/* Hint — bottom-left (tiny) */}
+      {/* Hint — bottom-right (tiny) */}
       <div className="pointer-events-none absolute bottom-4 right-4 z-10 rounded-lg border border-border/40 bg-background/60 px-3 py-1.5 font-mono text-[10px] text-muted-foreground backdrop-blur-md">
-        drag · pan shift+drag · paint wheel · zoom space · play s · step
+        {armedPattern
+          ? "click · stamp  r · rotate  shift+r · ccw  f · flip  esc · cancel"
+          : "drag · pan  shift+drag · paint  wheel · zoom  space · play  s · step"}
       </div>
     </div>
   );
