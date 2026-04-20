@@ -327,9 +327,13 @@ const MINIBROT_NEWTON_MAX_ITER = 40;
 // Converged when |delta|² dips below this. 1e-60 ≈ 10⁻³⁰ in magnitude,
 // which is well inside the precision of DD.
 const MINIBROT_NEWTON_TOL_SQ = 1e-60;
-// If the minimum |z_k| along the orbit isn't at least this close to 0,
-// there's no periodic point nearby worth converging to.
-const MINIBROT_MIN_DEPTH = 0.5;
+// Upper bound on min |z_k| along the orbit before we give up. Previously
+// 0.5 — found experimentally to be too strict for views in "open" regions
+// between minibrots, where the orbit never approaches 0 but Newton can
+// still reach a nearby minibrot centre. We now let the Newton verification
+// (|z_period(c)|² < 1e-20) + drift tolerance decide, so this gate is set
+// just below the escape radius.
+const MINIBROT_MIN_DEPTH = 2.0;
 
 export interface MinibrotResult {
   cx: DD;
@@ -339,8 +343,11 @@ export interface MinibrotResult {
 
 /**
  * Atom-period detection: iterate z←z²+c in DD and record argmin |z_k|.
- * Returns -1 if the orbit escapes (no minibrot to seek) or if the min
- * depth is too shallow.
+ * Even if the orbit escapes, the iteration where |z| was smallest is still
+ * a meaningful period-candidate for Newton — escaping just means the
+ * starting c is slightly outside the target minibrot's basin, and Newton
+ * should pull it in. We only bail when the minimum depth is too shallow
+ * to suggest any nearby periodic structure.
  */
 function detectPeriod(cx: DD, cy: DD, maxIter: number): number {
   let Zre: DD = [0, 0];
@@ -356,13 +363,14 @@ function detectPeriod(cx: DD, cy: DD, maxIter: number): number {
     Zim = ddAdd(ddAdd(reim, reim), cy);
 
     const absSq = Zre[0] * Zre[0] + Zim[0] * Zim[0];
-    if (absSq > 4.0) return -1;
+    if (absSq > 4.0) break;
     if (absSq < minAbsSq) {
       minAbsSq = absSq;
       bestK = i;
     }
   }
 
+  if (bestK < 1) return -1;
   if (minAbsSq > MINIBROT_MIN_DEPTH * MINIBROT_MIN_DEPTH) return -1;
   return bestK;
 }
@@ -377,7 +385,11 @@ function detectPeriod(cx: DD, cy: DD, maxIter: number): number {
 function newtonMinibrot(cx0: DD, cy0: DD, period: number, maxRadius: number): MinibrotResult | null {
   let cx = cx0;
   let cy = cy0;
-  const maxDriftSq = maxRadius * maxRadius * 4; // 2× the viewport radius, squared
+  // Widened to 10× viewport radius: the nearest minibrot is often just
+  // outside the viewport, especially in "dust" regions between atoms.
+  // Trusting the root verification (|z_period(c)|² < 1e-20) to reject
+  // false positives rather than being restrictive up front.
+  const maxDriftSq = maxRadius * maxRadius * 100;
 
   for (let step = 0; step < MINIBROT_NEWTON_MAX_ITER; step++) {
     let Zre: DD = [0, 0];

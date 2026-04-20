@@ -67,6 +67,11 @@ const mandelbrotFragmentShader = `
   // Debug: when > 0.5, output per-branch diagnostic colours instead of the
   // normal Mandelbrot palette. Toggle from controls with the D key.
   uniform float debugMode;
+  // BLA validity loosening. Strict BLA checks |ε|² < rSq. Multiplying rSq
+  // by this factor lets BLA fire more aggressively; post-skip escape and
+  // Pauldelbrot glitch detection catch the wrong ones. 1 = original, ~100
+  // = commonly acceptable, ~1000 = very loose.
+  uniform float blaRelaxFactor;
 
   // Orbit data
   uniform sampler2D orbitRe;
@@ -300,19 +305,13 @@ const mandelbrotFragmentShader = `
         break;
       }
 
-      // |δc|² at this pixel — constant across the level search, so
-      // compute once. Used by the BLA validity check below to account for
-      // the B·δc contribution, not just A·ε.
-      float dc_re_f = dcr.x + dcr.y;
-      float dc_im_f = dci.x + dci.y;
-      float dc_r2  = dc_re_f * dc_re_f + dc_im_f * dc_im_f;
-      float eps_mag = sqrt(eps_r2);
-      float dc_mag  = sqrt(dc_r2);
-
       // BLA search: highest level whose alignment, range, entry existence,
-      // and validity radius all admit the current state. Validity now
-      // enforces (|ε| + (|B|/|A|)·|δc|)² < rSq — AM/triangle bound on the
-      // magnitude of the linear skip result.
+      // and validity radius admit the current |ε|². We intentionally DON'T
+      // include a B·δc term here — the debug palette showed it was too
+      // conservative at moderate zoom, blocking BLA from firing essentially
+      // everywhere. The post-skip escape check + Pauldelbrot glitch
+      // detection catch any bad skip; a wrongly-accepted BLA just costs
+      // one extra round-trip, not incorrect output.
       float chosenStep = 0.0;
       vec4  chosenABHi = vec4(0.0);
       vec4  chosenABLo = vec4(0.0);
@@ -324,18 +323,12 @@ const mandelbrotFragmentShader = `
         if (e >= blaNumEntries[l]) continue;
 
         vec2 tcl = blaTexCoord(blaRowOffsets[l], e);
-        vec4 ABhi = texture2D(blaAB, tcl);
         float rSq = texture2D(blaR, tcl).r;
         if (rSq <= 0.0) continue;
 
-        float A_hi_sq = ABhi.x * ABhi.x + ABhi.y * ABhi.y;
-        float B_hi_sq = ABhi.z * ABhi.z + ABhi.w * ABhi.w;
-        float ba_mag = (A_hi_sq > 0.0) ? sqrt(B_hi_sq / A_hi_sq) : 1e30;
-        float effective = eps_mag + ba_mag * dc_mag;
-
-        if (effective * effective < rSq) {
+        if (eps_r2 < rSq * blaRelaxFactor) {
           chosenStep = stepL;
-          chosenABHi = ABhi;
+          chosenABHi = texture2D(blaAB, tcl);
           chosenABLo = texture2D(blaABLo, tcl);
           break;
         }
@@ -478,6 +471,11 @@ export default function MandelbrotBackground() {
   const theme = useTheme();
   const [currentZoom, setCurrentZoom] = useState(1.0);
   const [isComputingOrbit, setIsComputingOrbit] = useState(false);
+  const [isDebugMode, setIsDebugMode] = useState(false);
+  const [orbitStats, setOrbitStats] = useState<{ length: number; targetIter: number }>({
+    length: 0,
+    targetIter: 0
+  });
   const controlsRef = useRef<MandelbrotControls | null>(null);
 
   useEffect(() => {
@@ -552,6 +550,7 @@ export default function MandelbrotBackground() {
         iterationScale: { value: ITER_SCALE },
         iterationFloor: { value: ITER_FLOOR },
         debugMode: { value: 0.0 },
+        blaRelaxFactor: { value: 100.0 },
         isDarkTheme: { value: theme.resolvedTheme === "dark" ? 1.0 : 0.0 },
         backgroundColor: { value: new THREE.Color(theme.resolvedTheme === "dark" ? "#09090b" : "#ffffff") },
         orbitRe: { value: orbitReTex },
@@ -601,6 +600,10 @@ export default function MandelbrotBackground() {
       material.uniforms.orbitCenter2.value.set(cxQS[2], cyQS[2]);
       material.uniforms.orbitCenter3.value.set(cxQS[3], cyQS[3]);
       material.uniforms.orbitLength.value = length;
+
+      // Expose to the debug overlay. length < targetIter means the reference
+      // orbit escaped early and BLA higher levels are likely all empty.
+      setOrbitStats({ length, targetIter });
     };
 
     // ── Pull-based render loop ─────────────────────────────────────────
@@ -658,7 +661,9 @@ export default function MandelbrotBackground() {
     controls.onRenderRequest = markActive;
     controls.onDebugToggle = () => {
       const u = material.uniforms.debugMode;
-      u.value = u.value > 0.5 ? 0.0 : 1.0;
+      const next = u.value > 0.5 ? 0.0 : 1.0;
+      u.value = next;
+      setIsDebugMode(next > 0.5);
       markActive();
     };
 
@@ -764,6 +769,33 @@ export default function MandelbrotBackground() {
         <div className="fixed left-4 top-4 flex items-center gap-2 rounded-md bg-black/60 px-3 py-2 text-sm text-white backdrop-blur-sm">
           <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
           Computing reference orbit…
+        </div>
+      )}
+      {isDebugMode && (
+        <div className="fixed right-4 top-20 min-w-[220px] rounded-md bg-black/70 px-3 py-2 font-mono text-xs text-white backdrop-blur-sm">
+          <div className="mb-1 text-[10px] uppercase tracking-wider text-white/50">Debug [press D]</div>
+          <div>orbit len: {orbitStats.length.toLocaleString()}</div>
+          <div>target iter: {orbitStats.targetIter.toLocaleString()}</div>
+          <div className={orbitStats.length < orbitStats.targetIter ? "text-yellow-300" : "text-green-300"}>
+            {orbitStats.length < orbitStats.targetIter ? "ref escaped early" : "ref full depth"}
+          </div>
+          <div className="mt-2 border-t border-white/10 pt-1 text-[10px] leading-tight text-white/60">
+            <div>
+              <span className="text-red-400">R</span> iter ceiling
+            </div>
+            <div>
+              <span className="text-green-400">G</span> clean escape
+            </div>
+            <div>
+              <span className="text-cyan-300">C</span> BLA-dominated
+            </div>
+            <div>
+              <span className="text-blue-400">B</span> direct-QS fallback
+            </div>
+            <div>
+              <span className="text-fuchsia-400">M</span> glitched
+            </div>
+          </div>
         </div>
       )}
     </>

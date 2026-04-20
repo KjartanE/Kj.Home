@@ -1,15 +1,5 @@
 import * as THREE from "three";
-import {
-  type DD,
-  ddAdd,
-  ddSub,
-  ddMulFloat,
-  ddFrom,
-  ddToQS,
-  toDS,
-  findNearbyMinibrot,
-  MAX_ITER
-} from "./computeOrbit";
+import { type DD, ddAdd, ddSub, ddMulFloat, ddFrom, ddToQS, toDS, findNearbyMinibrot, MAX_ITER } from "./computeOrbit";
 
 export { MAX_ITER };
 export const ITER_SCALE = 2000;
