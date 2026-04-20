@@ -1,9 +1,10 @@
 import PendulumScene from "@/components/pendulum/PendulumScene";
+import ProjectPageLayout from "@/components/projects/ProjectPageLayout";
 
 export default function Page() {
   return (
-    <div className="fixed inset-0">
+    <ProjectPageLayout slug="pendulum">
       <PendulumScene />
-    </div>
+    </ProjectPageLayout>
   );
 }

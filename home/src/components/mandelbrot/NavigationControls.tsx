@@ -1,5 +1,5 @@
 // src/components/mandelbrot/NavigationControls.tsx
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Eye, EyeOff } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Eye, EyeOff, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 
@@ -7,9 +7,10 @@ interface NavigationControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onMove: (direction: "up" | "down" | "left" | "right") => void;
+  onReset: () => void;
 }
 
-export function NavigationControls({ onZoomIn, onZoomOut, onMove }: NavigationControlsProps) {
+export function NavigationControls({ onZoomIn, onZoomOut, onMove, onReset }: NavigationControlsProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [zoomInInterval, setZoomInInterval] = useState<NodeJS.Timeout | null>(null);
   const [zoomOutInterval, setZoomOutInterval] = useState<NodeJS.Timeout | null>(null);
@@ -82,6 +83,14 @@ export function NavigationControls({ onZoomIn, onZoomOut, onMove }: NavigationCo
               onTouchStart={handleZoomInStart}
               onTouchEnd={handleZoomInEnd}>
               <ZoomIn className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20"
+              onClick={onReset}
+              title="Reset (R)">
+              <RotateCcw className="h-4 w-4" />
             </Button>
           </div>
 

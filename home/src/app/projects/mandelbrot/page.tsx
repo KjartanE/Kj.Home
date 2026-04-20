@@ -1,9 +1,10 @@
 import MandelbrotBackground from "@/components/mandelbrot/MandelbrotBackground";
+import ProjectPageLayout from "@/components/projects/ProjectPageLayout";
 
 export default function MandelbrotPage() {
   return (
-    <div className="fixed inset-0">
+    <ProjectPageLayout slug="mandelbrot">
       <MandelbrotBackground />
-    </div>
+    </ProjectPageLayout>
   );
 }

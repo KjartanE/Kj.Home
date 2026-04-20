@@ -1,9 +1,10 @@
 import WaveformScene from "@/components/waveform/WaveformScene";
+import ProjectPageLayout from "@/components/projects/ProjectPageLayout";
 
 export default function Page() {
   return (
-    <div className="fixed inset-0">
+    <ProjectPageLayout slug="waveform">
       <WaveformScene />
-    </div>
+    </ProjectPageLayout>
   );
 }

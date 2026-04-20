@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { positions } from "@/constants/positions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,31 +10,116 @@ import { Briefcase, ExternalLink, ChevronRight, GraduationCap } from "lucide-rea
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { resume } from "@/constants/resume";
 import { getSkillsSection } from "./SkillsSection";
+import type { IWorkExperience } from "@/types";
+
+const renderListSection = (title: string, items: string[]) => (
+  <div className="space-y-2">
+    <h4 className="text-lg font-semibold text-primary">{title}</h4>
+    <ul className="space-y-1.5 pl-6">
+      {items.map((item, index) => (
+        <li key={index} className="relative flex items-start gap-2">
+          <ChevronRight className="absolute left-[-1rem] top-1 h-4 w-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">{item}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+const renderSkillsSection = (title: string, items: string[]) => (
+  <div className="space-y-2">
+    <h4 className="text-lg font-semibold text-primary">{title}</h4>
+    <div className="flex flex-wrap gap-3">{getSkillsSection(items)}</div>
+  </div>
+);
+
+const CompanyLogo = ({ company }: { company: string }) => {
+  if (company === "Quartech Systems Ltd") {
+    return (
+      <Image src="/images/quartech_logo.png" alt="Quartech Logo" width={40} height={40} className="rounded-lg" />
+    );
+  }
+  return (
+    <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border/50 bg-background">
+      <Briefcase className="h-5 w-5 text-muted-foreground" />
+    </div>
+  );
+};
+
+const CompanyMeta = ({ exp }: { exp: IWorkExperience }) => {
+  const isQuartech = exp.company === "Quartech Systems Ltd";
+  return (
+    <div className="space-y-1">
+      {isQuartech ? (
+        <Link
+          href="https://quartech.com/"
+          className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
+          <span>quartech.com</span>
+          <ExternalLink className="h-4 w-4" />
+        </Link>
+      ) : null}
+      <p className="text-sm text-muted-foreground">Victoria, BC · {exp.date}</p>
+    </div>
+  );
+};
+
+const WorkExperienceEntry = ({ exp }: { exp: IWorkExperience }) => {
+  const firstContractId = exp.contract[0]?.id;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-4">
+        <CompanyLogo company={exp.company} />
+        <div>
+          <h3 className="text-xl font-semibold">{exp.title}</h3>
+          <p className="text-sm text-muted-foreground">{exp.company}</p>
+        </div>
+      </div>
+      <CompanyMeta exp={exp} />
+
+      {exp.contract.length > 0 && (
+        <Tabs defaultValue={firstContractId}>
+          <TabsList className="flex w-full flex-wrap items-center justify-start gap-1 rounded-t-lg border-b border-gray-700 bg-muted/50 p-2">
+            {exp.contract.map((contract) => (
+              <TabsTrigger
+                key={contract.id}
+                value={contract.id}
+                className="min-h-[2.5rem] px-4 text-sm text-foreground transition-colors duration-300 hover:text-muted-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary sm:text-base">
+                {contract.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {exp.contract.map((contract) => (
+            <TabsContent key={contract.id} value={contract.id}>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">{contract.title}</h3>
+                <p className="text-sm text-muted-foreground">{contract.position}</p>
+                <p className="text-sm text-muted-foreground">{contract.date}</p>
+                <p className="text-sm">{contract.description}</p>
+              </div>
+
+              <Accordion type="single" collapsible className="mt-6" defaultValue="details">
+                <AccordionItem value="details" className="border-b-0">
+                  <AccordionTrigger className="rounded-md px-2 py-4 text-base font-semibold transition-colors hover:bg-muted/50 hover:text-primary [&[data-state=open]>svg]:rotate-180">
+                    Project Details
+                  </AccordionTrigger>
+                  <AccordionContent className="px-2">
+                    <div className="space-y-4">
+                      {contract.notes && renderListSection("Responsibilities", contract.notes)}
+                      {contract.technologies && renderSkillsSection("Technologies Used", contract.technologies)}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </TabsContent>
+          ))}
+        </Tabs>
+      )}
+    </div>
+  );
+};
 
 const QuartechComponent = () => {
-  const renderListSection = (title: string, items: string[]) => (
-    <div className="space-y-2">
-      <h4 className="text-lg font-semibold text-primary">{title}</h4>
-      <ul className="space-y-1.5 pl-6">
-        {items.map((item, index) => (
-          <li key={index} className="relative flex items-start gap-2">
-            <ChevronRight className="absolute left-[-1rem] top-1 h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">{item}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-
-  const renderSkillsSection = (title: string, items: string[]) => (
-    <div className="space-y-2">
-      <h4 className="text-lg font-semibold text-primary">{title}</h4>
-      <div className="flex flex-wrap gap-3">{getSkillsSection(items)}</div>
-    </div>
-  );
-
-  const contracts = resume.work_experience[0].contract;
-
   return (
     <Card>
       <CardHeader>
@@ -43,105 +130,45 @@ const QuartechComponent = () => {
           <CardTitle className="text-2xl">Work Experience</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex flex-col gap-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Image
-                src="/images/quartech_logo.png"
-                alt="Quartech Logo"
-                width={40}
-                height={40}
-                className="rounded-lg"
-              />
-              <h3 className="text-xl font-semibold">Full-stack Software Engineer</h3>
+      <CardContent className="space-y-10">
+        {resume.work_experience.map((exp, i) => (
+          <div key={exp.company}>
+            <WorkExperienceEntry exp={exp} />
+            {i < resume.work_experience.length - 1 && <div className="mt-10 border-t border-border/50" />}
+          </div>
+        ))}
+
+        <div className="space-y-4 border-t border-border/50 pt-6">
+          <div className="flex items-center gap-4">
+            <div className="rounded-lg border border-border/50 bg-background p-2">
+              <GraduationCap className="h-5 w-5 text-muted-foreground" />
             </div>
-            <p className="text-muted-foreground">
-              Currently employed at Quartech Systems Ltd., working on various BC Government and internal company
-              services.
-            </p>
-            <div>
-              <Link
-                href="https://quartech.com/"
-                className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
-                <span>quartech.com</span>
-                <ExternalLink className="h-4 w-4" />
-              </Link>
-              <p className="text-sm text-muted-foreground">Victoria, BC | 250-380-9686</p>
-            </div>
+            <h3 className="text-xl font-semibold">Position Requirements</h3>
           </div>
 
-          <div className="space-y-6">
-            <Tabs defaultValue={contracts[0].id}>
-              <TabsList className="flex w-full flex-wrap items-center justify-start gap-1 rounded-t-lg border-b border-gray-700 bg-muted/50 p-2">
-                {contracts.map((contract) => (
-                  <TabsTrigger
-                    key={contract.id}
-                    value={contract.id}
-                    className="min-h-[2.5rem] px-4 text-sm text-foreground transition-colors duration-300 hover:text-muted-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary sm:text-base">
-                    {contract.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              {contracts.map((contract) => (
-                <TabsContent key={contract.id} value={contract.id}>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">{contract.title}</h3>
-                    <p className="text-sm text-muted-foreground">{contract.position}</p>
-                    <p className="text-sm text-muted-foreground">{contract.date}</p>
-                    <p className="text-sm">{contract.description}</p>
-                  </div>
-
-                  <Accordion type="single" collapsible className="mt-6" defaultValue="details">
-                    <AccordionItem value="details" className="border-b-0">
-                      <AccordionTrigger className="rounded-md px-2 py-4 text-base font-semibold transition-colors hover:bg-muted/50 hover:text-primary [&[data-state=open]>svg]:rotate-180">
-                        Project Details
-                      </AccordionTrigger>
-                      <AccordionContent className="px-2">
-                        <div className="space-y-4">
-                          {contract.notes && renderListSection("Responsibilities", contract.notes)}
-                          {contract.technologies && renderSkillsSection("Technologies Used", contract.technologies)}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </TabsContent>
-              ))}
-            </Tabs>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="rounded-lg border border-border/50 bg-background p-2">
-                <GraduationCap className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold">Position Requirements</h3>
-            </div>
-
-            <Accordion type="single" collapsible className="w-full">
-              {positions.map((position, index) => (
-                <AccordionItem
-                  key={index}
-                  value={`position-${index}`}
-                  className={index === positions.length - 1 ? "border-b-0" : ""}>
-                  <AccordionTrigger className="text-lg font-semibold hover:text-primary">
-                    {position.title}
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-6 px-4">
-                    {position.requirements.education && renderListSection("Education", position.requirements.education)}
-                    {position.requirements.experience &&
-                      renderListSection("Experience", position.requirements.experience)}
-                    {position.requirements.technicalSkills &&
-                      renderListSection("Technical Skills", position.requirements.technicalSkills)}
-                    {position.requirements.softSkills &&
-                      renderListSection("Soft Skills", position.requirements.softSkills)}
-                    {position.requirements.responsibilities &&
-                      renderListSection("Additional Responsibilities", position.requirements.responsibilities)}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
+          <Accordion type="single" collapsible className="w-full">
+            {positions.map((position, index) => (
+              <AccordionItem
+                key={index}
+                value={`position-${index}`}
+                className={index === positions.length - 1 ? "border-b-0" : ""}>
+                <AccordionTrigger className="text-lg font-semibold hover:text-primary">
+                  {position.title}
+                </AccordionTrigger>
+                <AccordionContent className="space-y-6 px-4">
+                  {position.requirements.education && renderListSection("Education", position.requirements.education)}
+                  {position.requirements.experience &&
+                    renderListSection("Experience", position.requirements.experience)}
+                  {position.requirements.technicalSkills &&
+                    renderListSection("Technical Skills", position.requirements.technicalSkills)}
+                  {position.requirements.softSkills &&
+                    renderListSection("Soft Skills", position.requirements.softSkills)}
+                  {position.requirements.responsibilities &&
+                    renderListSection("Additional Responsibilities", position.requirements.responsibilities)}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </CardContent>
     </Card>

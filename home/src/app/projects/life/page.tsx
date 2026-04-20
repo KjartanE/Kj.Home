@@ -1,9 +1,10 @@
-import ThreeScene from "@/components/life/ThreeScene";
+import LifeCanvas from "@/components/life/LifeCanvas";
+import ProjectPageLayout from "@/components/projects/ProjectPageLayout";
 
 export default function Page() {
   return (
-    <div className="relative mt-14 h-[calc(100vh-3.5rem)] flex-1 overflow-hidden">
-      <ThreeScene />
-    </div>
+    <ProjectPageLayout slug="life">
+      <LifeCanvas />
+    </ProjectPageLayout>
   );
 }
