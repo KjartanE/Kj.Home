@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { useTheme } from "next-themes";
-import { MandelbrotControls } from "./MandelbrotControls";
+import { MandelbrotControls, MAX_ITER, ITER_SCALE, ITER_FLOOR } from "./MandelbrotControls";
 import { ZoomIndicator } from "./ZoomIndicator";
 import { NavigationControls } from "./NavigationControls";
 import { type DD, ddToQS, computeReferenceOrbitQS } from "./computeOrbit";
 
-const MAX_ITER = 1500;
+// Orbit texture geometry: 4096 × 16 = 65536 iterations.
+// Must match MAX_ITER and the shader's orbitTexCoord() function.
+const ORBIT_TEX_W = 4096;
+const ORBIT_TEX_H = 16;
 
 const mandelbrotVertexShader = `
   varying vec2 vUv;
@@ -21,10 +24,16 @@ const mandelbrotVertexShader = `
 /**
  * Perturbation Mandelbrot Shader with QS arithmetic.
  *
- * Reference orbit Z_n is precomputed on CPU and uploaded as two RGBA float32
- * textures (real and imaginary QS components). The GPU computes the small
- * perturbation epsilon: eps_{n+1} = (2*Z_n + eps_n) * eps_n + dc
- * where dc = pixel_c - orbit_center (both QS).
+ * Reference orbit Z_n is precomputed on CPU (DD precision) and uploaded as
+ * two 4096×16 RGBA float32 textures (real and imaginary QS components),
+ * giving up to 65 536 orbit entries. The GPU computes the perturbation
+ * ε_{n+1} = (2·Z_n + ε_n)·ε_n + δc, where δc = pixel_c − orbit_center (QS).
+ *
+ * Glitch handling: Pauldelbrot's criterion (|Z_n+ε_n|² < γ²·|ε_n|²) marks
+ * pixels where the perturbation linearization has broken down; those drop
+ * out of perturbation into the direct-QS fallback with their last valid
+ * (Z_i, ε_i) pair — no multi-reference needed at the precisions we can
+ * reach with QS alone.
  */
 const mandelbrotFragmentShader = `
   #ifdef GL_FRAGMENT_PRECISION_HIGH
@@ -46,6 +55,7 @@ const mandelbrotFragmentShader = `
   uniform float zoom;
   uniform float maxIterations;
   uniform float iterationScale;
+  uniform float iterationFloor;
   uniform float isDarkTheme;
   uniform vec3  backgroundColor;
 
@@ -57,6 +67,14 @@ const mandelbrotFragmentShader = `
   uniform vec2  orbitCenter2;
   uniform vec2  orbitCenter3;
   uniform float orbitLength;
+
+  // Pauldelbrot glitch tolerance, squared. γ² = 1e-6 → γ = 1e-3.
+  const float GLITCH_TOL_SQ = 1e-6;
+  // Orbit texture geometry — must match ORBIT_TEX_W/H in MandelbrotBackground.
+  const float ORBIT_TEX_W = 4096.0;
+  const float ORBIT_TEX_H = 16.0;
+  // Shader-level ceiling for dynamic loops. Matches MAX_ITER.
+  const float MAX_ITER_CONST = 65536.0;
 
   // ── Float32 error-free transforms ───────────────────────────────────
   vec2 two_sum(float a, float b) {
@@ -140,6 +158,14 @@ const mandelbrotFragmentShader = `
     return qs_renorm(p0.x, u1.x, c2, c3);
   }
 
+  // Map 1D iteration index → 2D texel center. i is exact up to 2^24, so
+  // the 65 536-cap is safely inside highp float's integer range.
+  vec2 orbitTexCoord(float i) {
+    float col = mod(i, ORBIT_TEX_W);
+    float row = floor(i / ORBIT_TEX_W);
+    return vec2((col + 0.5) / ORBIT_TEX_W, (row + 0.5) / ORBIT_TEX_H);
+  }
+
   // ── Color ──────────────────────────────────────────────────────────
   vec3 hsv2rgb(vec3 c) {
     vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
@@ -164,8 +190,16 @@ const mandelbrotFragmentShader = `
       vec4(off_im.x, off_im.y, 0.0, 0.0)
     );
 
-    float dynamicIterations = min(maxIterations, iterationScale * (log(zoom + 1.0) + 1.0));
-    float perturbIterations = min(dynamicIterations, orbitLength);
+    // dynamicIterations ≈ iterationScale·log2(zoom) + floor, capped at maxIterations
+    float log2Zoom = log2(max(zoom, 1.0));
+    float dynamicIterations = clamp(
+      iterationScale * log2Zoom + iterationFloor,
+      iterationFloor,
+      maxIterations
+    );
+    // Reserve the last orbit slot so Z_{perturbIterations} is always in the
+    // texture for the direct-QS fallback handoff.
+    float perturbIterations = min(dynamicIterations, max(orbitLength - 1.0, 0.0));
 
     // Cardioid / period-2 bulb early exit (float32 sufficient)
     float cx = cr.x + cr.y;
@@ -184,56 +218,73 @@ const mandelbrotFragmentShader = `
     vec4 dcr = qs_sub(cr, ocr);
     vec4 dci = qs_sub(ci, oci);
 
-    // ── Phase 1: Perturbation while reference orbit is available ──
+    // ── Phase 1: Perturbation ─────────────────────────────────────────
+    // Invariant entering iteration i: ε holds ε_i (state after i steps).
+    // We read Z_i, combine to z_i = Z_i + ε_i, check escape/glitch BEFORE
+    // updating ε. On escape/glitch break we keep (Z_i, ε_i) aligned so
+    // Phase 2 can reconstruct z = Z_i + ε_i and continue directly.
     vec4 eps_re = vec4(0.0);
     vec4 eps_im = vec4(0.0);
-    float iterations = dynamicIterations;
+    float lastIter = perturbIterations;
     float esc_re = 0.0;
     float esc_im = 0.0;
     bool escaped = false;
+    bool glitched = false;
 
-    for (float i = 0.0; i < 1500.0; i++) {
-      if (i >= perturbIterations) break;
+    for (float i = 0.0; i < MAX_ITER_CONST; i++) {
+      if (i >= perturbIterations) { lastIter = i; break; }
 
-      // Read reference orbit Z_n from textures
-      float texCoord = (i + 0.5) / maxIterations;
-      vec4 Zn_re = texture2D(orbitRe, vec2(texCoord, 0.5));
-      vec4 Zn_im = texture2D(orbitIm, vec2(texCoord, 0.5));
+      vec2 tc = orbitTexCoord(i);
+      vec4 Zn_re = texture2D(orbitRe, tc);
+      vec4 Zn_im = texture2D(orbitIm, tc);
 
-      // Escape check: |Z_n + eps_n|^2 > 4
       float full_re = Zn_re.x + Zn_re.y + eps_re.x + eps_re.y;
       float full_im = Zn_im.x + Zn_im.y + eps_im.x + eps_im.y;
       float r2 = full_re * full_re + full_im * full_im;
+
       if (r2 > 4.0) {
-        iterations = i;
+        lastIter = i;
         esc_re = full_re;
         esc_im = full_im;
         escaped = true;
         break;
       }
 
-      // eps_{n+1} = (2*Z_n + eps_n) * eps_n + dc  (complex multiply)
+      // Pauldelbrot glitch: |z|² < γ²·|ε|². The guard i > 4 keeps the
+      // early iterations (where both sides are near zero) from spuriously
+      // triggering; ε is still tiny there, and the criterion is noisy.
+      float eps_re_f = eps_re.x + eps_re.y;
+      float eps_im_f = eps_im.x + eps_im.y;
+      float eps_r2 = eps_re_f * eps_re_f + eps_im_f * eps_im_f;
+      if (i > 4.0 && r2 < GLITCH_TOL_SQ * eps_r2) {
+        lastIter = i;
+        glitched = true;
+        break;
+      }
+
+      // ε_{n+1} = (2·Z_n + ε_n)·ε_n + δc
       vec4 a_re = qs_add(Zn_re + Zn_re, eps_re);
       vec4 a_im = qs_add(Zn_im + Zn_im, eps_im);
-
       vec4 new_re = qs_add(qs_sub(qs_mul(a_re, eps_re), qs_mul(a_im, eps_im)), dcr);
       vec4 new_im = qs_add(qs_add(qs_mul(a_re, eps_im), qs_mul(a_im, eps_re)), dci);
-
       eps_re = new_re;
       eps_im = new_im;
     }
 
-    // ── Phase 2: Direct QS fallback if orbit ran out but pixel hasn't escaped ──
-    if (!escaped && perturbIterations < dynamicIterations) {
-      // Reconstruct full z = Z_last + eps for direct iteration
-      float lastTex = (perturbIterations - 0.5) / maxIterations;
-      vec4 Zlast_re = texture2D(orbitRe, vec2(lastTex, 0.5));
-      vec4 Zlast_im = texture2D(orbitIm, vec2(lastTex, 0.5));
+    // ── Phase 2: Direct QS fallback for glitched or orbit-exhausted pixels ──
+    // On entry, (Z_{lastIter}, ε_{lastIter}) are a consistent pair, so we
+    // reconstruct z = Z + ε and continue the plain z←z²+c iteration at
+    // full QS precision. Slower per-step but correct where perturbation
+    // broke down.
+    if (!escaped && lastIter < dynamicIterations) {
+      vec2 tc = orbitTexCoord(lastIter);
+      vec4 Zlast_re = texture2D(orbitRe, tc);
+      vec4 Zlast_im = texture2D(orbitIm, tc);
       vec4 zr = qs_add(Zlast_re, eps_re);
       vec4 zi = qs_add(Zlast_im, eps_im);
 
-      for (float i = 0.0; i < 1500.0; i++) {
-        float iter = perturbIterations + i;
+      for (float i = 0.0; i < MAX_ITER_CONST; i++) {
+        float iter = lastIter + i;
         if (iter >= dynamicIterations) break;
 
         vec4 zr2 = qs_sqr(zr);
@@ -246,7 +297,7 @@ const mandelbrotFragmentShader = `
         float zi_f = zi.x + zi.y;
         float r2 = zr_f * zr_f + zi_f * zi_f;
         if (r2 > 4.0) {
-          iterations = iter;
+          lastIter = iter;
           esc_re = zr_f;
           esc_im = zi_f;
           escaped = true;
@@ -255,11 +306,15 @@ const mandelbrotFragmentShader = `
       }
     }
 
-    if (iterations == dynamicIterations) {
+    // Suppress "unused var" warning on drivers that elide it; glitched is
+    // diagnostic only, reserved for future per-pixel visualization.
+    if (glitched) { /* no-op, reserved */ }
+
+    if (!escaped) {
       gl_FragColor = vec4(backgroundColor, 1.0);
     } else {
       float r2 = esc_re * esc_re + esc_im * esc_im;
-      float smoothed = iterations + 1.0 - log(log(r2) * 0.5) / log(2.0);
+      float smoothed = lastIter + 1.0 - log(log(r2) * 0.5) / log(2.0);
 
       float baseHue    = isDarkTheme > 0.5 ? 0.68 : 0.38;
       float saturation = isDarkTheme > 0.5 ? 0.98 : 0.85;
@@ -297,16 +352,19 @@ export default function MandelbrotBackground() {
     renderer.domElement.style.cursor = "crosshair";
     container.appendChild(renderer.domElement);
 
-    // Create orbit textures (1D textures stored as MAX_ITER×1 RGBA float32)
+    // Orbit textures: 2D RGBA float32, 4096 × 16 = 65 536 entries. The
+    // layout is chosen so iterationBudget() always fits (zoom ~10^25 needs
+    // ~25 k entries), the texture stays well under typical MAX_TEXTURE_SIZE
+    // limits, and row count is a small power of two for cache friendliness.
     const orbitReData = new Float32Array(MAX_ITER * 4);
     const orbitImData = new Float32Array(MAX_ITER * 4);
 
-    const orbitReTex = new THREE.DataTexture(orbitReData, MAX_ITER, 1, THREE.RGBAFormat, THREE.FloatType);
+    const orbitReTex = new THREE.DataTexture(orbitReData, ORBIT_TEX_W, ORBIT_TEX_H, THREE.RGBAFormat, THREE.FloatType);
     orbitReTex.minFilter = THREE.NearestFilter;
     orbitReTex.magFilter = THREE.NearestFilter;
     orbitReTex.needsUpdate = true;
 
-    const orbitImTex = new THREE.DataTexture(orbitImData, MAX_ITER, 1, THREE.RGBAFormat, THREE.FloatType);
+    const orbitImTex = new THREE.DataTexture(orbitImData, ORBIT_TEX_W, ORBIT_TEX_H, THREE.RGBAFormat, THREE.FloatType);
     orbitImTex.minFilter = THREE.NearestFilter;
     orbitImTex.magFilter = THREE.NearestFilter;
     orbitImTex.needsUpdate = true;
@@ -323,7 +381,8 @@ export default function MandelbrotBackground() {
         aspect: { value: aspect },
         zoom: { value: 1.0 },
         maxIterations: { value: MAX_ITER },
-        iterationScale: { value: 100.0 },
+        iterationScale: { value: ITER_SCALE },
+        iterationFloor: { value: ITER_FLOOR },
         isDarkTheme: { value: theme.resolvedTheme === "dark" ? 1.0 : 0.0 },
         backgroundColor: { value: new THREE.Color(theme.resolvedTheme === "dark" ? "#09090b" : "#ffffff") },
         orbitRe: { value: orbitReTex },
@@ -345,24 +404,20 @@ export default function MandelbrotBackground() {
     controlsRef.current = controls;
     controls.onZoomChange = (zoom) => setCurrentZoom(zoom);
 
-    // Orbit update callback
-    const updateOrbit = (cx: DD, cy: DD) => {
-      const orbit = computeReferenceOrbitQS(cx, cy, MAX_ITER);
-
-      // Upload orbit data to textures
-      orbitReData.set(orbit.reData);
-      orbitImData.set(orbit.imData);
+    // Orbit update callback — writes directly into the pre-allocated
+    // texture buffers; computeReferenceOrbitQS returns the valid length.
+    const updateOrbit = (cx: DD, cy: DD, targetIter: number) => {
+      const length = computeReferenceOrbitQS(cx, cy, targetIter, orbitReData, orbitImData);
       orbitReTex.needsUpdate = true;
       orbitImTex.needsUpdate = true;
 
-      // Upload orbit center as QS
       const cxQS = ddToQS(cx);
       const cyQS = ddToQS(cy);
       material.uniforms.orbitCenter0.value.set(cxQS[0], cyQS[0]);
       material.uniforms.orbitCenter1.value.set(cxQS[1], cyQS[1]);
       material.uniforms.orbitCenter2.value.set(cxQS[2], cyQS[2]);
       material.uniforms.orbitCenter3.value.set(cxQS[3], cyQS[3]);
-      material.uniforms.orbitLength.value = orbit.length;
+      material.uniforms.orbitLength.value = length;
     };
 
     controls.onOrbitUpdate = updateOrbit;

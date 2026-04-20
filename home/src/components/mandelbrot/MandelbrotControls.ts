@@ -1,6 +1,16 @@
 import * as THREE from "three";
 import { type DD, ddAdd, ddSub, ddMulFloat, ddFrom, ddToQS, toDS } from "./computeOrbit";
 
+export const MAX_ITER = 65536;
+export const ITER_SCALE = 300;
+export const ITER_FLOOR = 512;
+
+/** Iteration budget for a given zoom level. */
+export function iterationBudget(zoom: number): number {
+  const log2Zoom = Math.log2(Math.max(zoom, 1));
+  return Math.min(MAX_ITER, Math.max(ITER_FLOOR, Math.ceil(ITER_SCALE * log2Zoom + ITER_FLOOR)));
+}
+
 export class MandelbrotControls {
   private currentZoom: number;
   private targetZoom: number;
@@ -20,9 +30,10 @@ export class MandelbrotControls {
   private orbitCenterX: DD;
   private orbitCenterY: DD;
   private orbitZoom: number;
+  private orbitIter: number;
 
   public onZoomChange?: (zoom: number) => void;
-  public onOrbitUpdate?: (cx: DD, cy: DD) => void;
+  public onOrbitUpdate?: (cx: DD, cy: DD, targetIter: number) => void;
 
   constructor(material: THREE.ShaderMaterial, container: HTMLElement, aspect: number) {
     this.currentZoom = 1.0;
@@ -34,6 +45,7 @@ export class MandelbrotControls {
     this.orbitCenterX = ddFrom(0);
     this.orbitCenterY = ddFrom(0);
     this.orbitZoom = 1.0;
+    this.orbitIter = ITER_FLOOR;
     this.material = material;
     this.container = container;
     this.aspect = aspect;
@@ -70,14 +82,19 @@ export class MandelbrotControls {
     const dx = Math.abs(this.centerX[0] - this.orbitCenterX[0]) + Math.abs(this.centerX[1] - this.orbitCenterX[1]);
     const dy = Math.abs(this.centerY[0] - this.orbitCenterY[0]) + Math.abs(this.centerY[1] - this.orbitCenterY[1]);
     const zoomRatio = Math.max(this.currentZoom / this.orbitZoom, this.orbitZoom / this.currentZoom);
-    return dx > pixelSize * 200 || dy > pixelSize * 200 || zoomRatio > 4.0;
+    // Also recompute when the needed iteration budget outgrew the cached orbit
+    // by a noticeable margin — otherwise deep zoom starves on a short orbit.
+    const neededIter = iterationBudget(this.currentZoom);
+    const iterGrew = neededIter > this.orbitIter * 1.25;
+    return dx > pixelSize * 200 || dy > pixelSize * 200 || zoomRatio > 4.0 || iterGrew;
   }
 
   public triggerOrbitUpdate() {
     this.orbitCenterX = [...this.centerX];
     this.orbitCenterY = [...this.centerY];
     this.orbitZoom = this.currentZoom;
-    this.onOrbitUpdate?.(this.orbitCenterX, this.orbitCenterY);
+    this.orbitIter = iterationBudget(this.currentZoom);
+    this.onOrbitUpdate?.(this.orbitCenterX, this.orbitCenterY, this.orbitIter);
   }
 
   private animate() {

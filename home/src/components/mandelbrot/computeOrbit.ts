@@ -79,41 +79,39 @@ export function ddToQS(a: DD): [number, number, number, number] {
 
 // ── Reference orbit computation ────────────────────────────────────────
 
-export interface QSOrbitResult {
-  /** QS real part: 4 float32 per iteration */
-  reData: Float32Array;
-  /** QS imaginary part: 4 float32 per iteration */
-  imData: Float32Array;
-  /** Valid orbit entries (< maxIter if reference escapes early) */
-  length: number;
-}
-
 /**
  * Compute the Mandelbrot reference orbit at DD center (cx, cy).
- * Returns the orbit as QS (4× float32) values for two RGBA textures.
+ * Writes up to `targetIter` iterations into reOut/imOut as QS (4× float32).
+ * Returns the number of valid entries; may be < targetIter if the reference
+ * escapes early. Callers should pass pre-allocated buffers sized for the
+ * largest orbit they'll ever request (texture capacity) so this function
+ * can be called hot without GC churn.
  */
-export function computeReferenceOrbitQS(cx: DD, cy: DD, maxIter: number): QSOrbitResult {
-  const reData = new Float32Array(maxIter * 4);
-  const imData = new Float32Array(maxIter * 4);
-
+export function computeReferenceOrbitQS(
+  cx: DD,
+  cy: DD,
+  targetIter: number,
+  reOut: Float32Array,
+  imOut: Float32Array
+): number {
   let Z: [DD, DD] = [
     [0, 0],
     [0, 0]
   ];
-  let length = maxIter;
+  let length = targetIter;
 
-  for (let i = 0; i < maxIter; i++) {
-    // Store Z_i as QS before iterating
+  for (let i = 0; i < targetIter; i++) {
     const reQS = ddToQS(Z[0]);
     const imQS = ddToQS(Z[1]);
-    reData[i * 4 + 0] = reQS[0];
-    reData[i * 4 + 1] = reQS[1];
-    reData[i * 4 + 2] = reQS[2];
-    reData[i * 4 + 3] = reQS[3];
-    imData[i * 4 + 0] = imQS[0];
-    imData[i * 4 + 1] = imQS[1];
-    imData[i * 4 + 2] = imQS[2];
-    imData[i * 4 + 3] = imQS[3];
+    const base = i * 4;
+    reOut[base + 0] = reQS[0];
+    reOut[base + 1] = reQS[1];
+    reOut[base + 2] = reQS[2];
+    reOut[base + 3] = reQS[3];
+    imOut[base + 0] = imQS[0];
+    imOut[base + 1] = imQS[1];
+    imOut[base + 2] = imQS[2];
+    imOut[base + 3] = imQS[3];
 
     // Z = Z² + C
     const re2 = ddMul(Z[0], Z[0]);
@@ -127,5 +125,5 @@ export function computeReferenceOrbitQS(cx: DD, cy: DD, maxIter: number): QSOrbi
     }
   }
 
-  return { reData, imData, length };
+  return length;
 }
