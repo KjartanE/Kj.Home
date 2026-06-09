@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useEffect } from "react";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as THREE from "three";
 import { ThreeCleanup } from "@/lib/three/cleanup";
 import CubeScene from "./main";

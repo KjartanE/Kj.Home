@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { PLANETS } from "./bodies";
 import { auToScene, dateToJD, heliocentricAU } from "./kepler";
 import type { PlanetDef } from "./types";
