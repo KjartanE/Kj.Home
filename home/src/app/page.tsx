@@ -4,7 +4,7 @@ import Hero from "@/components/home/Hero";
 import Reveal from "@/components/home/Reveal";
 import BentoCard from "@/components/projects/BentoCard";
 import { ArrowRight } from "lucide-react";
-import { PROJECTS } from "@/constants/projects";
+import { getProjectsWithPreviews } from "@/lib/previews";
 
 const SUBTITLE_PHRASES = [
   "I like to code. Welcome to my collection of projects and experiments.",
@@ -13,9 +13,11 @@ const SUBTITLE_PHRASES = [
 ];
 
 const FEATURED_SLUGS = ["penrose", "mandelbrot", "pendulum"];
-const FEATURED_PROJECTS = FEATURED_SLUGS.map((slug) => PROJECTS.find((p) => p.slug === slug)!).filter(Boolean);
 
 export default function Home() {
+  const projects = getProjectsWithPreviews();
+  const featured = FEATURED_SLUGS.map((slug) => projects.find((p) => p.slug === slug)!).filter(Boolean);
+
   return (
     <>
       <PersistentPenroseBackground />
@@ -42,7 +44,7 @@ export default function Home() {
               </Link>
             </div>
             <div className="grid auto-rows-[11rem] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {FEATURED_PROJECTS.map((project, i) => (
+              {featured.map((project, i) => (
                 <div key={project.slug} className={i === 0 ? "sm:col-span-2 sm:row-span-2" : "sm:col-span-2"}>
                   <BentoCard project={project} />
                 </div>

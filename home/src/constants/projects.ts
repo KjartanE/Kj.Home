@@ -5,7 +5,9 @@ export type ProjectCategory = "Math" | "3D" | "Music";
  * To produce one: screen-record the project page (~8s, Cmd+Shift+5), then
  *   ffmpeg -i in.mov -t 6 -vf "scale=640:-2,fps=24" -c:v libvpx-vp9 -b:v 0 -crf 38 -an public/projects/previews/<slug>.webm
  *   ffmpeg -i in.mov -t 6 -vf "scale=640:-2,fps=24" -c:v libx264 -crf 28 -an -movflags +faststart public/projects/previews/<slug>.mp4
- * Target ≤500KB each. Cards fall back to the static poster until the files exist.
+ * Target ≤500KB each. src/lib/previews.ts checks which clips exist on disk and
+ * only then renders a <video> — cards show the static poster otherwise. Dev
+ * picks new clips up on refresh; production needs a rebuild.
  */
 export interface Project {
   slug: string;
