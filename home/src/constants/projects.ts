@@ -1,5 +1,12 @@
 export type ProjectCategory = "Math" | "3D" | "Music";
 
+/**
+ * Preview videos live in /public/projects/previews/<slug>.webm (+ .mp4 fallback).
+ * To produce one: screen-record the project page (~8s, Cmd+Shift+5), then
+ *   ffmpeg -i in.mov -t 6 -vf "scale=640:-2,fps=24" -c:v libvpx-vp9 -b:v 0 -crf 38 -an public/projects/previews/<slug>.webm
+ *   ffmpeg -i in.mov -t 6 -vf "scale=640:-2,fps=24" -c:v libx264 -crf 28 -an -movflags +faststart public/projects/previews/<slug>.mp4
+ * Target ≤500KB each. Cards fall back to the static poster until the files exist.
+ */
 export interface Project {
   slug: string;
   title: string;
@@ -8,6 +15,10 @@ export interface Project {
   image: string;
   category: ProjectCategory;
   tech: string[];
+  /** Hover-play video preview; poster falls back to `image`. */
+  preview?: { poster?: string; video?: string };
+  /** Bento tile size: "lg" spans 2x2. */
+  size?: "lg" | "sm";
 }
 
 export const PROJECTS: Project[] = [
@@ -20,7 +31,9 @@ export const PROJECTS: Project[] = [
       "Generates aperiodic Penrose tilings that never repeat regardless of how far they extend. Explore different deflation levels and color schemes interactively.",
     image: "/projects/penrose-preview.png",
     category: "Math",
-    tech: ["Three.js", "WebGL", "TypeScript"]
+    tech: ["Three.js", "WebGL", "TypeScript"],
+    preview: { video: "/projects/previews/penrose.webm" },
+    size: "lg"
   },
   {
     slug: "mandelbrot",
@@ -30,7 +43,9 @@ export const PROJECTS: Project[] = [
       "Explore the Mandelbrot set with smooth infinite zooming powered by GLSL fragment shaders running entirely on the GPU.",
     image: "/projects/mandelbrot-preview.png",
     category: "Math",
-    tech: ["Three.js", "GLSL", "WebGL", "TypeScript"]
+    tech: ["Three.js", "GLSL", "WebGL", "TypeScript"],
+    preview: { video: "/projects/previews/mandelbrot.webm" },
+    size: "lg"
   },
   {
     slug: "pendulum",
@@ -40,7 +55,8 @@ export const PROJECTS: Project[] = [
       "Interactive double pendulum exhibiting chaotic behaviour. Control the simulation with your cursor and watch the trail trace complex paths.",
     image: "/projects/pendulum-preview.png",
     category: "Math",
-    tech: ["Three.js", "Physics", "TypeScript"]
+    tech: ["Three.js", "Physics", "TypeScript"],
+    preview: { video: "/projects/previews/pendulum.webm" }
   },
   {
     slug: "chladni",
@@ -50,7 +66,8 @@ export const PROJECTS: Project[] = [
       "Visualizes the nodal patterns formed on vibrating plates. Adjust frequency mode numbers to reveal different standing wave geometries.",
     image: "/projects/chladni-preview.png",
     category: "Math",
-    tech: ["Three.js", "WebGL", "GLSL", "TypeScript"]
+    tech: ["Three.js", "WebGL", "GLSL", "TypeScript"],
+    preview: { video: "/projects/previews/chladni.webm" }
   },
   {
     slug: "spirograph",
@@ -60,7 +77,8 @@ export const PROJECTS: Project[] = [
       "Draws hypotrochoids and epitrochoids in real time. Tune the radii and offset to produce classic spirograph patterns or discover new ones.",
     image: "/projects/spiro-preview.png",
     category: "Math",
-    tech: ["Three.js", "React", "TypeScript"]
+    tech: ["Three.js", "React", "TypeScript"],
+    preview: { video: "/projects/previews/spirograph.webm" }
   },
   {
     slug: "life",
@@ -70,7 +88,8 @@ export const PROJECTS: Project[] = [
       "Conway's cellular automaton on a near-infinite sparse grid. Pan, zoom, stamp classic patterns, and watch emergent structures form.",
     image: "/projects/life-preview.png",
     category: "Math",
-    tech: ["Canvas 2D", "TypeScript"]
+    tech: ["Canvas 2D", "TypeScript"],
+    preview: { video: "/projects/previews/life.webm" }
   },
   // 3D Visualizations
   {
@@ -81,7 +100,9 @@ export const PROJECTS: Project[] = [
       "A real-time 3D model of the solar system with accurate relative scales and orbital mechanics. Click any body to follow it.",
     image: "/projects/solar-preview.png",
     category: "3D",
-    tech: ["Three.js", "React", "TypeScript"]
+    tech: ["Three.js", "React", "TypeScript"],
+    preview: { video: "/projects/previews/solar.webm" },
+    size: "lg"
   },
   {
     slug: "cube",
@@ -91,7 +112,8 @@ export const PROJECTS: Project[] = [
       "An interactive 3D cube rendered with Three.js. Rotate, zoom, and customize the rendering style.",
     image: "/projects/cube-preview.png",
     category: "3D",
-    tech: ["Three.js", "React", "TypeScript"]
+    tech: ["Three.js", "React", "TypeScript"],
+    preview: { video: "/projects/previews/cube.webm" }
   },
   {
     slug: "geometry",
@@ -112,7 +134,8 @@ export const PROJECTS: Project[] = [
       "Captures your microphone input and renders the waveform in real time using the Web Audio API and Three.js.",
     image: "/projects/waveform-preview.png",
     category: "Music",
-    tech: ["Three.js", "Web Audio API", "TypeScript"]
+    tech: ["Three.js", "Web Audio API", "TypeScript"],
+    preview: { video: "/projects/previews/waveform.webm" }
   },
   {
     slug: "butterchurn",
@@ -122,7 +145,8 @@ export const PROJECTS: Project[] = [
       "A WebGL port of the legendary Milkdrop visualizer. Reacts to microphone or line-in audio with GPU-rendered presets.",
     image: "/projects/butterchurn-preview.png",
     category: "Music",
-    tech: ["WebGL", "Web Audio API", "TypeScript"]
+    tech: ["WebGL", "Web Audio API", "TypeScript"],
+    preview: { video: "/projects/previews/butterchurn.webm" }
   }
 ];
 

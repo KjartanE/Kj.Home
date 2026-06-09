@@ -1,10 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import PersistentPenroseBackground from "@/components/penrose/background/PersistentPenroseBackground";
 import Hero from "@/components/home/Hero";
 import Reveal from "@/components/home/Reveal";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import BentoCard from "@/components/projects/BentoCard";
 import { ArrowRight } from "lucide-react";
 import { PROJECTS } from "@/constants/projects";
 
@@ -43,34 +41,11 @@ export default function Home() {
                 All projects <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <div className="grid gap-6 md:grid-cols-3">
-              {FEATURED_PROJECTS.map((project) => (
-                <Link href={`/projects/${project.slug}`} key={project.slug}>
-                  <Card className="h-full bg-background/80 backdrop-blur-xs transition-colors hover:bg-muted/50">
-                    <CardHeader className="pb-3">
-                      <div className="relative mb-3 aspect-video overflow-hidden rounded-lg">
-                        <Image
-                          src={project.image}
-                          alt={project.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-cover"
-                        />
-                      </div>
-                      <CardTitle className="text-lg">{project.title}</CardTitle>
-                      <CardDescription>{project.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-1">
-                        {project.tech.map((t) => (
-                          <Badge key={t} variant="secondary" className="text-xs">
-                            {t}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+            <div className="grid auto-rows-[11rem] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {FEATURED_PROJECTS.map((project, i) => (
+                <div key={project.slug} className={i === 0 ? "sm:col-span-2 sm:row-span-2" : "sm:col-span-2"}>
+                  <BentoCard project={project} />
+                </div>
               ))}
             </div>
           </div>
