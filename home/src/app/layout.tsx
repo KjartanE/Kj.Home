@@ -21,19 +21,19 @@ const firaCode = Fira_Code({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://kjhome.dev"),
+  metadataBase: new URL("https://www.forritun.dev"),
   title: {
     default: "kj.home",
     template: "%s | kj.home"
   },
-  description: "Personal portfolio and creative coding projects by Kjartan Einarsson. Interactive Three.js visualizations, web experiments, and blog.",
+  description: "Personal portfolio and creative coding projects by Kjartan Einarsson. Interactive Three.js visualizations and web experiments.",
   icons: {
     icon: "/favicon.ico"
   },
   openGraph: {
     title: "kj.home",
     description: "Personal portfolio and creative coding projects by Kjartan Einarsson.",
-    url: "https://kjhome.dev",
+    url: "https://www.forritun.dev",
     siteName: "kj.home",
     type: "website",
     locale: "en_US"
