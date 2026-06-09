@@ -193,7 +193,7 @@ const PenrosePlayground: React.FC = () => {
     <div className="relative h-full w-full">
       <div ref={containerRef} className="h-full w-full cursor-crosshair" />
       <Controls params={params} onChange={onChange} onReset={onReset} />
-      <div className="pointer-events-none absolute bottom-4 right-4 z-10 rounded-lg border border-border/40 bg-background/60 px-3 py-1.5 font-mono text-[10px] text-muted-foreground backdrop-blur-md">
+      <div className="pointer-events-none absolute right-4 bottom-4 z-10 rounded-lg border border-border/40 bg-background/60 px-3 py-1.5 font-mono text-[10px] text-muted-foreground backdrop-blur-md">
         click · pulse ripple
       </div>
     </div>

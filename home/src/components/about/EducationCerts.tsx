@@ -10,8 +10,8 @@ interface EducationCertsProps {
 export default function EducationCerts({ education, certifications, awards }: EducationCertsProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <div className="surface-solid rounded-xl p-4">
-        <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="rounded-xl surface-solid p-4">
+        <h3 className="flex items-center gap-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
           <GraduationCap className="h-4 w-4" /> Education
         </h3>
         {education.map((e) => (
@@ -22,7 +22,7 @@ export default function EducationCerts({ education, certifications, awards }: Ed
             </p>
           </div>
         ))}
-        <h3 className="mt-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <h3 className="mt-5 flex items-center gap-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
           <Medal className="h-4 w-4" /> Awards
         </h3>
         <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
@@ -31,8 +31,8 @@ export default function EducationCerts({ education, certifications, awards }: Ed
           ))}
         </ul>
       </div>
-      <div className="surface-solid rounded-xl p-4">
-        <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="rounded-xl surface-solid p-4">
+        <h3 className="flex items-center gap-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
           <Award className="h-4 w-4" /> Certifications
         </h3>
         <ul className="mt-3 space-y-2">

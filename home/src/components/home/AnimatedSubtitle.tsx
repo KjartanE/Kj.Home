@@ -29,7 +29,7 @@ export default function AnimatedSubtitle({ phrases }: AnimatedSubtitleProps) {
 
   return (
     <p
-      className="duration-800 mt-4 max-w-3xl text-center text-muted-foreground transition-opacity sm:text-xl"
+      className="mt-4 max-w-3xl text-center text-muted-foreground transition-opacity duration-800 sm:text-xl"
       style={{ opacity: visible ? 1 : 0 }}>
       {phrases[index]}
     </p>

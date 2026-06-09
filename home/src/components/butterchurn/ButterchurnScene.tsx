@@ -282,7 +282,7 @@ export default function ButterchurnScene() {
       />
 
       {error && (
-        <div className="absolute left-1/2 top-4 z-60 -translate-x-1/2 transform rounded bg-red-500 px-4 py-2 text-white">
+        <div className="absolute top-4 left-1/2 z-60 -translate-x-1/2 transform rounded bg-red-500 px-4 py-2 text-white">
           {error}
         </div>
       )}

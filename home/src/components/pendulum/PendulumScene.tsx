@@ -122,16 +122,16 @@ class Pendulum {
       // Get mouse position
       const mouseX = this.mouse.x;
       const mouseY = this.mouse.y;
-      
+
       // Calculate distance from origin to mouse
       const mouseDistSq = mouseX * mouseX + mouseY * mouseY;
       const mouseDist = Math.sqrt(mouseDistSq);
-      
+
       // Calculate max reach (sum of both arm lengths)
       const maxReach = this.armLength * 2;
-      
+
       let targetX, targetY;
-      
+
       // If mouse is beyond reach, find closest point on the circle
       if (mouseDist > maxReach) {
         const scale = maxReach / mouseDist;
@@ -141,10 +141,10 @@ class Pendulum {
         targetX = mouseX;
         targetY = mouseY;
       }
-      
+
       const targetDistSq = targetX * targetX + targetY * targetY;
       const targetDist = Math.sqrt(targetDistSq);
-      
+
       // Handle case where target is too close to origin (which could cause numerical issues)
       if (targetDist < 0.001) {
         // Set a default pose when very close to origin
@@ -152,36 +152,36 @@ class Pendulum {
         y1 = this.armLength;
         x2 = 0;
         y2 = 2 * this.armLength;
-        
+
         // For the default pose, set default angles
-        this.angle1 = -Math.PI/2;  // Straight down
-        this.angle2 = -Math.PI/2;  // Straight down
+        this.angle1 = -Math.PI / 2; // Straight down
+        this.angle2 = -Math.PI / 2; // Straight down
       } else {
         // Calculate position of first joint
         const a = this.armLength;
         const b = this.armLength;
         const c = targetDist;
-        const cosA = (b*b + c*c - a*a) / (2*b*c);
+        const cosA = (b * b + c * c - a * a) / (2 * b * c);
         const clampedCosA = Math.max(-1, Math.min(1, cosA));
         const A = Math.acos(clampedCosA);
-        
+
         const shoulderAngle = Math.atan2(targetY, targetX) - A;
         x1 = this.armLength * Math.cos(shoulderAngle);
         y1 = this.armLength * Math.sin(shoulderAngle);
-        
+
         // Position of second joint/bob is simply the target position
         x2 = targetX;
         y2 = targetY;
-        
+
         // Store angles for physics simulation when released
         // Convert from cartesian angles to pendulum angle coordinate system
-        this.angle1 = Math.atan2(y1, x1) + Math.PI/2;
-        
+        this.angle1 = Math.atan2(y1, x1) + Math.PI / 2;
+
         // Calculate the second angle properly in the pendulum coordinate system
         // This ensures the elbow angle is preserved in the transition to the physics simulation
-        this.angle2 = Math.atan2(y2 - y1, x2 - x1) + Math.PI/2;
+        this.angle2 = Math.atan2(y2 - y1, x2 - x1) + Math.PI / 2;
       }
-      
+
       // Reset velocities
       this.velocity1 = 0;
       this.velocity2 = 0;
@@ -475,7 +475,7 @@ const PendulumScene: React.FC = () => {
     const handlePointerDown = (event: PointerEvent) => {
       // Only respond to left-click (button 0)
       if (event.button !== 0) return;
-      
+
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const x = event.clientX - (rect.left + rect.width / 2);

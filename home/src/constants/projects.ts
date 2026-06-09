@@ -108,8 +108,7 @@ export const PROJECTS: Project[] = [
     slug: "cube",
     title: "Cube Visualization",
     description: "3D cube with interactive controls",
-    longDescription:
-      "An interactive 3D cube rendered with Three.js. Rotate, zoom, and customize the rendering style.",
+    longDescription: "An interactive 3D cube rendered with Three.js. Rotate, zoom, and customize the rendering style.",
     image: "/projects/cube-preview.png",
     category: "3D",
     tech: ["Three.js", "React", "TypeScript"],

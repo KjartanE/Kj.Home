@@ -13,7 +13,7 @@ export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="surface-glass fixed top-0 z-50 w-full border-b border-border/40">
+    <header className="fixed top-0 z-50 w-full border-b border-border/40 surface-glass">
       <div className="flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-4 sm:gap-6">
           <Link href="/" className="flex items-center gap-2">

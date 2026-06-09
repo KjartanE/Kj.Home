@@ -26,7 +26,7 @@ export default function Hero({ phrases }: HeroProps) {
     <>
       <motion.h1
         variants={item}
-        className="font-display text-balance text-center text-4xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
+        className="text-center font-display text-4xl font-bold tracking-tighter text-balance sm:text-6xl md:text-7xl">
         Kjartan Einarsson
       </motion.h1>
 

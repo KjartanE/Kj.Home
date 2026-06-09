@@ -49,7 +49,7 @@ export function NavMenu({ mobile, onSelect }: NavMenuProps) {
             <div className="flex flex-col p-4">
               <div className="mb-4">
                 <Link
-                  className="flex w-full select-none flex-col justify-end rounded-md bg-linear-to-b from-muted/40 to-muted p-4 no-underline outline-hidden focus:shadow-md"
+                  className="flex w-full flex-col justify-end rounded-md bg-linear-to-b from-muted/40 to-muted p-4 no-underline outline-hidden select-none focus:shadow-md"
                   href="/projects">
                   <div className="flex items-center">
                     <HomeLogo width={80} height={80} />

@@ -1,4 +1,10 @@
-export default function HomeLogo({ width = "100%", height = "100%" }: { width?: string | number, height?: string | number }) {
+export default function HomeLogo({
+  width = "100%",
+  height = "100%"
+}: {
+  width?: string | number;
+  height?: string | number;
+}) {
   return (
     <svg
       version="1.0"

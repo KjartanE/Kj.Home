@@ -17,11 +17,11 @@ export default function CareerTimeline({ highlights }: { highlights: IHighlight[
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-10%" }}
           transition={{ duration: 0.5, ease: "easeOut", delay: i * 0.05 }}>
-          <span className="absolute -left-[1.95rem] top-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-background" />
+          <span className="absolute top-1.5 -left-[1.95rem] h-3 w-3 rounded-full bg-primary ring-4 ring-background" />
           <p className="font-mono text-xs text-muted-foreground">
             {h.start} – {h.end}
           </p>
-          <h3 className="font-display mt-1 text-lg font-bold leading-tight">{h.role}</h3>
+          <h3 className="mt-1 font-display text-lg leading-tight font-bold">{h.role}</h3>
           <p className="text-sm text-muted-foreground">
             {h.org}
             {h.project && <span className="text-foreground/80"> · {h.project}</span>}

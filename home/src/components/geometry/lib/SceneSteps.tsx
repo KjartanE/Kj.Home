@@ -18,10 +18,10 @@ export class SceneSteps {
   constructor(scene: THREE.Scene, steps?: StepConfig[]) {
     this.scene = scene;
     this.steps = steps || [];
-    
+
     // Organize steps by category
     this.organizeStepsByCategory();
-    
+
     // If steps are provided, initialize with the first step
     if (this.steps.length > 0) {
       this.goToStep(0);
@@ -33,10 +33,13 @@ export class SceneSteps {
    */
   private organizeStepsByCategory(): void {
     this.categories.clear();
-    
+
     // Add all steps to the "All" category
-    this.categories.set("All", this.steps.map((_, index) => index));
-    
+    this.categories.set(
+      "All",
+      this.steps.map((_, index) => index)
+    );
+
     // Group steps by parent category
     this.steps.forEach((step, index) => {
       if (step.parentCategory) {
@@ -62,7 +65,7 @@ export class SceneSteps {
   setSteps(steps: StepConfig[]): void {
     this.steps = steps;
     this.organizeStepsByCategory();
-    
+
     if (this.currentStepIndex === -1 && steps.length > 0) {
       this.goToStep(0);
     }
@@ -129,15 +132,15 @@ export class SceneSteps {
 
     // Create a new geometry for this step
     const geometry = new Geometry(this.scene);
-    
+
     // Set up the new step using the configuration
     const step = this.steps[stepIndex];
     step.setupGeometry(geometry);
-    
+
     // Update current state
     this.currentStepIndex = stepIndex;
     this.currentGeometry = geometry;
-    
+
     return geometry;
   }
 

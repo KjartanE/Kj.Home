@@ -1,11 +1,8 @@
 "use client";
 
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const ButterchurnScene = dynamic(
-  () => import('./ButterchurnScene'),
-  { ssr: false }
-);
+const ButterchurnScene = dynamic(() => import("./ButterchurnScene"), { ssr: false });
 
 export default function ButterchurnWrapper() {
   return (
@@ -13,4 +10,4 @@ export default function ButterchurnWrapper() {
       <ButterchurnScene />
     </div>
   );
-} 
+}

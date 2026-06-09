@@ -95,8 +95,8 @@ export default function BentoCard({ project, className }: BentoCardProps) {
 
         {/* Overlay content */}
         <div className="relative z-10 p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">{project.category}</p>
-          <h3 className="font-display mt-0.5 text-lg font-bold leading-tight">{project.title}</h3>
+          <p className="text-[10px] font-semibold tracking-wider text-primary uppercase">{project.category}</p>
+          <h3 className="mt-0.5 font-display text-lg leading-tight font-bold">{project.title}</h3>
           <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{project.description}</p>
           <div className="mt-2 flex flex-wrap gap-1">
             {project.tech.slice(0, 3).map((t) => (

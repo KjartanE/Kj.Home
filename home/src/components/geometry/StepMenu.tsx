@@ -59,7 +59,7 @@ function DraggableCard({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`${isMobile ? "surface-glass w-full rounded-b-none" : "w-64"}`}>
+      <Card className={`${isMobile ? "w-full rounded-b-none surface-glass" : "w-64"}`}>
         <div
           {...(isMobile ? {} : { ...attributes, ...listeners })}
           className={`flex h-16 ${!isMobile && "cursor-move"} items-center justify-between px-3 ${isExpanded ? "border-b" : ""}`}>
@@ -142,7 +142,7 @@ export function StepMenu({
 
                       {/* Sub-categories */}
                       {expandedSubCategories[step.name] && (
-                        <div className="ml-4 mt-1 space-y-1 border-l border-gray-600 pl-2">
+                        <div className="mt-1 ml-4 space-y-1 border-l border-gray-600 pl-2">
                           {getStepsByParentCategory(step.name).map((subStep) => (
                             <button
                               key={subStep.index}
@@ -168,4 +168,4 @@ export function StepMenu({
       </DraggableCard>
     </DndContext>
   );
-} 
+}

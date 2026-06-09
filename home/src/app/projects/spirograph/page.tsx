@@ -6,12 +6,7 @@ import { Controls } from "@/components/spirograph/Controls";
 import ProjectPageLayout from "@/components/projects/ProjectPageLayout";
 import { DEFAULT_PARAMS, type SpirographParams } from "@/components/spirograph/types";
 import { BUILT_IN_PRESETS } from "@/components/spirograph/presets";
-import {
-  getSaveable,
-  loadSavedPresets,
-  saveSavedPresets,
-  type SavedPresets
-} from "@/components/spirograph/storage";
+import { getSaveable, loadSavedPresets, saveSavedPresets, type SavedPresets } from "@/components/spirograph/storage";
 import { downloadGCode } from "@/components/spirograph/gcode";
 
 export default function Page() {

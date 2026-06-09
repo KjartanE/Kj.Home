@@ -766,14 +766,14 @@ export default function MandelbrotBackground() {
       />
       <ZoomIndicator zoom={currentZoom} />
       {isComputingOrbit && (
-        <div className="fixed left-4 top-4 flex items-center gap-2 rounded-md bg-black/60 px-3 py-2 text-sm text-white backdrop-blur-xs">
+        <div className="fixed top-4 left-4 flex items-center gap-2 rounded-md bg-black/60 px-3 py-2 text-sm text-white backdrop-blur-xs">
           <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
           Computing reference orbit…
         </div>
       )}
       {isDebugMode && (
-        <div className="fixed right-4 top-20 min-w-[220px] rounded-md bg-black/70 px-3 py-2 font-mono text-xs text-white backdrop-blur-xs">
-          <div className="mb-1 text-[10px] uppercase tracking-wider text-white/50">Debug [press D]</div>
+        <div className="fixed top-20 right-4 min-w-[220px] rounded-md bg-black/70 px-3 py-2 font-mono text-xs text-white backdrop-blur-xs">
+          <div className="mb-1 text-[10px] tracking-wider text-white/50 uppercase">Debug [press D]</div>
           <div>orbit len: {orbitStats.length.toLocaleString()}</div>
           <div>target iter: {orbitStats.targetIter.toLocaleString()}</div>
           <div className={orbitStats.length < orbitStats.targetIter ? "text-yellow-300" : "text-green-300"}>

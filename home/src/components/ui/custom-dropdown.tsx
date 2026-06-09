@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface DropdownProps {
   trigger: React.ReactNode;
@@ -26,35 +26,33 @@ export const CustomDropdown: React.FC<DropdownProps> = ({ trigger, children, cla
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div 
+      <div
         onClick={() => setIsOpen(!isOpen)}
         className="cursor-pointer"
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
+          if (e.key === "Enter" || e.key === " ") {
             setIsOpen(!isOpen);
           }
-        }}
-      >
+        }}>
         {trigger}
       </div>
-      
+
       {isOpen && (
-        <div 
+        <div
           className={cn(
-            "absolute top-full left-0 mt-1 bg-background border border-border rounded-md shadow-lg z-50",
+            "absolute top-full left-0 z-50 mt-1 rounded-md border border-border bg-background shadow-lg",
             className
-          )}
-        >
+          )}>
           {children}
         </div>
       )}
@@ -64,15 +62,14 @@ export const CustomDropdown: React.FC<DropdownProps> = ({ trigger, children, cla
 
 export const DropdownItem: React.FC<DropdownItemProps> = ({ href, title, children, className }) => {
   return (
-    <Link 
+    <Link
       href={href}
       className={cn(
-        "block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-hidden transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+        "block space-y-1 rounded-md p-2 leading-none no-underline outline-hidden transition-colors select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
         className
-      )}
-    >
-      <div className="text-sm font-medium leading-none">{title}</div>
+      )}>
+      <div className="text-sm leading-none font-medium">{title}</div>
       <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">{children}</p>
     </Link>
   );
-}; 
+};

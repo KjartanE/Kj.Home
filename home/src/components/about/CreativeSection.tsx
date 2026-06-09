@@ -8,7 +8,7 @@ export default function CreativeSection({ projects }: { projects: ICreativeProje
       {projects.map((p) => {
         const inner = (
           <>
-            <h3 className="font-display flex items-center justify-between gap-2 text-base font-bold leading-tight">
+            <h3 className="flex items-center justify-between gap-2 font-display text-base leading-tight font-bold">
               {p.title}
               {p.href && (
                 <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
@@ -22,11 +22,11 @@ export default function CreativeSection({ projects }: { projects: ICreativeProje
           <Link
             key={p.title}
             href={p.href}
-            className="surface-solid group rounded-xl p-4 transition-colors hover:border-primary/50">
+            className="group rounded-xl surface-solid p-4 transition-colors hover:border-primary/50">
             {inner}
           </Link>
         ) : (
-          <div key={p.title} className="surface-solid rounded-xl p-4">
+          <div key={p.title} className="rounded-xl surface-solid p-4">
             {inner}
           </div>
         );

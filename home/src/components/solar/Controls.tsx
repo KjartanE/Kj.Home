@@ -42,9 +42,9 @@ export default function Controls({
   const dateForInput = format(epoch, "yyyy-MM-dd");
 
   return (
-    <div className="surface-glass pointer-events-auto absolute right-4 top-20 z-10 flex w-72 flex-col gap-3 rounded-xl border border-border/40 p-4 shadow-lg">
+    <div className="pointer-events-auto absolute top-20 right-4 z-10 flex w-72 flex-col gap-3 rounded-xl border border-border/40 surface-glass p-4 shadow-lg">
       <div>
-        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Simulation Date</div>
+        <div className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Simulation Date</div>
         <div className="mt-1 font-mono text-sm tabular-nums">{format(simDate, "yyyy-MM-dd HH:mm 'UTC'")}</div>
       </div>
 
@@ -74,7 +74,7 @@ export default function Controls({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <Label className="text-xs">Speed</Label>
-          <span className="font-mono text-xs tabular-nums text-muted-foreground">
+          <span className="font-mono text-xs text-muted-foreground tabular-nums">
             {formatDaysPerSecond(paused ? 0 : daysPerSecond)}
           </span>
         </div>

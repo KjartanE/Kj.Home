@@ -1,5 +1,15 @@
 // src/components/mandelbrot/NavigationControls.tsx
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Eye, EyeOff, RotateCcw } from "lucide-react";
+import {
+  ChevronUp,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
+  ZoomOut,
+  Eye,
+  EyeOff,
+  RotateCcw
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 
@@ -50,7 +60,7 @@ export function NavigationControls({ onZoomIn, onZoomOut, onMove, onReset }: Nav
   };
 
   return (
-    <div className="fixed bottom-20 right-4 flex flex-col items-center gap-2">
+    <div className="fixed right-4 bottom-20 flex flex-col items-center gap-2">
       <Button
         variant="ghost"
         size="icon"

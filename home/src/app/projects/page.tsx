@@ -20,7 +20,7 @@ export default function ProjectsPage() {
     <div className="container mx-auto mt-14 max-w-7xl px-4 py-8">
       <PersistentPenroseBackground />
 
-      <h1 className="font-display mb-2 text-3xl font-bold tracking-tight">Projects</h1>
+      <h1 className="mb-2 font-display text-3xl font-bold tracking-tight">Projects</h1>
       <p className="mb-6 text-muted-foreground">Interactive visualizations, simulations, and experiments.</p>
 
       {/* Category filter */}
@@ -41,12 +41,9 @@ export default function ProjectsPage() {
       </div>
 
       {/* Bento grid */}
-      <div className="grid auto-rows-[11rem] grid-flow-dense grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-flow-dense auto-rows-[11rem] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {filtered.map((project) => (
-          <motion.div
-            key={project.slug}
-            layout
-            className={project.size === "lg" ? "sm:col-span-2 sm:row-span-2" : ""}>
+          <motion.div key={project.slug} layout className={project.size === "lg" ? "sm:col-span-2 sm:row-span-2" : ""}>
             <BentoCard project={project} />
           </motion.div>
         ))}

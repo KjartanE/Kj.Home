@@ -69,7 +69,7 @@ function NumSlider({
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
         <Label className="text-xs">{label}</Label>
-        <span className="text-xs tabular-nums text-muted-foreground">{display}</span>
+        <span className="text-xs text-muted-foreground tabular-nums">{display}</span>
       </div>
       <Slider value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
     </div>
@@ -165,7 +165,7 @@ export function Controls({
   return (
     <div style={wrapperStyle}>
       <Card
-        className={`surface-glass flex flex-col overflow-hidden ${isMobile ? "rounded-b-none" : ""}`}
+        className={`flex flex-col overflow-hidden surface-glass ${isMobile ? "rounded-b-none" : ""}`}
         style={{ maxHeight: "inherit" }}>
         <div className="flex h-12 shrink-0 items-center justify-between border-b px-3">
           <div className="flex items-center gap-2">
@@ -179,10 +179,10 @@ export function Controls({
           </Button>
         </div>
 
-        <div className="overflow-y-auto px-3 pb-3 pt-2">
+        <div className="overflow-y-auto px-3 pt-2 pb-3">
           <Accordion type="multiple" defaultValue={["presets", "animation", "arms"]} className="w-full">
             <AccordionItem value="presets">
-              <AccordionTrigger className="py-2 text-xs font-semibold uppercase tracking-wider">
+              <AccordionTrigger className="py-2 text-xs font-semibold tracking-wider uppercase">
                 Presets
               </AccordionTrigger>
               <AccordionContent className="space-y-3 pt-1">
@@ -198,7 +198,7 @@ export function Controls({
                     ))}
                     {presetNames.saved.length > 0 && (
                       <>
-                        <div className="mt-1 border-t pt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                        <div className="mt-1 border-t pt-1 text-[10px] tracking-wider text-muted-foreground uppercase">
                           <div className="px-2 py-1">Saved</div>
                         </div>
                         {presetNames.saved.map((name) => (
@@ -228,7 +228,7 @@ export function Controls({
             </AccordionItem>
 
             <AccordionItem value="animation">
-              <AccordionTrigger className="py-2 text-xs font-semibold uppercase tracking-wider">
+              <AccordionTrigger className="py-2 text-xs font-semibold tracking-wider uppercase">
                 Animation
               </AccordionTrigger>
               <AccordionContent className="space-y-3 pt-1">
@@ -296,7 +296,7 @@ export function Controls({
               params.animationMode === "Animate Scale" ||
               params.animationMode === "Animate All") && (
               <AccordionItem value="anim-ranges">
-                <AccordionTrigger className="py-2 text-xs font-semibold uppercase tracking-wider">
+                <AccordionTrigger className="py-2 text-xs font-semibold tracking-wider uppercase">
                   Animation Ranges
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3 pt-1">
@@ -353,10 +353,10 @@ export function Controls({
             )}
 
             <AccordionItem value="arms">
-              <AccordionTrigger className="py-2 text-xs font-semibold uppercase tracking-wider">Arms</AccordionTrigger>
+              <AccordionTrigger className="py-2 text-xs font-semibold tracking-wider uppercase">Arms</AccordionTrigger>
               <AccordionContent className="space-y-4 pt-1">
                 <div className="space-y-2 rounded-md border p-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <div className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                     Arm 1 (base)
                   </div>
                   <NumSlider
@@ -386,7 +386,7 @@ export function Controls({
                 </div>
 
                 <div className="space-y-2 rounded-md border p-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Arm 2</div>
+                  <div className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Arm 2</div>
                   <NumSlider
                     label="Radius"
                     value={params.arm2Radius}
@@ -415,7 +415,7 @@ export function Controls({
 
                 <div className="space-y-2 rounded-md border p-3">
                   <div className="flex items-center justify-between">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <div className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                       Arm 3
                     </div>
                     <Switch checked={params.arm3Enabled} onCheckedChange={(v) => onChange("arm3Enabled", v)} />
@@ -452,7 +452,7 @@ export function Controls({
 
                 <div className="space-y-2 rounded-md border p-3">
                   <div className="flex items-center justify-between">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <div className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                       Arm 4
                     </div>
                     <Switch checked={params.arm4Enabled} onCheckedChange={(v) => onChange("arm4Enabled", v)} />
@@ -490,7 +490,7 @@ export function Controls({
             </AccordionItem>
 
             <AccordionItem value="drift">
-              <AccordionTrigger className="py-2 text-xs font-semibold uppercase tracking-wider">
+              <AccordionTrigger className="py-2 text-xs font-semibold tracking-wider uppercase">
                 Static drift
               </AccordionTrigger>
               <AccordionContent className="space-y-3 pt-1">
@@ -522,7 +522,7 @@ export function Controls({
             </AccordionItem>
 
             <AccordionItem value="visual">
-              <AccordionTrigger className="py-2 text-xs font-semibold uppercase tracking-wider">
+              <AccordionTrigger className="py-2 text-xs font-semibold tracking-wider uppercase">
                 Visual
               </AccordionTrigger>
               <AccordionContent className="space-y-3 pt-1">
@@ -559,7 +559,7 @@ export function Controls({
             </AccordionItem>
 
             <AccordionItem value="gcode">
-              <AccordionTrigger className="py-2 text-xs font-semibold uppercase tracking-wider">
+              <AccordionTrigger className="py-2 text-xs font-semibold tracking-wider uppercase">
                 G-Code export
               </AccordionTrigger>
               <AccordionContent className="space-y-3 pt-1">
