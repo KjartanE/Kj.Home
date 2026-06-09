@@ -26,7 +26,7 @@ export default function Home() {
       {/* Hero — full viewport */}
       <div className="flex h-[calc(100vh-3.5rem)] items-center overflow-hidden">
         <div className="container mx-auto flex flex-col items-center justify-center px-4">
-          <h1 className="text-balance text-center text-4xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
+          <h1 className="font-display text-balance text-center text-4xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
             Kjartan Einarsson
           </h1>
 
@@ -59,7 +59,7 @@ export default function Home() {
           <div>
             <div className="mb-8 flex items-end justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Featured Projects</h2>
+                <h2 className="font-display text-2xl font-bold tracking-tight">Featured Projects</h2>
                 <p className="mt-1 text-muted-foreground">A selection of interactive visualizations.</p>
               </div>
               <Link

@@ -57,7 +57,7 @@ export default function InfoPanel({ bodyName, onClose, onFocus, onSelect }: Info
   if (!body) return null;
 
   return (
-    <div className="pointer-events-auto absolute left-4 top-20 z-10 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-border/40 bg-background/85 p-4 shadow-lg backdrop-blur-md">
+    <div className="surface-glass pointer-events-auto absolute left-4 top-20 z-10 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-border/40 p-4 shadow-lg">
       <div className="flex items-start justify-between gap-2">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

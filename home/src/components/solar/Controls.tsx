@@ -42,7 +42,7 @@ export default function Controls({
   const dateForInput = format(epoch, "yyyy-MM-dd");
 
   return (
-    <div className="pointer-events-auto absolute right-4 top-20 z-10 flex w-72 flex-col gap-3 rounded-xl border border-border/40 bg-background/80 p-4 shadow-lg backdrop-blur-md">
+    <div className="surface-glass pointer-events-auto absolute right-4 top-20 z-10 flex w-72 flex-col gap-3 rounded-xl border border-border/40 p-4 shadow-lg">
       <div>
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Simulation Date</div>
         <div className="mt-1 font-mono text-sm tabular-nums">{format(simDate, "yyyy-MM-dd HH:mm 'UTC'")}</div>

@@ -35,7 +35,7 @@ export default function ProjectPageLayout({ slug, children }: ProjectPageLayoutP
       {project && (
         <div className="absolute bottom-4 left-4 z-20 w-72 max-w-[calc(100vw-2rem)]">
           {panelOpen && (
-            <div className="mb-1 rounded-xl border border-border/40 bg-background/80 p-4 shadow-lg backdrop-blur-md">
+            <div className="surface-glass mb-1 rounded-xl border border-border/40 p-4 shadow-lg">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {project.category}
               </p>
@@ -57,13 +57,13 @@ export default function ProjectPageLayout({ slug, children }: ProjectPageLayoutP
           <div className="flex items-center gap-1">
             <button
               onClick={() => setPanelOpen((v) => !v)}
-              className="flex items-center gap-1 rounded-lg border border-border/40 bg-background/80 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur-md transition-colors hover:text-foreground">
+              className="surface-glass flex items-center gap-1 rounded-lg border border-border/40 px-3 py-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:text-foreground">
               {panelOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
               {panelOpen ? "Hide info" : project.title}
             </button>
             <button
               onClick={toggleFullscreen}
-              className="flex items-center gap-1 rounded-lg border border-border/40 bg-background/80 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur-md transition-colors hover:text-foreground">
+              className="surface-glass flex items-center gap-1 rounded-lg border border-border/40 px-3 py-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:text-foreground">
               {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
               {isFullscreen ? "Exit" : "Fullscreen"}
             </button>

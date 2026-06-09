@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Fira_Code } from "next/font/google";
+import { Inter, Fira_Code, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/providers/theme-provider";
 import { Header } from "@/components/layout/header";
@@ -18,6 +18,13 @@ const firaCode = Fira_Code({
   variable: "--font-fira-code",
   display: "swap",
   weight: ["400", "500"]
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+  weight: ["500", "700"]
 });
 
 export const metadata: Metadata = {
@@ -51,7 +58,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${firaCode.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${firaCode.variable} ${spaceGrotesk.variable}`}>
       <body className="flex min-h-screen flex-col font-sans">
         <ThemeProvider attribute="class" defaultTheme="dark">
           <Header />

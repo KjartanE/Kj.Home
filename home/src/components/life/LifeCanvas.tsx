@@ -581,13 +581,13 @@ export default function LifeCanvas() {
         <Button
           size="sm"
           variant="outline"
-          className="bg-background/70 backdrop-blur-md"
+          className="surface-glass"
           onClick={() => setPatternsOpen((v) => !v)}>
           Patterns
           {patternsOpen ? <ChevronUp className="ml-1 h-3 w-3" /> : <ChevronDown className="ml-1 h-3 w-3" />}
         </Button>
         {patternsOpen && (
-          <div className="flex max-h-[min(720px,calc(100vh-9rem))] w-80 flex-col overflow-hidden rounded-xl border border-border/40 bg-background/85 shadow-lg backdrop-blur-md">
+          <div className="surface-glass flex max-h-[min(720px,calc(100vh-9rem))] w-80 flex-col overflow-hidden rounded-xl border border-border/40 shadow-lg">
             <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Patterns ({PATTERNS.length})
@@ -626,7 +626,7 @@ export default function LifeCanvas() {
       </div>
 
       {/* Controls — bottom-center */}
-      <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-xl border border-border/40 bg-background/70 p-3 backdrop-blur-md">
+      <div className="surface-glass absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-xl border border-border/40 p-3">
         <Button
           size="sm"
           variant={isRunning ? "secondary" : "default"}
