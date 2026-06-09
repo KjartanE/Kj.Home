@@ -1,72 +1,55 @@
 export interface IResume {
   personal: IPersonal;
-  skills: string[];
-  technologies: string[];
-  languages: string[];
+  highlights: IHighlight[];
+  skillGroups: ISkillGroup[];
   education: IEducation[];
   certifications: ICertification[];
-  work_experience: IWorkExperience[];
+  awards: string[];
+  creativeProjects: ICreativeProject[];
 }
 
 export interface IPersonal {
   name: string;
+  title: string;
   email: string;
-  phone: string;
   description: string;
   location: string;
+  website: string;
   linkedin: string;
   github: string;
   youtube: string;
 }
 
-export interface ICertification {
-  title: string;
-  short: string;
-  date: string;
-  description: string;
-  logo: string;
+export interface IHighlight {
+  role: string;
+  org: string;
+  project?: string;
+  start: string;
+  end: string;
+  summary: string;
+  bullets?: string[];
+  tech: string[];
+}
+
+export interface ISkillGroup {
+  label: string;
+  items: string[];
 }
 
 export interface IEducation {
-  title: string;
   school: string;
   degree: string;
-  major: string;
-  graduation: string;
-  logo: string;
+  date: string;
 }
 
-export interface IWorkExperience {
-  company: string;
+export interface ICertification {
   title: string;
-  date: string;
-  contract: IContract[];
+  issuer?: string;
+  date?: string;
 }
 
-export interface IContract {
-  id: string;
-  label: string;
+export interface ICreativeProject {
   title: string;
-  date: string;
-  position: string;
   description: string;
-  notes?: string[];
-  technologies: string[];
-}
-
-export interface ICertComponent {
-  certifications: ICertification[];
-}
-
-export interface IEducationComponent {
-  education: IEducation[];
-}
-
-export interface IPersonalStickyComponent {
-  personal: IPersonal;
-  onClick?: () => void;
-}
-
-export interface IContractData {
-  contract: IContract;
+  href?: string;
 }

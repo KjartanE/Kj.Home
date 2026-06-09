@@ -1,39 +1,48 @@
-import PersonalStickyComponent from "@/components/about/PersonalStickyComponent";
-import { resume } from "@/constants/resume";
-import IntroductionComponent from "@/components/about/IntroductionComponent";
-import QuartechComponent from "@/components/about/QuartechComponent";
-import SkillsSection from "@/components/about/SkillsSection";
+import type { Metadata } from "next";
 import PersistentPenroseBackground from "@/components/penrose/background/PersistentPenroseBackground";
+import BioHeader, { BioActions } from "@/components/about/BioHeader";
+import CareerTimeline from "@/components/about/CareerTimeline";
+import SkillGroups from "@/components/about/SkillGroups";
+import CreativeSection from "@/components/about/CreativeSection";
+import EducationCerts from "@/components/about/EducationCerts";
+import { resume } from "@/constants/resume";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Kjartan Einarsson — Senior Full Stack Software Engineer in Victoria, BC. Career highlights, skills, and creative projects."
+};
 
 export default function AboutPage() {
   return (
-    <div className="container mx-auto mt-14 py-8">
+    <div className="container mx-auto mt-14 max-w-3xl px-4 py-12">
       <PersistentPenroseBackground />
-      {/*
-        Show for desktop and tablet
-      */}
-      <div className="hidden gap-6 md:grid md:grid-cols-[300px_1fr]">
-        <div className="relative md:block">
-          <div className="backface-visibility-hidden sticky top-20 transform-gpu will-change-transform">
-            <PersonalStickyComponent personal={resume.personal} />
-          </div>
-        </div>
-        <main className="space-y-6">
-          <IntroductionComponent />
-          <QuartechComponent />
-          <SkillsSection />
-        </main>
+
+      <BioHeader personal={resume.personal} />
+      <p className="mt-6 text-pretty leading-relaxed text-muted-foreground">{resume.personal.description}</p>
+      <div className="mt-6">
+        <BioActions personal={resume.personal} />
       </div>
 
-      {/*
-        Show for mobile
-      */}
-      <div className="space-y-4 px-4 md:hidden">
-        <IntroductionComponent />
-        <QuartechComponent />
-        <SkillsSection />
-        <PersonalStickyComponent personal={resume.personal} />
-      </div>
+      <section className="mt-14">
+        <h2 className="font-display mb-6 text-2xl font-bold tracking-tight">Experience</h2>
+        <CareerTimeline highlights={resume.highlights} />
+      </section>
+
+      <section className="mt-14">
+        <h2 className="font-display mb-6 text-2xl font-bold tracking-tight">Skills</h2>
+        <SkillGroups groups={resume.skillGroups} />
+      </section>
+
+      <section className="mt-14">
+        <h2 className="font-display mb-6 text-2xl font-bold tracking-tight">Beyond work</h2>
+        <CreativeSection projects={resume.creativeProjects} />
+      </section>
+
+      <section className="mt-14">
+        <h2 className="font-display mb-6 text-2xl font-bold tracking-tight">Education &amp; Certifications</h2>
+        <EducationCerts education={resume.education} certifications={resume.certifications} awards={resume.awards} />
+      </section>
     </div>
   );
 }

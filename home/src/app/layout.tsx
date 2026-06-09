@@ -33,13 +33,14 @@ export const metadata: Metadata = {
     default: "kj.home",
     template: "%s | kj.home"
   },
-  description: "Personal portfolio and creative coding projects by Kjartan Einarsson. Interactive Three.js visualizations and web experiments.",
+  description:
+    "Creative coding portfolio of Kjartan Einarsson — interactive Three.js visualizations, math and physics simulations, and audio experiments.",
   icons: {
     icon: "/favicon.ico"
   },
   openGraph: {
     title: "kj.home",
-    description: "Personal portfolio and creative coding projects by Kjartan Einarsson.",
+    description: "Creative coding portfolio of Kjartan Einarsson — interactive visualizations and experiments.",
     url: "https://www.forritun.dev",
     siteName: "kj.home",
     type: "website",
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "kj.home",
-    description: "Personal portfolio and creative coding projects by Kjartan Einarsson."
+    description: "Creative coding portfolio of Kjartan Einarsson — interactive visualizations and experiments."
   },
   robots: {
     index: true,
