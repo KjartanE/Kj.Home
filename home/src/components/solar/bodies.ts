@@ -274,7 +274,7 @@ export const PLANETS: PlanetDef[] = [
       orbitalDays: 10759.22,
       tiltDeg: 26.73,
       description:
-        "Famous for its ring system of water ice and rock. Less dense than water — it would float. 146 known moons."
+        "Famous for its ring-3 system of water ice and rock. Less dense than water — it would float. 146 known moons."
     },
     moons: [
       {
@@ -301,7 +301,7 @@ export const PLANETS: PlanetDef[] = [
           radiusKm: 763.8,
           distanceKm: 527108,
           periodDays: 4.518,
-          description: "Saturn's second-largest moon. An icy body that may have a tenuous ring system of its own."
+          description: "Saturn's second-largest moon. An icy body that may have a tenuous ring-3 system of its own."
         }
       }
     ]

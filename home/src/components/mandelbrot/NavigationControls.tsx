@@ -61,7 +61,7 @@ export function NavigationControls({ onZoomIn, onZoomOut, onMove, onReset }: Nav
 
       {isVisible && (
         <>
-          <div className="flex gap-2 rounded-md bg-black/50 p-2 backdrop-blur-sm">
+          <div className="flex gap-2 rounded-md bg-black/50 p-2 backdrop-blur-xs">
             <Button
               variant="ghost"
               size="icon"
@@ -94,7 +94,7 @@ export function NavigationControls({ onZoomIn, onZoomOut, onMove, onReset }: Nav
             </Button>
           </div>
 
-          <div className="flex flex-col items-center gap-2 rounded-md bg-black/50 p-2 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-2 rounded-md bg-black/50 p-2 backdrop-blur-xs">
             <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => onMove("up")}>
               <ChevronUp className="h-4 w-4" />
             </Button>

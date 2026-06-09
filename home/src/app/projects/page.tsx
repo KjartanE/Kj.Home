@@ -16,10 +16,10 @@ const FILTERS: FilterValue[] = [ALL, "Math", "3D", "Music"];
 function ProjectCard({ project, large }: { project: Project; large?: boolean }) {
   return (
     <Link href={`/projects/${project.slug}`} className={large ? "md:col-span-2" : ""}>
-      <Card className="group h-full bg-background/80 backdrop-blur-sm transition-all duration-300 hover:bg-muted/50 hover:shadow-lg">
+      <Card className="group h-full bg-background/80 backdrop-blur-xs transition-all duration-300 hover:bg-muted/50 hover:shadow-lg">
         <CardHeader className="pb-3">
           {(project.image || large) && (
-            <div className={`relative mb-3 overflow-hidden rounded-lg ${large ? "aspect-[21/9]" : "aspect-video"}`}>
+            <div className={`relative mb-3 overflow-hidden rounded-lg ${large ? "aspect-21/9" : "aspect-video"}`}>
               {project.image ? (
                 <Image
                   src={project.image}

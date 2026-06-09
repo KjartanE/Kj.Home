@@ -165,7 +165,7 @@ export function Controls({
   return (
     <div style={wrapperStyle}>
       <Card
-        className={`flex flex-col overflow-hidden bg-background/90 backdrop-blur-sm ${isMobile ? "rounded-b-none" : ""}`}
+        className={`flex flex-col overflow-hidden bg-background/90 backdrop-blur-xs ${isMobile ? "rounded-b-none" : ""}`}
         style={{ maxHeight: "inherit" }}>
         <div className="flex h-12 shrink-0 items-center justify-between border-b px-3">
           <div className="flex items-center gap-2">

@@ -71,7 +71,7 @@ export default function Home() {
             <div className="grid gap-6 md:grid-cols-3">
               {FEATURED_PROJECTS.map((project) => (
                 <Link href={`/projects/${project.slug}`} key={project.slug}>
-                  <Card className="h-full bg-background/80 backdrop-blur-sm transition-colors hover:bg-muted/50">
+                  <Card className="h-full bg-background/80 backdrop-blur-xs transition-colors hover:bg-muted/50">
                     <CardHeader className="pb-3">
                       <div className="relative mb-3 aspect-video overflow-hidden rounded-lg">
                         <Image

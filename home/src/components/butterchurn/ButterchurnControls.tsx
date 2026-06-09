@@ -200,7 +200,7 @@ export function ButterchurnControls({
             className={`fixed bottom-0 left-0 right-0 z-20 transition-all duration-300 ${
               showControls ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
             }`}>
-            <div className="bg-black/30 backdrop-blur-sm px-4 py-3 text-center text-white">
+            <div className="bg-black/30 backdrop-blur-xs px-4 py-3 text-center text-white">
               <div className="flex justify-center items-center space-x-4">
                 <button
                   onClick={onPreviousPreset}

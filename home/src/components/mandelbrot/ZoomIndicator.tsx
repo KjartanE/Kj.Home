@@ -15,7 +15,7 @@ export function ZoomIndicator({ zoom }: ZoomIndicatorProps) {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 rounded-md bg-black/50 px-3 py-2 text-sm text-white backdrop-blur-sm">
+    <div className="fixed bottom-4 right-4 rounded-md bg-black/50 px-3 py-2 text-sm text-white backdrop-blur-xs">
       Zoom: {formatZoom(zoom)}
     </div>
   );

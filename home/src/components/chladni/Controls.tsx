@@ -59,7 +59,7 @@ function DraggableCard({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`${isMobile ? "w-full rounded-b-none bg-background/80 backdrop-blur-sm" : "w-80"}`}>
+      <Card className={`${isMobile ? "w-full rounded-b-none bg-background/80 backdrop-blur-xs" : "w-80"}`}>
         <div
           {...(isMobile ? {} : { ...attributes, ...listeners })}
           className={`flex h-16 ${!isMobile && "cursor-move"} items-center justify-between px-3 ${isExpanded ? "border-b" : ""}`}>

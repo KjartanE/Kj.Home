@@ -72,8 +72,8 @@ function DraggableCard({
       <Card
         className={
           isMobile
-            ? "w-full rounded-b-none bg-background/80 backdrop-blur-sm"
-            : "w-80 bg-background/80 backdrop-blur-sm"
+            ? "w-full rounded-b-none bg-background/80 backdrop-blur-xs"
+            : "w-80 bg-background/80 backdrop-blur-xs"
         }>
         <div
           {...(isMobile ? {} : { ...attributes, ...listeners })}

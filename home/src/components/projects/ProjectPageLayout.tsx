@@ -57,13 +57,13 @@ export default function ProjectPageLayout({ slug, children }: ProjectPageLayoutP
           <div className="flex items-center gap-1">
             <button
               onClick={() => setPanelOpen((v) => !v)}
-              className="flex items-center gap-1 rounded-lg border border-border/40 bg-background/80 px-3 py-1.5 text-xs text-muted-foreground shadow backdrop-blur-md transition-colors hover:text-foreground">
+              className="flex items-center gap-1 rounded-lg border border-border/40 bg-background/80 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur-md transition-colors hover:text-foreground">
               {panelOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
               {panelOpen ? "Hide info" : project.title}
             </button>
             <button
               onClick={toggleFullscreen}
-              className="flex items-center gap-1 rounded-lg border border-border/40 bg-background/80 px-3 py-1.5 text-xs text-muted-foreground shadow backdrop-blur-md transition-colors hover:text-foreground">
+              className="flex items-center gap-1 rounded-lg border border-border/40 bg-background/80 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur-md transition-colors hover:text-foreground">
               {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
               {isFullscreen ? "Exit" : "Fullscreen"}
             </button>

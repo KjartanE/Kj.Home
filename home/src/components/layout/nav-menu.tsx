@@ -19,7 +19,7 @@ export function NavMenu({ mobile, onSelect }: NavMenuProps) {
   const mobileClasses = mobile ? "flex flex-col space-y-3" : "";
   const linkClasses = mobile
     ? "flex w-full p-3 hover:bg-accent rounded-md transition-colors text-foreground"
-    : "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2";
+    : "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2";
 
   if (mobile) {
     return (
@@ -42,14 +42,14 @@ export function NavMenu({ mobile, onSelect }: NavMenuProps) {
             trigger={
               <button className={linkClasses}>
                 Projects
-                <ChevronDown className="relative top-[1px] ml-1 h-3 w-3 transition duration-300 hover:rotate-180" />
+                <ChevronDown className="relative top-px ml-1 h-3 w-3 transition duration-300 hover:rotate-180" />
               </button>
             }
             className="w-[300px] md:w-[500px] lg:w-[800px]">
             <div className="flex flex-col p-4">
               <div className="mb-4">
                 <Link
-                  className="flex w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/40 to-muted p-4 no-underline outline-none focus:shadow-md"
+                  className="flex w-full select-none flex-col justify-end rounded-md bg-linear-to-b from-muted/40 to-muted p-4 no-underline outline-hidden focus:shadow-md"
                   href="/projects">
                   <div className="flex items-center">
                     <HomeLogo width={80} height={80} />

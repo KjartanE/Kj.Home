@@ -18,7 +18,7 @@ const renderListSection = (title: string, items: string[]) => (
     <ul className="space-y-1.5 pl-6">
       {items.map((item, index) => (
         <li key={index} className="relative flex items-start gap-2">
-          <ChevronRight className="absolute left-[-1rem] top-1 h-4 w-4 text-muted-foreground" />
+          <ChevronRight className="absolute -left-4 top-1 h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">{item}</span>
         </li>
       ))}
@@ -84,7 +84,7 @@ const WorkExperienceEntry = ({ exp }: { exp: IWorkExperience }) => {
               <TabsTrigger
                 key={contract.id}
                 value={contract.id}
-                className="min-h-[2.5rem] px-4 text-sm text-foreground transition-colors duration-300 hover:text-muted-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary sm:text-base">
+                className="min-h-10 px-4 text-sm text-foreground transition-colors duration-300 hover:text-muted-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary sm:text-base">
                 {contract.label}
               </TabsTrigger>
             ))}
