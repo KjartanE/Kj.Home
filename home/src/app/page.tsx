@@ -1,9 +1,8 @@
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import PersistentPenroseBackground from "@/components/penrose/background/PersistentPenroseBackground";
-import AnimatedSubtitle from "@/components/home/AnimatedSubtitle";
-import FadeIn from "@/components/home/FadeIn";
+import Hero from "@/components/home/Hero";
+import Reveal from "@/components/home/Reveal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
@@ -25,37 +24,13 @@ export default function Home() {
 
       {/* Hero — full viewport */}
       <div className="flex h-[calc(100vh-3.5rem)] items-center overflow-hidden">
-        <div className="container mx-auto flex flex-col items-center justify-center px-4">
-          <h1 className="font-display text-balance text-center text-4xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
-            Kjartan Einarsson
-          </h1>
-
-          <AnimatedSubtitle phrases={SUBTITLE_PHRASES} />
-
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="/projects">
-              <Button size="lg" className="rounded-full">
-                Current Projects
-              </Button>
-            </Link>
-            <Link href="/about">
-              <Button size="lg" variant="secondary" className="rounded-full">
-                About Me
-              </Button>
-            </Link>
-            <a href="mailto:kjartanreinarsson@gmail.com">
-              <Button size="lg" variant="outline" className="rounded-full">
-                Get in touch
-              </Button>
-            </a>
-          </div>
-        </div>
+        <Hero phrases={SUBTITLE_PHRASES} />
       </div>
 
       {/* Below-fold sections */}
       <div className="container mx-auto max-w-7xl space-y-20 px-4 pb-24">
         {/* Featured Projects */}
-        <FadeIn>
+        <Reveal>
           <div>
             <div className="mb-8 flex items-end justify-between">
               <div>
@@ -99,7 +74,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </FadeIn>
+        </Reveal>
 
       </div>
     </>
