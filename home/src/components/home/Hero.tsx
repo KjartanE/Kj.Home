@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import { Button } from "@/components/ui/button";
+import DecryptedText from "@/components/reactbits/DecryptedText";
 import AnimatedSubtitle from "./AnimatedSubtitle";
 
 interface HeroProps {
@@ -27,7 +28,19 @@ export default function Hero({ phrases }: HeroProps) {
       <motion.h1
         variants={item}
         className="text-center font-display text-4xl font-bold tracking-tighter text-balance sm:text-6xl md:text-7xl">
-        Kjartan Einarsson
+        {reducedMotion ? (
+          "Kjartan Einarsson"
+        ) : (
+          <DecryptedText
+            text="Kjartan Einarsson"
+            animateOn="view"
+            sequential
+            speed={50}
+            maxIterations={12}
+            revealDirection="start"
+            encryptedClassName="text-primary/80"
+          />
+        )}
       </motion.h1>
 
       <motion.div variants={item}>
@@ -45,11 +58,6 @@ export default function Hero({ phrases }: HeroProps) {
             About Me
           </Button>
         </Link>
-        <a href="mailto:kjartanreinarsson@gmail.com">
-          <Button size="lg" variant="outline" className="rounded-full">
-            Get in touch
-          </Button>
-        </a>
       </motion.div>
     </>
   );

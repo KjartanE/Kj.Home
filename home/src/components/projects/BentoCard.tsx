@@ -60,7 +60,25 @@ export default function BentoCard({ project, className }: BentoCardProps) {
         onMouseEnter={videoSrc ? play : undefined}
         onMouseLeave={videoSrc ? stop : undefined}
         onFocus={videoSrc ? play : undefined}
-        onBlur={videoSrc ? stop : undefined}>
+        onBlur={videoSrc ? stop : undefined}
+        onMouseMove={
+          reducedMotion
+            ? undefined
+            : (e) => {
+                const r = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+                e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+              }
+        }>
+        {/* Cursor spotlight glow — tracks the pointer via CSS vars, fades in on hover */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-[5] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{
+            background:
+              "radial-gradient(circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklab, var(--primary) 18%, transparent), transparent 70%)"
+          }}
+        />
         {/* Media layer */}
         <div className="absolute inset-0">
           {poster ? (

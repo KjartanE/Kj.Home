@@ -3,6 +3,7 @@ import PersistentPenroseBackground from "@/components/penrose/background/Persist
 import BioHeader, { BioActions } from "@/components/about/BioHeader";
 import CareerTimeline from "@/components/about/CareerTimeline";
 import SkillGroups from "@/components/about/SkillGroups";
+import SkillsMarquee from "@/components/about/SkillsMarquee";
 import CreativeSection from "@/components/about/CreativeSection";
 import EducationCerts from "@/components/about/EducationCerts";
 import { resume } from "@/constants/resume";
@@ -31,7 +32,10 @@ export default function AboutPage() {
 
       <section className="mt-14">
         <h2 className="mb-6 font-display text-2xl font-bold tracking-tight">Skills</h2>
-        <SkillGroups groups={resume.skillGroups} />
+        <SkillsMarquee />
+        <div className="mt-8">
+          <SkillGroups groups={resume.skillGroups} />
+        </div>
       </section>
 
       <section className="mt-14">
