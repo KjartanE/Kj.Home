@@ -1,11 +1,8 @@
 export const fadeVertexShader = `
     precision highp float;
-    attribute float width;
-    varying float vWidth;
     varying vec3 vPosition;
-    
+
     void main() {
-      vWidth = width;
       // Explicitly copy the position to make sure it's preserved for distance calculations
       vPosition = vec3(position);
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -14,7 +11,6 @@ export const fadeVertexShader = `
 
 export const fadeFragmentShader = `
     precision highp float;
-    varying float vWidth;
     varying vec3 vPosition;
     uniform float themeColor;
     uniform float baseWidth;
