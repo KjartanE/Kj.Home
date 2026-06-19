@@ -33,3 +33,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# project preview sources (final clips in public/projects/previews/ ARE committed)
+/public/projects/previews/.raw/
+/.preview-tmp/
